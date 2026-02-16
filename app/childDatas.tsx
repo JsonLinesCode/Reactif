@@ -44,8 +44,8 @@ export default function ChildDatas() {
 
     const saveValue = () => {
         if (mode === undefined) {
-             Alert.alert("Error", "Please select a mode (Months or Years).");
-             return;
+            Alert.alert("Error", "Please select a mode (Months or Years).");
+            return;
         }
         if (valeurTemp === "") {
             Alert.alert("Error", "Please enter a valid value.");
@@ -58,7 +58,7 @@ export default function ChildDatas() {
             `Value for ${mode} : ${savedDatas[mode]}\nTotal actuel : Mois(${savedDatas.months}), Année(${savedDatas.years})`
         );
 
-        setValeurTemp(''); // On vide le champ après sauvegarde
+        setValeurTemp('');
     }; // End of saveValue function
 
     const toggleYearsInput = () => {
@@ -70,9 +70,10 @@ export default function ChildDatas() {
     };
     const toggleMonthsInput = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setYearsInputVisible(!monthsInputVisible);
+        setMonthsInputVisible(!monthsInputVisible);
         if (!monthsInputVisible) {
             setMode('months');
+        }
     }
 
     return (
@@ -99,7 +100,7 @@ export default function ChildDatas() {
                             onPress={toggleMonthsInput}
                         >
                             <Text style={styles.subButtonText}>
-                                {monthsInputVisible ? "Fermer Mois" : "Mois" }
+                                {monthsInputVisible ? "Fermer Mois" : "Mois"}
                             </Text>
                         </TouchableOpacity>
 
@@ -152,8 +153,8 @@ export default function ChildDatas() {
                                     }}
                                 />
                                 <TouchableOpacity
-                                style={styles.validationButton}
-                                onPress={() => router.push("/cprPediatric")}
+                                    style={styles.validationButton}
+                                    onPress={() => router.push("/cprPediatric")}
                                 >
                                     <Text style={styles.subButtonText}> Valider et calculer</Text>
                                 </TouchableOpacity>
@@ -161,7 +162,7 @@ export default function ChildDatas() {
                         )}
                     </View>
                 )}
-               <View style={styles.expandedContent}></View>
+                <View style={styles.expandedContent}></View>
                 <TouchableOpacity
                     style={styles.choiceButton}
                     onPress={() => {
@@ -173,6 +174,7 @@ export default function ChildDatas() {
         </SafeAreaView>
     )
 }
+
 const styles = StyleSheet.create({
     Container: {
         flex: 1,
@@ -293,5 +295,4 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 3,
     },
-
 });
