@@ -1,3 +1,4 @@
+import LongPressButton from "@/components/LongPressButton";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -36,13 +37,16 @@ export default function ActionButtons({
       </View>
 
       <View style={styles.actionItem}>
-        <TouchableOpacity
-          style={[styles.circleButton, { backgroundColor: "#444" }]}
-          onPress={onCancel}
-        >
-          <Ionicons name="arrow-undo" size={32} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.actionLabel}>Annuler</Text>
+        {/* 
+          LongPressButton handles the circular button and gesture.
+          We pass size=64 to match other buttons.
+      */}
+        <LongPressButton
+          onComplete={onCancel}
+          label=""
+          color="#444"
+          size={64}
+        />
       </View>
     </View>
   );
