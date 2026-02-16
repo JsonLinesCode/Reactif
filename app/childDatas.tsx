@@ -14,6 +14,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {router} from "expo-router";
+import { sessionStore } from "@/store/sessionStore";
+import CustomSwitch from "@/components/CustomSwitch";
 
 
 
@@ -35,36 +37,35 @@ export default function ChildDatas() {
     const toggleExpand = () => {
         //Animation
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        if (!expanded) {
+            setWeightExpanded(false);
+        }
         setExpanded(!expanded);
     };
 
     {/* Age input states */}
-    const [mode, setMode] = useState<AgeMode | undefined>(undefined);
+    const [mode, setMode] = useState<AgeMode | undefined>('months');
     const [valeurTemp, setValeurTemp] = useState('');
-    const [yearsInputVisible, setYearsInputVisible] = useState(false);
-    const [monthsInputVisible, setMonthsInputVisible] = useState(false);
+
+    const onSelectSwitch = (index: number) => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        if (index === 1) {
+            setMode('months');
+        } else {
+            setMode('years');
+        }
+        setValeurTemp('');
+    };
 
     {/* Weight expansion state */}
     const [weightExpanded, setWeightExpanded] = useState(false);
     const toggleWeightExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        if (!weightExpanded) {
+            setExpanded(false);
+        }
         setWeightExpanded(!weightExpanded);
     };
-
-    const toggleYearsInput = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setYearsInputVisible(!yearsInputVisible);
-        if (!yearsInputVisible) {
-            setMode('years');
-        }
-    };
-    const toggleMonthsInput = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setMonthsInputVisible(!monthsInputVisible);
-        if (!monthsInputVisible) {
-            setMode('months');
-        }
-    }
 
     const MONTHLY_WEIGHTS = [3, 4, 5, 5.5, 6, 6.5, 7, 8, 8.5, 9, 9, 9.5];
 
@@ -73,7 +74,7 @@ export default function ChildDatas() {
 
         const strategies: Record<AgeMode, () => number | null> = {
             months: () => (age >= 12 ? 10 : MONTHLY_WEIGHTS[age] ?? null),
-            years: () => (age >= 1 && age <= 18 ? (age + 4) * 2 : null)
+            years: () => (age >= 1 && age <= 12 ? (age + 4) * 2 : null)
         };
 
         return strategies[mode] ? strategies[mode]() : null;
@@ -88,6 +89,31 @@ export default function ChildDatas() {
     const adrenalineDose = finalWeight ? (0.01 * finalWeight).toFixed(2) : null;
     const cordaroneDose = finalWeight ? (5 * finalWeight).toFixed(1) : null;
     const energyDose = finalWeight ? (4 * finalWeight).toFixed(0) : null;
+
+    const handleValidation = () => {
+        if (!mode && !weightInput) {
+             Alert.alert("Erreur", "Veuillez entrer une donnée (âge ou poids).");
+             return;
+        }
+
+        const ageVal = parsedAge || 0;
+        const currentMode = mode || 'years'; // Default if only weight is entered, though logically ageMode might not matter if weight is manual. Let's keep it simple.
+
+
+        // Save to store
+        sessionStore.setPediatricData({
+            ageMode: currentMode,
+            ageValue: ageVal,
+            weight: finalWeight ?? 0,
+            adrenalineDose: adrenalineDose ?? undefined,
+            cordaroneDose: cordaroneDose ?? undefined,
+            energyDose: energyDose ?? undefined
+        });
+
+        router.push("/displayChildData");
+    };
+
+
 
     return (
         <SafeAreaView style={{flex: 1, backgroundColor: '#25292e'}} edges={['top', 'left', 'right']}>
@@ -105,26 +131,25 @@ export default function ChildDatas() {
                     onPress={toggleExpand}
                 >
                     <Text style={styles.choiceButtonText}>
-                        {expanded ? "Fermer" : "Âge"}
+                        {expanded ? "Âge" : "Âge"}
                     </Text>
                 </TouchableOpacity>
                 {/* Content that disappear/appear */}
                 {expanded && (
                     <View style={styles.expandedContent}>
                         <Text style={styles.expendedButtonText}> Choix mois/années</Text>
+                        <View style={{marginVertical: 20}}>
+                            <CustomSwitch
+                                selectionMode={mode === 'years' ? 2 : 1}
+                                roundCorner={true}
+                                option1={'Mois'}
+                                option2={'Années'}
+                                onSelectSwitch={onSelectSwitch}
+                                selectionColor={'#007BFF'}
+                            />
+                        </View>
 
-                        {/* Mois */}
-
-                        <TouchableOpacity
-                            style={styles.subButton}
-                            onPress={toggleMonthsInput}
-                        >
-                            <Text style={styles.subButtonText}>
-                                {monthsInputVisible ? "Fermer Mois" : "Mois"}
-                            </Text>
-                        </TouchableOpacity>
-
-                        {monthsInputVisible && (
+                        {mode === 'months' && (
                                 <View style={styles.expandedContent}>
                                     <Text style={styles.expendedButtonText}>{"Entrez l'âge (mois):"}</Text>
                                     <TextInput
@@ -140,24 +165,14 @@ export default function ChildDatas() {
                                     />
                                     <TouchableOpacity
                                         style={styles.validationButton}
-                                        onPress={() => router.push("/displayChildData")}
+                                        onPress={handleValidation}
                                     >
                                         <Text style={styles.subButtonText}> Valider et calculer</Text>
                                     </TouchableOpacity>
                                 </View>
                         )}
 
-                        {/* Années */}
-                        <TouchableOpacity
-                            style={styles.subButton}
-                            onPress={toggleYearsInput}
-                        >
-                            <Text style={styles.subButtonText}>
-                                {yearsInputVisible ? "Fermer Années" : "Années"}
-                            </Text>
-                        </TouchableOpacity>
-
-                        {yearsInputVisible && (
+                        {mode === 'years' && (
                                 <View style={styles.expandedContent}>
                                     <Text style={styles.expendedButtonText}>Entrez âge (années):</Text>
                                     <TextInput
@@ -174,7 +189,7 @@ export default function ChildDatas() {
                                     />
                                     <TouchableOpacity
                                         style={styles.validationButton}
-                                        onPress={() => router.push("/displayChildData")}
+                                        onPress={handleValidation}
                                     >
                                         <Text style={styles.subButtonText}> Valider et calculer</Text>
                                     </TouchableOpacity>
@@ -188,7 +203,7 @@ export default function ChildDatas() {
                     onPress={toggleWeightExpand}
                 >
                     <Text style={styles.choiceButtonText}>
-                        {weightExpanded ? "Fermer Poids" : "Poids (kg)"}
+                        {weightExpanded ? " Poids (kg)" : "Poids (kg)"}
                     </Text>
                 </TouchableOpacity>
 
@@ -201,12 +216,15 @@ export default function ChildDatas() {
                                 placeholderTextColor="#ccc"
                                 keyboardType="decimal-pad" // Allow decimals for weight
                                 value={weightInput}
-                                onChangeText={setWeightInput}
+                                onChangeText={(text) => {
+                                    setWeightInput(text);
+                                    // If user types here, we probably unset age mode or keep it but rely on weightInput
+                                }}
                                 maxLength={5} // e.g. 45.5 or 110.2
                             />
                             <TouchableOpacity
                                 style={styles.validationButton}
-                                onPress={() => router.push("/displayChildData")}
+                                onPress={handleValidation}
                             >
                                 <Text style={styles.subButtonText}> Valider et calculer</Text>
                             </TouchableOpacity>
