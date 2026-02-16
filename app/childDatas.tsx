@@ -125,7 +125,7 @@ export default function ChildDatas() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#25292e" }}
-      edges={["top", "left", "right"]}
+      edges={["top", "left", "right", "bottom"]}
     >
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -133,7 +133,7 @@ export default function ChildDatas() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
       >
         <ScrollView
-          contentContainerStyle={styles.Container}
+          contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
           <Text style={styles.titleText}>
@@ -141,9 +141,7 @@ export default function ChildDatas() {
             et énergies de RCP pédiatrique.
           </Text>
           <TouchableOpacity style={styles.choiceButton} onPress={toggleExpand}>
-            <Text style={styles.choiceButtonText}>
-              {expanded ? "Âge" : "Âge"}
-            </Text>
+            <Text style={styles.choiceButtonText}>Âge</Text>
           </TouchableOpacity>
           {/* Content that disappear/appear */}
           {expanded && (
@@ -177,12 +175,6 @@ export default function ChildDatas() {
                     setValeurTemp(text);
                   }}
                 />
-                <TouchableOpacity
-                  style={styles.validationButton}
-                  onPress={handleValidation}
-                >
-                  <Text style={styles.subButtonText}> Valider et calculer</Text>
-                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -212,12 +204,6 @@ export default function ChildDatas() {
                 }}
                 maxLength={5} // e.g. 45.5 or 110.2
               />
-              <TouchableOpacity
-                style={styles.validationButton}
-                onPress={handleValidation}
-              >
-                <Text style={styles.subButtonText}> Valider et calculer</Text>
-              </TouchableOpacity>
             </View>
           )}
 
@@ -228,18 +214,29 @@ export default function ChildDatas() {
             référer aux recommandations et protocoles locaux.
           </Text>
         </ScrollView>
+        {(expanded || weightExpanded) && (
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={styles.validationButton}
+              onPress={handleValidation}
+            >
+              <Text style={styles.subButtonText}> Valider et calculer</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  Container: {
+  container: {
     flexGrow: 1,
     paddingTop: 100,
     paddingBottom: 150,
     paddingHorizontal: 20,
     justifyContent: "flex-start",
+    gap: 10,
     backgroundColor: "#25292e",
     alignItems: "center",
   },
@@ -383,5 +380,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     marginTop: 20,
+  },
+  footer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#25292e",
+    borderTopWidth: 1,
+    borderTopColor: "#333",
   },
 });
