@@ -27,6 +27,12 @@ export default function Index() {
         <Text style={styles.menuButtonText}>Historique sessions</Text>
       </TouchableOpacity>
       <TouchableOpacity
+        style={styles.menuButton}
+        onPress={() => router.push("/settings")}
+      >
+        <Text style={styles.menuButtonText}>Paramètres</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
         style={styles.aboutButton}
         onPress={() =>
           router.push({ pathname: "/about", params: { us: "value" } })

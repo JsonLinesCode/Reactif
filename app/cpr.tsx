@@ -14,6 +14,7 @@ import CprTimer from "@/components/CprTimer";
 import EventSelectionModal from "@/components/EventSelectionModal";
 import MetronomeControl from "@/components/MetronomeControl";
 import ShockTimer from "@/components/ShockTimer";
+import { useCprSettings } from "@/hooks/useCprSettings";
 
 // Configure audio session
 const configureAudio = async () => {
@@ -29,6 +30,9 @@ const configureAudio = async () => {
 };
 
 export default function Cpr() {
+  const { shockDuration, cordaroneDuration, adrenalineDuration, loading } =
+    useCprSettings(); // load settings
+
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
   const [isMuted, setIsMuted] = useState(false);
@@ -170,7 +174,12 @@ export default function Cpr() {
         <CprTimer />
 
         {/* Shock Circular Timer */}
-        <ShockTimer onShock={handleShock} lastShockTime={lastShockTime} />
+        {/* Pass shockDuration from settings */}
+        <ShockTimer
+          onShock={handleShock}
+          lastShockTime={lastShockTime}
+          durationSeconds={shockDuration}
+        />
 
         {/* Action Progress Bars */}
         <View style={styles.actionsContainer}>
@@ -181,7 +190,7 @@ export default function Cpr() {
             iconName="flash"
             onPress={handleShock}
             lastActionTime={lastShockTime}
-            durationSeconds={120}
+            durationSeconds={shockDuration} // Use setting
           />
 
           <ActionProgressBar
@@ -191,7 +200,7 @@ export default function Cpr() {
             iconName="medkit"
             onPress={handleCordarone}
             lastActionTime={lastCordaroneTime}
-            durationSeconds={300}
+            durationSeconds={cordaroneDuration} // Use setting
           />
 
           <ActionProgressBar
@@ -201,7 +210,7 @@ export default function Cpr() {
             iconName="eyedrop"
             onPress={handleAdrenaline}
             lastActionTime={lastAdrenalineTime}
-            durationSeconds={240}
+            durationSeconds={adrenalineDuration} // Use setting
           />
         </View>
 
