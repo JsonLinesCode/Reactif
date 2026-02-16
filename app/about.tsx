@@ -6,7 +6,7 @@ export default function About() {
   return (
     <View>
       <Text>A propos </Text>
-      <Text>Groszizi : {params.groszizi}</Text>
+      <Text>constructor : {params.us}</Text>
     </View>
   );
 }

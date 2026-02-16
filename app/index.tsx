@@ -18,7 +18,9 @@ export default function Index() {
       >
         <Text style={styles.menuButtonText}>RCP Adulte</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.menuButton}>
+      <TouchableOpacity
+        style={styles.menuButton}
+        onPress={() => router.push("/childDatas")}>
         <Text style={styles.menuButtonText}>RCP pédiatrique</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.menuButton}>
@@ -27,7 +29,7 @@ export default function Index() {
       <TouchableOpacity
         style={styles.aboutButton}
         onPress={() =>
-          router.push({ pathname: "/about", params: { groszizi: "value" } })
+          router.push({ pathname: "/about", params: { us: "value" } })
         }
       >
         <View>
