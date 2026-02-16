@@ -60,6 +60,18 @@ export default function Cpr() {
     };
   }, []);
 
+  // Listen to session store to stop metronome on definitive end
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      const currentSession = sessionStore.getSession();
+      if (currentSession?.endTime) {
+        setIsMuted(true);
+        isPlayingSV.value = false;
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   // Update shared values
   useEffect(() => {
     isPlayingSV.value = !isMuted;
@@ -166,7 +178,7 @@ export default function Cpr() {
 
     // Log each event to session store
     selectedEvents.forEach((event) => {
-      sessionStore.logEvent("event", { details: event, timestamp: now });
+      sessionStore.logEvent("event", event);
     });
 
     console.log("Logged events:", selectedEvents);

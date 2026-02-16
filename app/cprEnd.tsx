@@ -139,7 +139,6 @@ export default function CprEnd() {
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.summaryScroll}>
         <View style={styles.header}>
-          <FontAwesome5 name="ambulance" size={24} color="#333" />
           <Text style={styles.headerTitle}> Résumé de la RCP</Text>
         </View>
 
@@ -214,30 +213,11 @@ export default function CprEnd() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.actionButton, styles.blueButton]}
-            onPress={handleNewCpr}
-          >
-            <FontAwesome5 name="sync" size={18} color="#fff" />
-            <Text style={styles.actionButtonText}> Nouvelle RCP</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
             style={[styles.actionButton, styles.greyButton]}
             onPress={handleGoHome}
           >
             <FontAwesome5 name="home" size={18} color="#fff" />
             <Text style={styles.actionButtonText}> Retour à l'accueil</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionButton, styles.tealButton]}
-            onPress={handleViewHistory}
-          >
-            <FontAwesome5 name="box-open" size={18} color="#fff" />
-            <Text style={styles.actionButtonText}>
-              {" "}
-              Voir l'historique détaillé
-            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
