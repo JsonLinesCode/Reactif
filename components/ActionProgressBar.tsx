@@ -10,6 +10,7 @@ interface ActionProgressBarProps {
   onPress: () => void;
   lastActionTime?: number; // timestamp
   durationSeconds?: number;
+  subtitle?: string;
 }
 
 export default function ActionProgressBar({
@@ -20,6 +21,7 @@ export default function ActionProgressBar({
   onPress,
   lastActionTime,
   durationSeconds = 120, // Default 2 minutes
+  subtitle,
 }: ActionProgressBarProps) {
   const [elapsed, setElapsed] = useState(0);
   const [width, setWidth] = useState(0);
@@ -67,6 +69,9 @@ export default function ActionProgressBar({
           )}
           <View style={styles.labelContainer}>
             <Text style={[styles.label, { color }]}>{label}</Text>
+            {subtitle && (
+              <Text style={[styles.subtitle, { color }]}>{subtitle}</Text>
+            )}
           </View>
           <View style={[styles.badge, { backgroundColor: color }]}>
             <Text style={[styles.badgeText, { color: "#fff" }]}>{count}</Text>
@@ -96,6 +101,9 @@ export default function ActionProgressBar({
           )}
           <View style={styles.labelContainer}>
             <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
+            {subtitle && (
+              <Text style={[styles.subtitle, { color: "#fff" }]}>{subtitle}</Text>
+            )}
           </View>
           <View style={[styles.badge, { backgroundColor: "#fff" }]}>
             <Text style={[styles.badgeText, { color }]}>{count}</Text>
@@ -144,6 +152,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "normal",
   },
   badge: {
     width: 32,

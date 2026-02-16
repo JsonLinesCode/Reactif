@@ -46,6 +46,13 @@ export default function Cpr() {
   const intervalMsSV = useSharedValue(0);
   const nextTickSV = useSharedValue(0);
 
+  // Doses State
+  const [doses, setDoses] = useState({
+    adrenaline: sessionStore.getAdrenalineDose(),
+    cordarone: sessionStore.getCordaroneDose(),
+    energy: sessionStore.getEnergyDose(),
+  });
+
   useEffect(() => {
     configureAudio();
     async function loadSound() {
@@ -60,7 +67,7 @@ export default function Cpr() {
     };
   }, []);
 
-  // Listen to session store to stop metronome on definitive end
+  // Listen to session store to stop metronome on definitive end and update doses
   useEffect(() => {
     const unsubscribe = sessionStore.subscribe(() => {
       const currentSession = sessionStore.getSession();
@@ -68,6 +75,11 @@ export default function Cpr() {
         setIsMuted(true);
         isPlayingSV.value = false;
       }
+      setDoses({
+        adrenaline: sessionStore.getAdrenalineDose(),
+        cordarone: sessionStore.getCordaroneDose(),
+        energy: sessionStore.getEnergyDose(),
+      });
     });
     return unsubscribe;
   }, []);
@@ -221,6 +233,7 @@ export default function Cpr() {
             onPress={handleShock}
             lastActionTime={lastShockTime}
             durationSeconds={shockDuration} // Use setting
+            subtitle={doses.energy ? `${doses.energy} J` : undefined}
           />
 
           <ActionProgressBar
@@ -231,6 +244,7 @@ export default function Cpr() {
             onPress={handleCordarone}
             lastActionTime={lastCordaroneTime}
             durationSeconds={cordaroneDuration} // Use setting
+            subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
           />
 
           <ActionProgressBar
@@ -241,6 +255,7 @@ export default function Cpr() {
             onPress={handleAdrenaline}
             lastActionTime={lastAdrenalineTime}
             durationSeconds={adrenalineDuration} // Use setting
+            subtitle={doses.adrenaline ? `${doses.adrenaline} mg` : undefined}
           />
         </View>
 
