@@ -140,7 +140,7 @@ export default function ChildDatas() {
 
                         {yearsInputVisible && (
                             <View style={styles.expandedContent}>
-                                <Text style={styles.expendedButtonText}>Entrez l'âge (années):</Text>
+                                <Text style={styles.expendedButtonText}>Entrez âge (années):</Text>
                                 <TextInput
                                     style={styles.input}
                                     keyboardType="numeric"
