@@ -40,6 +40,7 @@ export default function ChildDatas() {
     const [mode, setMode] = useState<AgeMode | undefined>(undefined);
     const [valeurTemp, setValeurTemp] = useState('');
     const [yearsInputVisible, setYearsInputVisible] = useState(false);
+    const [monthsInputVisible, setMonthsInputVisible] = useState(false);
 
     const saveValue = () => {
         if (mode === undefined) {
@@ -67,6 +68,12 @@ export default function ChildDatas() {
             setMode('years');
         }
     };
+    const toggleMonthsInput = () => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        setYearsInputVisible(!monthsInputVisible);
+        if (!monthsInputVisible) {
+            setMode('months');
+    }
 
     return (
         <SafeAreaView style={{flex: 1, backgroundColor: '#25292e'}} edges={['top', 'left', 'right']}>
@@ -84,11 +91,43 @@ export default function ChildDatas() {
                 {expanded && (
                     <View style={styles.expandedContent}>
                         <Text style={styles.expendedButtonText}> Choix mois/années</Text>
+
+                        {/* Mois */}
+
                         <TouchableOpacity
                             style={styles.subButton}
+                            onPress={toggleMonthsInput}
                         >
-                            <Text style={styles.subButtonText}>Mois</Text>
+                            <Text style={styles.subButtonText}>
+                                {monthsInputVisible ? "Fermer Mois" : "Mois" }
+                            </Text>
                         </TouchableOpacity>
+
+                        {monthsInputVisible && (
+                            <View style={styles.expandedContent}>
+                                <Text style={styles.expendedButtonText}>Entrez l'âge (mois):</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    keyboardType="numeric"
+                                    placeholder="Ex: 10"
+                                    placeholderTextColor="#ccc"
+                                    value={mode === 'months' ? valeurTemp : ''}
+                                    onChangeText={(text) => {
+                                        setMode('months');
+                                        setValeurTemp(text);
+                                    }}
+                                />
+                                <TouchableOpacity
+                                    style={styles.validationButton}
+                                    onPress={() => router.push("/cprPediatric")}
+                                >
+                                    <Text style={styles.subButtonText}> Valider et calculer</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
+                        {/* Années */}
+
                         <TouchableOpacity
                             style={styles.subButton}
                             onPress={toggleYearsInput}
@@ -113,18 +152,16 @@ export default function ChildDatas() {
                                     }}
                                 />
                                 <TouchableOpacity
-                                style={styles.validationButton}>
-                                    <Text
-                                        style={styles.subButtonText}
-                                        >
-
-                                    </Text>
+                                style={styles.validationButton}
+                                onPress={() => router.push("/cprPediatric")}
+                                >
+                                    <Text style={styles.subButtonText}> Valider et calculer</Text>
                                 </TouchableOpacity>
                             </View>
                         )}
                     </View>
                 )}
-                <View style={styles.expandedContent}></View>
+               <View style={styles.expandedContent}></View>
                 <TouchableOpacity
                     style={styles.choiceButton}
                     onPress={() => {
@@ -227,7 +264,7 @@ const styles = StyleSheet.create({
     },
     modeButtonSelected: {
         backgroundColor: "#fff",
-        paddingVertical: 18,
+        paddingVertical: 10,
         borderRadius: 12,
         marginBottom: 20,
         width: "100%",
