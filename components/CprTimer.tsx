@@ -30,7 +30,7 @@ export default function CprTimer() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#333",
-    borderRadius: 12,
+    borderRadius: 25,
     padding: 16,
     alignItems: "center",
     marginBottom: 16,
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   },
   label: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 20,
     marginBottom: 4,
   },
   timerContainer: {

@@ -25,7 +25,6 @@ export default function MetronomeControl({
         <TouchableOpacity style={styles.bpmButton} onPress={decreaseBpm}>
           <Ionicons name="remove" size={24} color="#000" />
         </TouchableOpacity>
-
         <View style={styles.bpmDisplay}>
           <Text style={styles.bpmValue}>{bpm}</Text>
           <Text style={styles.bpmLabel}>BPM</Text>
@@ -36,14 +35,13 @@ export default function MetronomeControl({
         </TouchableOpacity>
       </View>
 
-      {/* Mute Toggle */}
       <View style={styles.muteContainer}>
         <Switch
           trackColor={{ false: "#767577", true: "#81b0ff" }}
           thumbColor={!isMuted ? "#f4f3f4" : "#f5dd4b"}
           ios_backgroundColor="#3e3e3e"
           onValueChange={() => setIsMuted(!isMuted)}
-          value={!isMuted} // Switch represents "Sound On" maybe? Or Mute? Screenshot has speaker icon. Usually checks "sound on".
+          value={!isMuted}
         />
         <Ionicons
           name={isMuted ? "volume-mute" : "volume-high"}
@@ -62,36 +60,36 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#333",
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 25,
+    padding: 15,
     width: "100%",
   },
   bpmContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#444", // slightly lighter background for control? Or transpaernt. Screenshot shows grey container.
+    justifyContent: "space-between",
+    gap: 12,
     borderRadius: 8,
   },
   bpmButton: {
-    width: 40,
-    height: 40,
+    width: 60,
+    height: 60,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#ccc",
-    borderRadius: 8,
+    borderRadius: 15,
     marginHorizontal: 4,
   },
   bpmDisplay: {
     alignItems: "center",
-    width: 60,
   },
   bpmValue: {
-    fontSize: 24,
+    fontSize: 55,
     fontWeight: "bold",
     color: "#fff",
   },
   bpmLabel: {
-    fontSize: 10,
+    fontSize: 25,
     color: "#ccc",
   },
   muteContainer: {

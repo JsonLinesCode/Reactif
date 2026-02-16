@@ -27,12 +27,12 @@ export default function ActionButtons({
 
       <View style={styles.actionItem}>
         <TouchableOpacity
-          style={[styles.squareButton, { backgroundColor: "#448AFF" }]}
+          style={[styles.circleButton, { backgroundColor: "#448AFF" }]}
           onPress={onEvent}
         >
           <Ionicons name="add" size={48} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.actionLabelSingleLine}>Saisie{"\n"}Evenements</Text>
+        <Text style={styles.actionLabel}>Saisie événements</Text>
       </View>
 
       <View style={styles.actionItem}>
@@ -68,25 +68,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  squareButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 12, // Slightly rounded square
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-    borderWidth: 2,
-    borderColor: "#448AFF",
-    backgroundColor: "rgba(68, 138, 255, 0.1)", // Or solid if preferred, screenshot looks vaguely outlined/light? Actually solid blue with white plus.
-  },
+
   actionLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    textAlign: "center",
-    color: "#000",
-  },
-  actionLabelSingleLine: {
-    fontSize: 12,
+    fontSize: 20,
     fontWeight: "600",
     textAlign: "center",
     color: "#000",
