@@ -1,0 +1,142 @@
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Svg, { Circle, G } from "react-native-svg";
+
+interface ShockTimerProps {
+  onShock: () => void;
+  lastShockTime: number; // timestamp
+  durationSeconds?: number;
+}
+
+export default function ShockTimer({
+  onShock,
+  lastShockTime,
+  durationSeconds = 120, // Default 2 minutes
+}: ShockTimerProps) {
+  const [timeLeft, setTimeLeft] = useState(durationSeconds);
+
+  // SVG Config
+  const size = 180;
+  const strokeWidth = 16;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const center = size / 2;
+
+  useEffect(() => {
+    if (!lastShockTime) {
+      setTimeLeft(durationSeconds);
+      return;
+    }
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - lastShockTime) / 1000);
+      const remaining = Math.max(0, durationSeconds - elapsed);
+      setTimeLeft(remaining);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [lastShockTime, durationSeconds]);
+
+  const formatTime = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  // Progress logic:
+  // Red = Remaining ("decreases progressively")
+  // Blue = Background (Elapsed)
+  // When full (120s), progress = 1, offset = 0 (Full Red)
+  // When empty (0s), progress = 0, offset = circumference (No Red, all Blue)
+  const progress = timeLeft / durationSeconds;
+  const strokeDashoffset = circumference * (1 - progress);
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity onPress={onShock} activeOpacity={0.8}>
+        <View style={styles.svgContainer}>
+          <Svg width={size} height={size}>
+            <G rotation="-90" origin={`${center}, ${center}`}>
+              {/* Background Circle (Blue) */}
+              <Circle
+                cx={center}
+                cy={center}
+                r={radius}
+                stroke="#2979FF"
+                strokeWidth={strokeWidth}
+                fill="none"
+              />
+              {/* Foreground Circle (Red) */}
+              <Circle
+                cx={center}
+                cy={center}
+                r={radius}
+                stroke="#FF5252"
+                strokeWidth={strokeWidth}
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                fill="none"
+              />
+            </G>
+          </Svg>
+
+          <View style={styles.innerContent}>
+            <Ionicons
+              name="flash"
+              size={32}
+              color="black"
+              style={{ marginBottom: 4 }}
+            />
+            <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+            <Text style={styles.labelText}>CHOC</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    marginVertical: 24,
+  },
+  svgContainer: {
+    position: "relative",
+    width: 180,
+    height: 180,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  innerContent: {
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 136,
+    height: 136,
+    borderRadius: 68,
+    backgroundColor: "#F5F5F5",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  timerText: {
+    fontSize: 48,
+    fontWeight: "bold",
+    color: "#000",
+    lineHeight: 52,
+  },
+  labelText: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: "#000",
+    textTransform: "uppercase",
+  },
+});
