@@ -1,9 +1,20 @@
+import { sessionStore } from "@/store/sessionStore";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Index() {
   const router = useRouter();
+
+  const startAdultCpr = () => {
+    sessionStore.startNewSession();
+    router.push("/cpr");
+  };
+
+  const startPediatricCpr = () => {
+    sessionStore.startNewSession();
+    router.push("/childDatas");
+  };
 
   return (
     <View style={styles.container}>
@@ -12,18 +23,16 @@ export default function Index() {
         style={styles.logo}
       />
       <View style={{ height: 20 }} />
-      <TouchableOpacity
-        style={styles.menuButton}
-        onPress={() => router.push("/cpr")}
-      >
+      <TouchableOpacity style={styles.menuButton} onPress={startAdultCpr}>
         <Text style={styles.menuButtonText}>RCP Adulte</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.menuButton}
-        onPress={() => router.push("/childDatas")}>
+      <TouchableOpacity style={styles.menuButton} onPress={startPediatricCpr}>
         <Text style={styles.menuButtonText}>RCP pédiatrique</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.menuButton}>
+      <TouchableOpacity
+        style={styles.menuButton}
+        onPress={() => router.push("/history")}
+      >
         <Text style={styles.menuButtonText}>Historique sessions</Text>
       </TouchableOpacity>
       <TouchableOpacity

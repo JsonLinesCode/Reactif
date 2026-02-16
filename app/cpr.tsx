@@ -17,6 +17,8 @@ import ShockTimer from "@/components/ShockTimer";
 import { useCprSettings } from "@/hooks/useCprSettings";
 import { sessionStore } from "@/store/sessionStore";
 
+import { router } from "expo-router";
+
 // Configure audio session
 const configureAudio = async () => {
   await Audio.setAudioModeAsync({
@@ -148,8 +150,8 @@ export default function Cpr() {
   };
 
   const handleEnd = () => {
-    console.log("End CPR");
-    sessionStore.logEvent("cpr_end");
+    // Navigate to End Cpr flow
+    router.push("/cprEnd");
   };
   const handleEvent = () => setModalVisible(true);
 
