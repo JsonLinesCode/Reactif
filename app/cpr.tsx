@@ -15,6 +15,7 @@ import EventSelectionModal from "@/components/EventSelectionModal";
 import MetronomeControl from "@/components/MetronomeControl";
 import ShockTimer from "@/components/ShockTimer";
 import { useCprSettings } from "@/hooks/useCprSettings";
+import { sessionStore } from "@/store/sessionStore";
 
 // Configure audio session
 const configureAudio = async () => {
@@ -129,18 +130,27 @@ export default function Cpr() {
 
   // Actions
   const handleShock = () => {
-    setLogs((prev) => [...prev, { type: "shock", timestamp: Date.now() }]);
+    const timestamp = Date.now();
+    setLogs((prev) => [...prev, { type: "shock", timestamp }]);
+    sessionStore.logEvent("shock", { timestamp });
   };
 
   const handleCordarone = () => {
-    setLogs((prev) => [...prev, { type: "cordarone", timestamp: Date.now() }]);
+    const timestamp = Date.now();
+    setLogs((prev) => [...prev, { type: "cordarone", timestamp }]);
+    sessionStore.logEvent("cordarone", { timestamp });
   };
 
   const handleAdrenaline = () => {
-    setLogs((prev) => [...prev, { type: "adrenaline", timestamp: Date.now() }]);
+    const timestamp = Date.now();
+    setLogs((prev) => [...prev, { type: "adrenaline", timestamp }]);
+    sessionStore.logEvent("adrenaline", { timestamp });
   };
 
-  const handleEnd = () => console.log("End CPR");
+  const handleEnd = () => {
+    console.log("End CPR");
+    sessionStore.logEvent("cpr_end");
+  };
   const handleEvent = () => setModalVisible(true);
 
   const handleSaveEvents = (selectedEvents: string[]) => {
@@ -151,6 +161,12 @@ export default function Cpr() {
       details: event,
     }));
     setLogs((prev) => [...prev, ...newLogs]);
+
+    // Log each event to session store
+    selectedEvents.forEach((event) => {
+      sessionStore.logEvent("event", { details: event, timestamp: now });
+    });
+
     console.log("Logged events:", selectedEvents);
   };
 
