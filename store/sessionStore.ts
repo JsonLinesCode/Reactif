@@ -6,6 +6,9 @@ export interface PediatricData {
   ageMode: AgeMode;
   ageValue: number;
   weight?: number; // In kg
+  adrenalineDose?: string;
+  cordaroneDose?: string;
+  energyDose?: string;
 }
 
 export interface CprEvent {
@@ -101,6 +104,26 @@ class SessionStore {
 
   getHistory(): CprSession[] {
     return this.history;
+  }
+
+  getPediatricData(): PediatricData | undefined {
+    return this.currentSession?.pediatricData;
+  }
+
+  getWeight(): number | undefined {
+    return this.currentSession?.pediatricData?.weight;
+  }
+
+  getAdrenalineDose(): string | undefined {
+    return this.currentSession?.pediatricData?.adrenalineDose;
+  }
+
+  getCordaroneDose(): string | undefined {
+    return this.currentSession?.pediatricData?.cordaroneDose;
+  }
+
+  getEnergyDose(): string | undefined {
+    return this.currentSession?.pediatricData?.energyDose;
   }
 
   async loadHistory() {
