@@ -1,6 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
 
 interface ShockTimerProps {
@@ -9,12 +16,19 @@ interface ShockTimerProps {
   durationSeconds?: number;
 }
 
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity);
+
 export default function ShockTimer({
   onShock,
   lastShockTime,
   durationSeconds = 120, // Default 2 minutes
 }: ShockTimerProps) {
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
+
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const soundPlayedRef = useRef(false);
+  const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
   // SVG Config
   const size = 160;
@@ -26,6 +40,8 @@ export default function ShockTimer({
   useEffect(() => {
     if (!lastShockTime) {
       setTimeLeft(durationSeconds);
+      stopBlinking();
+      soundPlayedRef.current = false;
       return;
     }
 
@@ -40,6 +56,75 @@ export default function ShockTimer({
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
   }, [lastShockTime, durationSeconds]);
+
+  useEffect(() => {
+    if (timeLeft === 0) {
+      if (!soundPlayedRef.current) {
+        soundPlayedRef.current = true;
+      }
+      startBlinking();
+    } else {
+      stopBlinking();
+      if (timeLeft > 0) {
+        soundPlayedRef.current = false;
+      }
+    }
+  }, [timeLeft]);
+
+  const startBlinking = () => {
+    if (blinkingRef.current) return;
+
+    blinkingRef.current = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.05,
+          duration: 500,
+          useNativeDriver: true,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+          easing: Easing.inOut(Easing.ease),
+        }),
+      ]),
+    );
+    blinkingRef.current.start();
+  };
+
+  const stopBlinking = () => {
+    if (blinkingRef.current) {
+      blinkingRef.current.stop();
+      blinkingRef.current = null;
+    }
+    Animated.timing(scaleAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Stop blinking immediately on press
+    stopBlinking();
+    soundPlayedRef.current = false;
+
+    onShock();
+  };
 
   const formatTime = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
@@ -57,7 +142,11 @@ export default function ShockTimer({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={onShock} activeOpacity={0.8}>
+      <AnimatedTouchableOpacity
+        onPress={handlePress}
+        activeOpacity={0.8}
+        style={{ transform: [{ scale: scaleAnim }] }}
+      >
         <View style={styles.svgContainer}>
           <Svg width={size} height={size}>
             <G rotation="-90" origin={`${center}, ${center}`}>
@@ -96,7 +185,7 @@ export default function ShockTimer({
             <Text style={styles.labelText}>CHOC</Text>
           </View>
         </View>
-      </TouchableOpacity>
+      </AnimatedTouchableOpacity>
     </View>
   );
 }

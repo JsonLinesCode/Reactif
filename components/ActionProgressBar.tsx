@@ -1,34 +1,53 @@
-import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Audio } from "expo-av";
+import * as Haptics from "expo-haptics";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface ActionProgressBarProps {
   label: string;
   count: number;
   color: string;
-  iconName?: keyof typeof Ionicons.glyphMap;
+  icon?: React.ReactElement; // Should be a valid element we can clone
   onPress: () => void;
   lastActionTime?: number; // timestamp
   durationSeconds?: number;
   subtitle?: string;
+  soundSource?: any;
 }
+
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity);
 
 export default function ActionProgressBar({
   label,
   count,
   color,
-  iconName,
+  icon,
   onPress,
   lastActionTime,
   durationSeconds = 120, // Default 2 minutes
   subtitle,
+  soundSource,
 }: ActionProgressBarProps) {
   const [elapsed, setElapsed] = useState(0);
   const [width, setWidth] = useState(0);
 
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const soundPlayedRef = useRef(false);
+  const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
+
   useEffect(() => {
     if (!lastActionTime) {
       setElapsed(0);
+      soundPlayedRef.current = false;
+      stopBlinking();
       return;
     }
 
@@ -44,29 +63,114 @@ export default function ActionProgressBar({
   }, [lastActionTime]);
 
   const timeLeft = Math.max(0, durationSeconds - elapsed);
+  const isExpired = elapsed >= durationSeconds;
+
+  useEffect(() => {
+    if (isExpired) {
+      if (!soundPlayedRef.current) {
+        playSound();
+        triggerHaptic();
+        soundPlayedRef.current = true;
+      }
+      startBlinking();
+    } else {
+      stopBlinking();
+      if (timeLeft > 0) {
+        soundPlayedRef.current = false; // Reset if time is added back for some reason, or user resets
+      }
+    }
+  }, [isExpired, timeLeft]);
+
+  const playSound = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        soundSource || require("../assets/audio/beep.wav"),
+      );
+      await sound.playAsync();
+    } catch (error) {
+      console.log("Error playing sound", error);
+    }
+  };
+
+  const triggerHaptic = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+  };
+
+  const startBlinking = () => {
+    if (blinkingRef.current) return; // Already blinking
+
+    blinkingRef.current = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.05,
+          duration: 500,
+          useNativeDriver: true,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+          easing: Easing.inOut(Easing.ease),
+        }),
+      ]),
+    );
+    blinkingRef.current.start();
+  };
+
+  const stopBlinking = () => {
+    if (blinkingRef.current) {
+      blinkingRef.current.stop();
+      blinkingRef.current = null;
+    }
+    Animated.timing(scaleAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePress = () => {
+    // Bounce on tap
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Stop blinking immediately on press (as it resets the timer usually)
+    stopBlinking();
+    soundPlayedRef.current = false;
+
+    onPress();
+  };
+
   const progressPercent = Math.min(
     100,
     Math.max(0, (timeLeft / durationSeconds) * 100),
   );
 
   return (
-    <TouchableOpacity
-      onPress={onPress}
+    <AnimatedTouchableOpacity
+      onPress={handlePress}
       activeOpacity={0.8}
       onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
-      style={[styles.container, { borderColor: color }]}
+      style={[
+        styles.container,
+        { borderColor: color, transform: [{ scale: scaleAnim }] },
+      ]}
     >
       {/* First layer */}
       <View style={styles.layer}>
         <View style={styles.content}>
-          {iconName && (
-            <Ionicons
-              name={iconName}
-              size={24}
-              color={color}
-              style={styles.icon}
-            />
-          )}
+          {icon && React.cloneElement(icon, { color: "#fff" } as any)}
           <View style={styles.labelContainer}>
             <Text style={[styles.label, { color }]}>{label}</Text>
             {subtitle && (
@@ -91,18 +195,13 @@ export default function ActionProgressBar({
         ]}
       >
         <View style={[styles.content, { width: width - 7 }]}>
-          {iconName && (
-            <Ionicons
-              name={iconName}
-              size={24}
-              color="#fff"
-              style={styles.icon}
-            />
-          )}
+          {icon && React.cloneElement(icon, { color: "#fff" } as any)}
           <View style={styles.labelContainer}>
             <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
             {subtitle && (
-              <Text style={[styles.subtitle, { color: "#fff" }]}>{subtitle}</Text>
+              <Text style={[styles.subtitle, { color: "#fff" }]}>
+                {subtitle}
+              </Text>
             )}
           </View>
           <View style={[styles.badge, { backgroundColor: "#fff" }]}>
@@ -110,7 +209,7 @@ export default function ActionProgressBar({
           </View>
         </View>
       </View>
-    </TouchableOpacity>
+    </AnimatedTouchableOpacity>
   );
 }
 

@@ -18,6 +18,7 @@ import { useCprSettings } from "@/hooks/useCprSettings";
 import { sessionStore } from "@/store/sessionStore";
 
 import { router } from "expo-router";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 
 // Configure audio session
 const configureAudio = async () => {
@@ -229,33 +230,36 @@ export default function Cpr() {
             label="Choc"
             count={shockCount}
             color="#FF5252"
-            iconName="flash"
+            icon={<Ionicons name="flash" size={24} />}
             onPress={handleShock}
             lastActionTime={lastShockTime}
             durationSeconds={shockDuration} // Use setting
             subtitle={doses.energy ? `${doses.energy} J` : undefined}
+            soundSource={require("@/assets/audio/beep_shock.wav")}
           />
 
           <ActionProgressBar
             label="Cordarone"
             count={cordaroneCount}
             color="#448AFF"
-            iconName="medkit"
+            icon={<FontAwesome5 name="syringe" size={24} />}
             onPress={handleCordarone}
             lastActionTime={lastCordaroneTime}
             durationSeconds={cordaroneDuration} // Use setting
             subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
+            soundSource={require("@/assets/audio/beep.wav")}
           />
 
           <ActionProgressBar
             label="Adrenaline"
             count={adrenalineCount}
             color="#448AFF"
-            iconName="eyedrop"
+            icon={<FontAwesome5 name="syringe" size={24} />}
             onPress={handleAdrenaline}
             lastActionTime={lastAdrenalineTime}
             durationSeconds={adrenalineDuration} // Use setting
             subtitle={doses.adrenaline ? `${doses.adrenaline} mg` : undefined}
+            soundSource={require("@/assets/audio/beep.wav")}
           />
         </View>
 
