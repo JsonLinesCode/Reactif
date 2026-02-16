@@ -11,6 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ActionButtons from "@/components/ActionButtons";
 import ActionProgressBar from "@/components/ActionProgressBar";
 import CprTimer from "@/components/CprTimer";
+import EventSelectionModal from "@/components/EventSelectionModal";
 import MetronomeControl from "@/components/MetronomeControl";
 import ShockTimer from "@/components/ShockTimer";
 
@@ -92,38 +93,72 @@ export default function Cpr() {
   });
 
   // ----- CPR State -----
-  const [lastShockTime, setLastShockTime] = useState<number>(Date.now());
-  const [shockCount, setShockCount] = useState(1);
+  const [startTime] = useState(Date.now());
+  const [logs, setLogs] = useState<
+    { type: string; timestamp: number; details?: any }[]
+  >([]);
 
-  const [lastCordaroneTime, setLastCordaroneTime] = useState<number>(
-    Date.now(),
-  );
-  const [cordaroneCount, setCordaroneCount] = useState(1);
+  // Helper to get last action time
+  const getLastTime = (type: string) => {
+    const relevantLogs = logs.filter((l) => l.type === type);
+    return relevantLogs.length > 0
+      ? relevantLogs[relevantLogs.length - 1].timestamp
+      : startTime;
+  };
 
-  const [lastAdrenalineTime, setLastAdrenalineTime] = useState<number>(
-    Date.now(),
-  );
-  const [adrenalineCount, setAdrenalineCount] = useState(1);
+  // Helper to get counts
+  const getCount = (type: string) => {
+    return logs.filter((l) => l.type === type).length + 1;
+  };
+
+  const shockCount = getCount("shock");
+  const lastShockTime = getLastTime("shock");
+
+  const cordaroneCount = getCount("cordarone");
+  const lastCordaroneTime = getLastTime("cordarone");
+
+  const adrenalineCount = getCount("adrenaline");
+  const lastAdrenalineTime = getLastTime("adrenaline");
+
+  // Modal State
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Actions
   const handleShock = () => {
-    setShockCount((c) => c + 1);
-    setLastShockTime(Date.now());
+    setLogs((prev) => [...prev, { type: "shock", timestamp: Date.now() }]);
   };
 
   const handleCordarone = () => {
-    setCordaroneCount((c) => c + 1);
-    setLastCordaroneTime(Date.now());
+    setLogs((prev) => [...prev, { type: "cordarone", timestamp: Date.now() }]);
   };
 
   const handleAdrenaline = () => {
-    setAdrenalineCount((c) => c + 1);
-    setLastAdrenalineTime(Date.now());
+    setLogs((prev) => [...prev, { type: "adrenaline", timestamp: Date.now() }]);
   };
 
   const handleEnd = () => console.log("End CPR");
-  const handleEvent = () => console.log("Add Event");
-  const handleCancel = () => console.log("Cancel last");
+  const handleEvent = () => setModalVisible(true);
+
+  const handleSaveEvents = (selectedEvents: string[]) => {
+    const now = Date.now();
+    const newLogs = selectedEvents.map((event) => ({
+      type: "event",
+      timestamp: now,
+      details: event,
+    }));
+    setLogs((prev) => [...prev, ...newLogs]);
+    console.log("Logged events:", selectedEvents);
+  };
+
+  const handleCancel = () => {
+    setLogs((prev) => {
+      if (prev.length === 0) return prev;
+      const newLogs = [...prev];
+      newLogs.pop();
+      return newLogs;
+    });
+    console.log("Cancelled last action");
+  };
 
   return (
     <SafeAreaView
@@ -183,6 +218,12 @@ export default function Cpr() {
           setBpm={setBpm}
           isMuted={isMuted}
           setIsMuted={setIsMuted}
+        />
+
+        <EventSelectionModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onSave={handleSaveEvents}
         />
       </View>
     </SafeAreaView>
