@@ -17,7 +17,7 @@ export default function ShockTimer({
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
 
   // SVG Config
-  const size = 180;
+  const size = 160;
   const strokeWidth = 16;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -104,12 +104,11 @@ export default function ShockTimer({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    marginVertical: 24,
   },
   svgContainer: {
     position: "relative",
-    width: 180,
-    height: 180,
+    width: 170,
+    height: 170,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -117,8 +116,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",
-    width: 136,
-    height: 136,
+    width: 125,
+    height: 125,
     borderRadius: 68,
     backgroundColor: "#F5F5F5",
     elevation: 5,
@@ -128,13 +127,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   timerText: {
-    fontSize: 48,
+    fontSize: 37,
     fontWeight: "bold",
     color: "#000",
     lineHeight: 52,
   },
   labelText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "900",
     color: "#000",
     textTransform: "uppercase",

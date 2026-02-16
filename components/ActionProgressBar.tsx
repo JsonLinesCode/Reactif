@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   container: {
     height: 56,
     borderRadius: 28,
-    marginBottom: 12,
+    marginBottom: 8,
     borderWidth: 2,
     position: "relative",
     justifyContent: "center",
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderRadius: 28,
     borderWidth: 2,
-    borderColor: "#fff"
+    borderColor: "#fff",
   },
   content: {
     flexDirection: "row",

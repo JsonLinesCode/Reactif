@@ -1,18 +1,18 @@
-import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, View, ScrollView } from "react-native";
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useEffect, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import {
   runOnJS,
   useFrameCallback,
   useSharedValue,
 } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import CprTimer from "@/components/CprTimer";
-import ShockTimer from "@/components/ShockTimer";
-import ActionProgressBar from "@/components/ActionProgressBar";
 import ActionButtons from "@/components/ActionButtons";
+import ActionProgressBar from "@/components/ActionProgressBar";
+import CprTimer from "@/components/CprTimer";
 import MetronomeControl from "@/components/MetronomeControl";
+import ShockTimer from "@/components/ShockTimer";
 
 // Configure audio session
 const configureAudio = async () => {
@@ -42,7 +42,7 @@ export default function Cpr() {
     configureAudio();
     async function loadSound() {
       const { sound } = await Audio.Sound.createAsync(
-        require("@/assets/audio/metronome_tick.wav")
+        require("@/assets/audio/metronome_tick.wav"),
       );
       soundRef.current = sound;
     }
@@ -54,20 +54,20 @@ export default function Cpr() {
 
   // Update shared values
   useEffect(() => {
-    isPlayingSV.value = !isMuted; 
-    
+    isPlayingSV.value = !isMuted;
+
     if (bpm > 0) {
-        intervalMsSV.value = (60 / bpm) * 1000;
+      intervalMsSV.value = (60 / bpm) * 1000;
     }
   }, [bpm, isMuted]);
 
   const playSound = async () => {
     if (soundRef.current) {
-        try {
-            await soundRef.current.replayAsync();
-        } catch (error) {
-            console.log("Sound error", error);
-        }
+      try {
+        await soundRef.current.replayAsync();
+      } catch (error) {
+        console.log("Sound error", error);
+      }
     }
   };
 
@@ -75,7 +75,7 @@ export default function Cpr() {
     if (!isPlayingSV.value || !frameInfo || !frameInfo.timestamp) {
       return;
     }
-    
+
     const now = frameInfo.timestamp;
 
     if (nextTickSV.value === 0) {
@@ -86,35 +86,38 @@ export default function Cpr() {
       runOnJS(playSound)();
       nextTickSV.value += intervalMsSV.value;
       if (now > nextTickSV.value + intervalMsSV.value) {
-         nextTickSV.value = now + intervalMsSV.value;
-       }
+        nextTickSV.value = now + intervalMsSV.value;
+      }
     }
   });
-
 
   // ----- CPR State -----
   const [lastShockTime, setLastShockTime] = useState<number>(Date.now());
   const [shockCount, setShockCount] = useState(1);
-  
-  const [lastCordaroneTime, setLastCordaroneTime] = useState<number>(Date.now());
+
+  const [lastCordaroneTime, setLastCordaroneTime] = useState<number>(
+    Date.now(),
+  );
   const [cordaroneCount, setCordaroneCount] = useState(1);
 
-  const [lastAdrenalineTime, setLastAdrenalineTime] = useState<number>(Date.now());
+  const [lastAdrenalineTime, setLastAdrenalineTime] = useState<number>(
+    Date.now(),
+  );
   const [adrenalineCount, setAdrenalineCount] = useState(1);
 
   // Actions
   const handleShock = () => {
-    setShockCount(c => c + 1);
+    setShockCount((c) => c + 1);
     setLastShockTime(Date.now());
   };
 
   const handleCordarone = () => {
-    setCordaroneCount(c => c + 1);
+    setCordaroneCount((c) => c + 1);
     setLastCordaroneTime(Date.now());
   };
 
   const handleAdrenaline = () => {
-    setAdrenalineCount(c => c + 1);
+    setAdrenalineCount((c) => c + 1);
     setLastAdrenalineTime(Date.now());
   };
 
@@ -123,78 +126,77 @@ export default function Cpr() {
   const handleCancel = () => console.log("Cancel last");
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#fff" }}
+      edges={["top", "left", "right"]}
+    >
+      <View style={styles.container}>
         {/* Top Timer */}
         <CprTimer />
 
         {/* Shock Circular Timer */}
-        <ShockTimer 
-            onShock={handleShock} 
-            lastShockTime={lastShockTime} 
-        />
+        <ShockTimer onShock={handleShock} lastShockTime={lastShockTime} />
 
         {/* Action Progress Bars */}
         <View style={styles.actionsContainer}>
-            <ActionProgressBar 
-                label="Choc"
-                count={shockCount} 
-                color="#FF5252"
-                iconName="flash"
-                onPress={handleShock}
-                lastActionTime={lastShockTime}
-                durationSeconds={120}
-            />
+          <ActionProgressBar
+            label="Choc"
+            count={shockCount}
+            color="#FF5252"
+            iconName="flash"
+            onPress={handleShock}
+            lastActionTime={lastShockTime}
+            durationSeconds={120}
+          />
 
-            <ActionProgressBar 
-                label="Cordarone" 
-                count={cordaroneCount} 
-                color="#448AFF"
-                iconName="medkit"
-                onPress={handleCordarone}
-                lastActionTime={lastCordaroneTime}
-                durationSeconds={300}
-            />
+          <ActionProgressBar
+            label="Cordarone"
+            count={cordaroneCount}
+            color="#448AFF"
+            iconName="medkit"
+            onPress={handleCordarone}
+            lastActionTime={lastCordaroneTime}
+            durationSeconds={300}
+          />
 
-            <ActionProgressBar 
-                label="Adrenaline" 
-                count={adrenalineCount} 
-                color="#448AFF"
-                iconName="eyedrop"
-                onPress={handleAdrenaline}
-                lastActionTime={lastAdrenalineTime}
-                durationSeconds={240}
-            />
+          <ActionProgressBar
+            label="Adrenaline"
+            count={adrenalineCount}
+            color="#448AFF"
+            iconName="eyedrop"
+            onPress={handleAdrenaline}
+            lastActionTime={lastAdrenalineTime}
+            durationSeconds={240}
+          />
         </View>
 
         {/* Action Buttons Grid */}
-        <ActionButtons 
-            onEnd={handleEnd}
-            onEvent={handleEvent}
-            onCancel={handleCancel}
+        <ActionButtons
+          onEnd={handleEnd}
+          onEvent={handleEvent}
+          onCancel={handleCancel}
         />
 
         {/* Metronome */}
-        <MetronomeControl 
-            bpm={bpm}
-            setBpm={setBpm}
-            isMuted={isMuted}
-            setIsMuted={setIsMuted}
+        <MetronomeControl
+          bpm={bpm}
+          setBpm={setBpm}
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
         />
-
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
+  container: {
+    flex: 1,
     padding: 16,
-    paddingBottom: 40,
+    justifyContent: "space-between",
+    gap: 5,
   },
   actionsContainer: {
-    width: '100%',
-    marginVertical: 10,
+    width: "100%",
   },
 });

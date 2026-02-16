@@ -72,8 +72,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   bpmButton: {
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#ccc",
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   bpmValue: {
-    fontSize: 55,
+    fontSize: 35,
     fontWeight: "bold",
     color: "#fff",
   },

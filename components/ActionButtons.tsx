@@ -53,7 +53,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around", // Distribute evenly
     alignItems: "flex-start",
-    marginVertical: 20,
     width: "100%",
   },
   actionItem: {
@@ -70,7 +69,7 @@ const styles = StyleSheet.create({
   },
 
   actionLabel: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: "600",
     textAlign: "center",
     color: "#000",
