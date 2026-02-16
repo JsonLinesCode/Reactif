@@ -106,7 +106,7 @@ export default function ChildDatas() {
 
                         {monthsInputVisible && (
                             <View style={styles.expandedContent}>
-                                <Text style={styles.expendedButtonText}>Entrez l'âge (mois):</Text>
+                                <Text style={styles.expendedButtonText}>{"Entrez l'âge (mois):"}</Text>
                                 <TextInput
                                     style={styles.input}
                                     keyboardType="numeric"
