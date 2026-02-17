@@ -1,7 +1,7 @@
 import CustomSwitch from "@/components/CustomSwitch";
 import { sessionStore } from "@/store/sessionStore";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -33,6 +33,21 @@ let savedDatas: Record<AgeMode, string> = {
 };
 
 export default function ChildDatas() {
+  const [theme, setTheme] = useState(sessionStore.theme);
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const isDark = theme === "dark";
+  const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };
+  const textStyle = { color: isDark ? "#fff" : "#000" };
+  const expandedBg = { backgroundColor: isDark ? "#353636" : "#f9f9f9" };
+  const footerBg = { backgroundColor: isDark ? "#353636" : "#f9f9f9", borderTopColor: isDark ? "#333" : "#ccc" };
+
   {
     /* Animation for the expansion of the content */
   }
@@ -124,7 +139,7 @@ export default function ChildDatas() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#25292e" }}
+      style={[{ flex: 1 }, bgStyle]}
       edges={["top", "left", "right", "bottom"]}
     >
       <KeyboardAvoidingView
@@ -133,10 +148,10 @@ export default function ChildDatas() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
       >
         <ScrollView
-          contentContainerStyle={styles.container}
+          contentContainerStyle={[styles.container, bgStyle]}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.titleText}>
+          <Text style={[styles.titleText, textStyle]}>
             Sélectionnez l'âge ou le poids de l'enfant pour calculer les doses
             et énergies de RCP pédiatrique.
           </Text>
@@ -145,7 +160,7 @@ export default function ChildDatas() {
           </TouchableOpacity>
           {/* Content that disappear/appear */}
           {expanded && (
-            <View style={styles.expandedContent}>
+            <View style={[styles.expandedContent, expandedBg]}>
               <Text style={styles.expandedButtonText}> Choix mois/années</Text>
               <View style={{ marginVertical: 20 }}>
                 <CustomSwitch
@@ -215,7 +230,7 @@ export default function ChildDatas() {
           </Text>
         </ScrollView>
         {(expanded || weightExpanded) && (
-          <View style={styles.footer}>
+          <View style={[styles.footer, footerBg]}>
             <TouchableOpacity
               style={styles.validationButton}
               onPress={handleValidation}

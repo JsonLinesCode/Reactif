@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -12,9 +12,22 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useCprSettings } from "@/hooks/useCprSettings";
+import { sessionStore } from "@/store/sessionStore";
+import CustomSwitch from "@/components/CustomSwitch";
+
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const [theme, setTheme] = useState(sessionStore.theme);
+
+  useEffect(() => {
+    // Subscribe to sessionStore changes
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const {
     shockDuration,
     cordaroneDuration,
@@ -26,8 +39,8 @@ export default function SettingsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text>Chargement...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: theme === "light" ? "#fff" : "#353636" }]}>
+        <Text style={{ color: theme === "light" ? "#000" : "#fff" }}>Chargement...</Text>
       </View>
     );
   }
@@ -42,23 +55,36 @@ export default function SettingsScreen() {
     }
   };
 
+  const onSelectSwitch = async (val: number) => {
+    const newTheme = val === 1 ? 'light' : 'dark';
+    await sessionStore.setTheme(newTheme);
+  };
+
+  const isDark = theme === "dark";
+  const bgStyle = { backgroundColor: isDark ? "#121212" : "#fff" };
+  const textStyle = { color: isDark ? "#fff" : "#000" };
+  const inputBgStyle = { backgroundColor: isDark ? "#333" : "#f9f9f9", borderColor: isDark ? "#555" : "#ccc" };
+  const sectionTitleColor = { color: isDark ? "#ddd" : "#333" };
+  const labelColor = { color: isDark ? "#aaa" : "#555" };
+
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={[styles.container, bgStyle]}>
+      <View style={[styles.header, { borderBottomColor: isDark ? "#333" : "#eee" }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color={isDark ? "#fff" : "#000"} />
         </TouchableOpacity>
-        <Text style={styles.title}>Paramètres</Text>
+        <Text style={[styles.title, textStyle]}>Paramètres</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.sectionTitle}>Durées par défaut (secondes)</Text>
+        <Text style={[styles.sectionTitle, sectionTitleColor]}>Durées par défaut (secondes)</Text>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Choc (Intervalle)</Text>
-          <View style={styles.inputWrapper}>
+          <Text style={[styles.label, labelColor]}>Choc (Intervalle)</Text>
+          <View style={[styles.inputWrapper, inputBgStyle]}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, textStyle]}
               keyboardType="numeric"
               value={shockDuration.toString()}
               onChangeText={(text) => handleChange("shock", text)}
@@ -68,10 +94,10 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Cordarone (Intervalle)</Text>
-          <View style={styles.inputWrapper}>
+          <Text style={[styles.label, labelColor]}>Cordarone (Intervalle)</Text>
+          <View style={[styles.inputWrapper, inputBgStyle]}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, textStyle]}
               keyboardType="numeric"
               value={cordaroneDuration.toString()}
               onChangeText={(text) => handleChange("cordarone", text)}
@@ -81,16 +107,28 @@ export default function SettingsScreen() {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Adrénaline (Intervalle)</Text>
-          <View style={styles.inputWrapper}>
+          <Text style={[styles.label, labelColor]}>Adrénaline (Intervalle)</Text>
+          <View style={[styles.inputWrapper, inputBgStyle]}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, textStyle]}
               keyboardType="numeric"
               value={adrenalineDuration.toString()}
               onChangeText={(text) => handleChange("adrenaline", text)}
             />
             <Text style={styles.unit}>sec</Text>
           </View>
+        </View>
+
+         <Text style={[styles.sectionTitle, sectionTitleColor, { marginTop: 20 }]}>Thème de l&#39;application</Text>
+         <View style={{ alignItems: 'center', marginBottom: 20 }}>
+            <CustomSwitch
+                selectionMode={theme === "light" ? 1 : 2}
+                roundCorner={true}
+                option1={"Clair"}
+                option2={"Sombre"}
+                onSelectSwitch={onSelectSwitch}
+                selectionColor={"#007BFF"}
+            />
         </View>
 
         <TouchableOpacity style={styles.resetButton} onPress={resetSettings}>
@@ -161,6 +199,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#888",
     marginLeft: 8,
+  },
+  switchThemeButton: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: "#007BFF",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+   switchThemeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   resetButton: {
     marginTop: 40,

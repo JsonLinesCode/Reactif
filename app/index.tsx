@@ -2,12 +2,23 @@ import { sessionStore } from "@/store/sessionStore";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import Feather from '@expo/vector-icons/Feather';
+import React, { useEffect, useState } from "react";
 
 
 export default function Index() {
   const router = useRouter();
+  const [theme, setTheme] = useState(sessionStore.theme);
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const isDark = theme === "dark";
+  const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };
 
   const startAdultCpr = () => {
     sessionStore.startNewSession();
@@ -20,9 +31,10 @@ export default function Index() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, bgStyle]}>
+
       <Image
-        source={require("@/assets/images/logoWhite.png")}
+        source={isDark ? require("@/assets/images/logoWhite.png") : require("@/assets/images/logo.png")}
         style={styles.logo}
       />
       <View style={{ height: 20 }} />

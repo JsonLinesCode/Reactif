@@ -160,6 +160,12 @@ class SessionStore {
   private notifyListeners() {
     this.listeners.forEach((l) => l());
   }
+
+  async setTheme(theme: "light" | "dark") {
+    this.theme = theme;
+    this.notifyListeners();
+  }
+  theme: "light" | "dark" = "light";
 }
 
 export const sessionStore = new SessionStore();
