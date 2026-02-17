@@ -5,6 +5,13 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DisplayChildData() {
+  const [theme, setTheme] = useState(sessionStore.theme);
+  const isDark = theme === "dark";
+  const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };
+  const textStyle = { color: isDark ? "#fff" : "#000" };
+  const cardBgStyle = { backgroundColor: isDark ? "#2a2e33" : "#f0f0f0" };
+  const labelStyle = { color: isDark ? "#ccc" : "#666" };
+
   const [data, setData] = useState<PediatricData | undefined>(
     sessionStore.getPediatricData(),
   );
@@ -12,13 +19,14 @@ export default function DisplayChildData() {
   useEffect(() => {
     const unsubscribe = sessionStore.subscribe(() => {
       setData(sessionStore.getPediatricData());
+      setTheme(sessionStore.theme);
     });
     return unsubscribe;
   }, []);
 
   if (!data) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, bgStyle]}>
         <Text style={styles.errorText}>
           Aucune donnée pédiatrique disponible.
         </Text>
@@ -36,33 +44,33 @@ export default function DisplayChildData() {
   } = data;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, bgStyle]}>
       <View style={styles.scrollContent}>
-        <Text style={styles.title}>Données Patient</Text>
+        <Text style={[styles.title, textStyle]}>Données Patient</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.label}>Age:</Text>
-          <Text style={styles.value}>
+        <View style={[styles.card, cardBgStyle]}>
+          <Text style={[styles.label, labelStyle]}>Age:</Text>
+          <Text style={[styles.value, textStyle]}>
             {ageValue} {ageMode === "months" ? "Mois" : "Ans"}
           </Text>
 
-          <Text style={styles.label}>Poids Estimé/Saisi:</Text>
-          <Text style={styles.value}>{weight} kg</Text>
+          <Text style={[styles.label, labelStyle]}>Poids Estimé/Saisi:</Text>
+          <Text style={[styles.value, textStyle]}>{weight} kg</Text>
 
           <View style={styles.separator} />
 
-          <Text style={styles.label}>Adrénaline (IV/IO):</Text>
-          <Text style={styles.value}>
+          <Text style={[styles.label, labelStyle]}>Adrénaline (IV/IO):</Text>
+          <Text style={[styles.value, textStyle]}>
             {adrenalineDose ? `${adrenalineDose} mg` : "N/A"}
           </Text>
 
-          <Text style={styles.label}>Amiodarone (Cordarone):</Text>
-          <Text style={styles.value}>
+          <Text style={[styles.label, labelStyle]}>Amiodarone (Cordarone):</Text>
+          <Text style={[styles.value, textStyle]}>
             {cordaroneDose ? `${cordaroneDose} mg` : "N/A"}
           </Text>
 
-          <Text style={styles.label}>Choc électrique (Energie):</Text>
-          <Text style={styles.value}>
+          <Text style={[styles.label, labelStyle]}>Choc électrique (Energie):</Text>
+          <Text style={[styles.value, textStyle]}>
             {energyDose ? `${energyDose} J` : "N/A"}
           </Text>
         </View>

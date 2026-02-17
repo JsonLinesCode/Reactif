@@ -152,7 +152,7 @@ export default function ChildDatas() {
           keyboardShouldPersistTaps="handled"
         >
           <Text style={[styles.titleText, textStyle]}>
-            Sélectionnez l'âge ou le poids de l'enfant pour calculer les doses
+            Sélectionnez l&#39;âge ou le poids de l&#39;enfant pour calculer les doses
             et énergies de RCP pédiatrique.
           </Text>
           <TouchableOpacity style={styles.choiceButton} onPress={toggleExpand}>
