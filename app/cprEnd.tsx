@@ -1,6 +1,5 @@
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
-import { router, Stack } from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
 import {
@@ -14,25 +13,43 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CprSession, sessionStore } from "@/store/sessionStore";
+import {router, Stack, useLocalSearchParams} from "expo-router";
 
 export default function CprEnd() {
-  const [step, setStep] = useState<"confirm" | "summary">("confirm");
+  const params = useLocalSearchParams();
+  const initialMode = params.mode === "death" ? "summary" : "racs";
+
+  const [step, setStep] = useState<"racs" | "summary">(initialMode as any);
   const [session, setSession] = useState<CprSession | null>(null);
 
   useEffect(() => {
-    // Load current session summary for display
     const current = sessionStore.getSession();
     setSession(current);
-  }, []);
+
+    if (params.mode === "death") {
+      setStep("summary");
+    } else {
+      setStep("racs");
+    }
+  }, [params.mode]);
 
   const handleResume = () => {
-    router.back();
+    // "Reprendre la RCP"
+    sessionStore.logEvent("RESUME");
+    router.dismissAll();
+    router.replace("/cpr");
+  };
+
+  const handleDeath = async () => {
+    // "Décès"
+    await sessionStore.saveCurrentSession("Décès");
+    setSession(sessionStore.getSession());
+    setStep("summary");
   };
 
   const handleConfirmEnd = async () => {
-    // Save session
-    await sessionStore.saveCurrentSession();
-    // Update local state to ensure we have the latest
+    // "Arrêter définitivement" (RACS -> Stop)
+    await sessionStore.saveCurrentSession("Arrêt définitif");
     setSession(sessionStore.getSession());
     setStep("summary");
   };
@@ -59,19 +76,6 @@ export default function CprEnd() {
     router.replace("/");
   };
 
-  const handleNewCpr = () => {
-    sessionStore.startNewSession();
-    // Check if pediatric or adult needed? Defaulting to adult menu logic for now or ask user.
-    // Ideally we might go back to selection screen or just straight to CPR if we knew type.
-    // For safety, let's go to home to choose again, or just adult CPR?
-    // User request "Nouvelle RCP" implies fresh start. Let's go to index for choice.
-    router.replace("/");
-  };
-
-  const handleViewHistory = () => {
-    router.push("/history");
-  };
-
   // derived data
   const getDurationString = () => {
     if (!session || !session.endTime) return "0 minutes et 0 secondes";
@@ -86,7 +90,6 @@ export default function CprEnd() {
   };
 
   const getActions = () => {
-    // Cordarone, Adrenaline, etc.
     return (
       session?.events.filter((e) =>
         ["cordarone", "adrenaline"].includes(e.type),
@@ -98,127 +101,132 @@ export default function CprEnd() {
     return session?.events.filter((e) => e.type === "event") || [];
   };
 
-  if (step === "confirm") {
+  if (step === "racs") {
     return (
-      <SafeAreaView style={styles.container}>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View style={styles.confirmContainer}>
-          <Text style={styles.title}>Arrêt de la réanimation ?</Text>
-          <Text style={styles.subtitle}>
-            Souhaitez-vous vraiment arrêter la réanimation et enregistrer la
-            session ?
-          </Text>
+        <SafeAreaView style={styles.container}>
+            <Stack.Screen options={{ headerShown: false }} />
+            <View style={styles.confirmContainer}>
+                <Text style={styles.title}>RACS</Text>
+                <Text style={styles.subtitle}>
+                    Retour d&#39;Activité Circulatoire Spontanée
+                </Text>
 
-          <View style={styles.buttonGroupConfirm}>
-            <TouchableOpacity
-              style={[styles.buttonConfirm, styles.resumeButton]}
-              onPress={handleResume}
-            >
-              <Ionicons name="play" size={24} color="#fff" />
-              <Text style={styles.buttonText}>Reprendre RCP</Text>
-            </TouchableOpacity>
+                <View style={styles.buttonGroupConfirm}>
+                    <TouchableOpacity
+                        style={[styles.buttonConfirm, styles.resumeButton]}
+                        onPress={handleResume}
+                    >
+                        <Text style={styles.buttonText}>Reprendre la RCP</Text>
+                    </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.buttonConfirm, styles.stopButton]}
-              onPress={handleConfirmEnd}
-            >
-              <Ionicons name="stop" size={24} color="#fff" />
-              <Text style={styles.buttonText}>Arrêter définitivement</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </SafeAreaView>
+                    <TouchableOpacity
+                        style={[styles.buttonConfirm, styles.deathButton]}
+                        onPress={handleDeath}
+                    >
+                        <Text style={styles.buttonText}>Décès</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.buttonConfirm, styles.stopButton]}
+                        onPress={handleConfirmEnd}
+                    >
+                        <Text style={styles.buttonText}>Arrêter définitivement</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </SafeAreaView>
     );
   }
 
   const actions = getActions();
   const customEvents = getCustomEvents();
+  const summaryTitle = session?.events.find(e => e.type === "cpr_end")?.details || "Fin de session";
 
   return (
     <SafeAreaView style={[styles.container, styles.summaryBackground]}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.summaryScroll}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}> Résumé de la RCP</Text>
+            <Text style={styles.headerTitle}> {summaryTitle === "Décès" ? "Patient décédé" : "Résumé de la RCP"}</Text>
         </View>
 
         {/* Stats Card */}
         <View style={styles.card}>
-          <View style={styles.cardRow}>
-            <FontAwesome5
-              name="hourglass-half"
-              size={18}
-              color="black"
-              style={styles.iconWidth}
-            />
-            <Text style={styles.cardText}>
-              Durée totale: {getDurationString()}
-            </Text>
-          </View>
-          <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <FontAwesome5
-              name="bolt"
-              size={18}
-              color="black"
-              style={styles.iconWidth}
-            />
-            <Text style={styles.cardText}>
-              Chocs délivrés: {getShockCount()}
-            </Text>
-          </View>
+            <View style={styles.cardRow}>
+                <FontAwesome5
+                    name="hourglass-half"
+                    size={18}
+                    color="black"
+                    style={styles.iconWidth}
+                />
+                <Text style={styles.cardText}>
+                    Durée totale: {getDurationString()}
+                </Text>
+            </View>
+            <View style={[styles.cardRow, { marginTop: 8 }]}>
+                <FontAwesome5
+                    name="bolt"
+                    size={18}
+                    color="black"
+                    style={styles.iconWidth}
+                />
+                <Text style={styles.cardText}>
+                    Chocs délivrés: {getShockCount()}
+                </Text>
+            </View>
         </View>
 
         {/* Actions Card */}
         <View style={styles.card}>
-          <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}> Actions réalisées:</Text>
-          </View>
-          <View style={styles.divider} />
-          {actions.length === 0 ? (
-            <Text style={styles.emptyText}>Aucune action.</Text>
-          ) : (
-            actions.map((act, i) => (
-              <Text key={i} style={styles.itemText}>
-                • {act.type} ({new Date(act.timestamp).toLocaleTimeString()})
-              </Text>
-            ))
-          )}
+            <View style={styles.cardHeaderRow}>
+                <Text style={styles.cardTitle}> Actions réalisées:</Text>
+            </View>
+            <View style={styles.divider} />
+            {actions.length === 0 ? (
+                <Text style={styles.emptyText}>Aucune action.</Text>
+            ) : (
+                actions.map((act, i) => (
+                    <Text key={i} style={styles.itemText}>
+                        • {act.type} ({new Date(act.timestamp).toLocaleTimeString()})
+                    </Text>
+                ))
+            )}
         </View>
 
         {/* Events Card */}
         <View style={styles.card}>
-          <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}> Événements saisis:</Text>
-          </View>
-          <View style={styles.divider} />
-          {customEvents.length === 0 ? (
-            <Text style={styles.emptyText}>Aucun événement.</Text>
-          ) : (
-            customEvents.map((evt, i) => (
-              <Text key={i} style={styles.itemText}>
-                • {evt.details} ({new Date(evt.timestamp).toLocaleTimeString()})
-              </Text>
-            ))
-          )}
+            <View style={styles.cardHeaderRow}>
+                <Text style={styles.cardTitle}> Événements saisis:</Text>
+            </View>
+            <View style={styles.divider} />
+            {customEvents.length === 0 ? (
+                <Text style={styles.emptyText}>Aucun événement.</Text>
+            ) : (
+                customEvents.map((evt, i) => (
+                    <Text key={i} style={styles.itemText}>
+                        • {evt.details} ({new Date(evt.timestamp).toLocaleTimeString()})
+                    </Text>
+                ))
+            )}
         </View>
 
         {/* Buttons */}
         <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.greyButton]}
-            onPress={handleExportPdf}
-          >
-            <FontAwesome5 name="file-pdf" size={18} color="#fff" />
-            <Text style={styles.actionButtonText}> Exporter en PDF</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+                style={[styles.actionButton, styles.greyButton]}
+                onPress={handleExportPdf}
+            >
+                <FontAwesome5 name="file-pdf" size={18} color="#fff" />
+                <Text style={styles.actionButtonText}> Exporter en PDF</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.actionButton, styles.greyButton]}
-            onPress={handleGoHome}
-          >
-            <FontAwesome5 name="home" size={18} color="#fff" />
-            <Text style={styles.actionButtonText}> Retour à l&#39;accueil</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+                style={[styles.actionButton, styles.greyButton]}
+                onPress={handleGoHome}
+            >
+                <FontAwesome5 name="home" size={18} color="#fff" />
+                <Text style={styles.actionButtonText}> Retour à l&apos;accueil</Text>
+            </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -227,18 +235,30 @@ export default function CprEnd() {
 
 // Simple HTML generator for the PDF
 function generateHtml(session: CprSession) {
-  // ... existing HTML logic ...
-  const eventsHtml = session.events
-    .map(
-      (evt) => `
+
+  let cycleCount = 1;
+  let eventsHtml = "";
+
+  // Header for first cycle
+  eventsHtml += `<tr class="cycle-header"><td colspan="3"><strong>RCP ${cycleCount}</strong></td></tr>`;
+
+  session.events.forEach(evt => {
+      const time = new Date(evt.timestamp).toLocaleTimeString();
+      const details = evt.details ? (typeof evt.details === "string" ? evt.details : JSON.stringify(evt.details)) : "-";
+
+      eventsHtml += `
         <tr>
-            <td>${new Date(evt.timestamp).toLocaleTimeString()}</td>
+            <td>${time}</td>
             <td>${evt.type}</td>
-            <td>${evt.details ? (typeof evt.details === "string" ? evt.details : JSON.stringify(evt.details)) : "-"}</td>
+            <td>${details}</td>
         </tr>
-    `,
-    )
-    .join("");
+      `;
+
+      if (evt.type === "RACS" || evt.type === "racs") {
+          cycleCount++;
+          eventsHtml += `<tr class="cycle-header"><td colspan="3" style="background-color: #e6fffa; text-align: center; padding: 10px;"><strong>RCP ${cycleCount}</strong> (Reprise)</td></tr>`;
+      }
+  });
 
   const pediatricInfo = session.pediatricData
     ? `<p><strong>Patient:</strong> Enfant (${session.pediatricData.ageValue} ${session.pediatricData.ageMode})</p>`
@@ -255,6 +275,7 @@ function generateHtml(session: CprSession) {
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
             th { background-color: #f2f2f2; }
+            .cycle-header td { background-color: #e0e0e0; }
         </style>
       </head>
       <body>
@@ -364,8 +385,18 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 4,
   },
+  cycleTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: '#0D47A1',
+      marginTop: 20,
+      marginBottom: 10,
+      marginLeft: 4,
+  },
+  cycleContainer: {
+      marginBottom: 10,
+  },
 
-  // Buttons
   actionButtonsContainer: {
     marginTop: 20,
     gap: 12,
@@ -431,6 +462,9 @@ const styles = StyleSheet.create({
   },
   stopButton: {
     backgroundColor: "#d9534f",
+  },
+  deathButton: {
+    backgroundColor: "#333", // Black/Dark Grey for Death
   },
   buttonText: {
     color: "#fff",

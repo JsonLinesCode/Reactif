@@ -53,14 +53,14 @@ class SessionStore {
     }
   }
 
-  async saveCurrentSession() {
+  async saveCurrentSession(endReason?: string) {
     if (this.currentSession) {
       this.currentSession.endTime = Date.now();
       // Add 'cpr_end' event if not last event
       const lastEvent =
         this.currentSession.events[this.currentSession.events.length - 1];
       if (!lastEvent || lastEvent.type !== "cpr_end") {
-        this.logEvent("cpr_end");
+        this.logEvent("cpr_end", endReason); // Pass reason as details
       }
 
       this.history.unshift(this.currentSession);

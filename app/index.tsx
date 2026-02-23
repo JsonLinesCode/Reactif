@@ -1,9 +1,10 @@
 import { sessionStore } from "@/store/sessionStore";
-import Feather from "@expo/vector-icons/Feather";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Feather from '@expo/vector-icons/Feather';
+import React, { useEffect, useState } from "react";
+
 
 export default function Index() {
   const router = useRouter();
@@ -39,41 +40,45 @@ export default function Index() {
         }
         style={styles.logo}
       />
-      <View style={styles.mainButtons}>
-        <TouchableOpacity style={styles.menuButton} onPress={startAdultCpr}>
-          <Text style={styles.menuButtonText}>RCP Adulte</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuButton} onPress={startPediatricCpr}>
-          <Text style={styles.menuButtonText}>RCP pédiatrique</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.menuButton}
+      <View style={{gap: 100, justifyContent: 'center', width: '100%', alignItems: 'center'}}>
+
+      <View style={{width: '100%', alignItems: 'center'}}>
+      <View style={{ height: 20 }} />
+      <TouchableOpacity style={styles.menuButton} onPress={startAdultCpr}>
+        <Text style={styles.menuButtonText}>RCP Adulte</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.menuButton} onPress={startPediatricCpr}>
+        <Text style={styles.menuButtonText}>RCP pédiatrique</Text>
+      </TouchableOpacity>
+      </View>
+        <View style={{width: '100%', alignItems: 'center'}}>
+      <TouchableOpacity
+          style={styles.buttonHistory}
           onPress={() => router.push("/history")}
         >
-          <Text style={styles.menuButtonText}>Historique sessions</Text>
+          <Text style={styles.buttonHistoryText}>Historique sessions</Text>
         </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.menuSubButton}
+            onPress={() => router.push("/settings")}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text style={styles.menuSubButtonText}>Paramètres</Text>
+              <Feather name="settings" size={24} color="white" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.aboutButton}
+            onPress={() => router.push({ pathname: "/about", params: { us: "value" } })}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text style={styles.menuButtonText}>A propos</Text>
+              <Feather name="info" size={24} color="white" />
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.buttonRow}>
-        <TouchableOpacity
-          style={styles.menuSubButton}
-          onPress={() => router.push("/settings")}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Text style={styles.menuSubButtonText}>Paramètres</Text>
-            <Feather name="settings" size={24} color="white" />
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.aboutButton}
-          onPress={() =>
-            router.push({ pathname: "/about", params: { us: "value" } })
-          }
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Text style={styles.menuButtonText}>A propos</Text>
-            <Feather name="info" size={24} color="white" />
-          </View>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -100,6 +105,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
+  buttonHistory: {
+    paddingVertical: 18,
+    backgroundColor: "#fff",
+    borderColor: "#007BFF",
+    borderWidth: 2,
+    borderRadius: 12,
+    marginBottom: 20,
+    width: "100%",
+    maxWidth: 400,
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  buttonHistoryText: {
+    color: "#007BFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "center",
@@ -124,7 +150,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-  },
+    },
   aboutButton: {
     backgroundColor: "#28a745",
     paddingVertical: 18,

@@ -126,9 +126,21 @@ export default function Cpr() {
 
   // ----- CPR State -----
   const [startTime] = useState(Date.now());
+
+  // Initialize logs from session store to persist counts on resume
   const [logs, setLogs] = useState<
     { type: string; timestamp: number; details?: any }[]
-  >([]);
+  >(() => {
+    const currentSession = sessionStore.getSession();
+    if (currentSession && currentSession.events) {
+       return currentSession.events.map(e => ({
+         type: e.type,
+         timestamp: e.timestamp,
+         details: e.details
+       }));
+    }
+    return [];
+  });
 
   // Helper to get last action time
   const getLastTime = (type: string) => {
@@ -181,7 +193,7 @@ export default function Cpr() {
 
   const handleEnd = () => {
     // Navigate to End Cpr flow
-    router.push("/cprEnd");
+    router.push("/cprEndFirstPage");
   };
   const handleEvent = () => setModalVisible(true);
 
