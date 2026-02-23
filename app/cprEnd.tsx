@@ -217,7 +217,7 @@ export default function CprEnd() {
             onPress={handleGoHome}
           >
             <FontAwesome5 name="home" size={18} color="#fff" />
-            <Text style={styles.actionButtonText}> Retour à l'accueil</Text>
+            <Text style={styles.actionButtonText}> Retour à l&#39;accueil</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

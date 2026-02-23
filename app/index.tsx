@@ -27,7 +27,7 @@ export default function Index() {
 
   const startPediatricCpr = () => {
     sessionStore.startNewSession();
-    router.push("/childDatas");
+    router.push("/childData");
   };
 
   return (
@@ -62,9 +62,7 @@ export default function Index() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.aboutButton}
-          onPress={() =>
-            router.push({ pathname: "/about", params: { us: "value" } })
-          }
+          onPress={() => router.push({ pathname: "/about", params: { us: "value" } })}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Text style={styles.menuButtonText}>A propos</Text>
@@ -99,7 +97,7 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     gap: 10,
   },

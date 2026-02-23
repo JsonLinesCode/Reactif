@@ -126,6 +126,12 @@ class SessionStore {
     return this.currentSession?.pediatricData?.energyDose;
   }
 
+  async deleteSession(sessionId: string) {
+    this.history = this.history.filter((s) => s.id !== sessionId);
+    this.notifyListeners();
+    await this.persistHistory();
+  }
+
   async loadHistory() {
     try {
       const json = await AsyncStorage.getItem(STORAGE_KEY_HISTORY);
@@ -168,4 +174,4 @@ class SessionStore {
   theme: "light" | "dark" = "light";
 }
 
-export const sessionStore = new SessionStore();
+export const sessionStore =  new SessionStore();

@@ -40,7 +40,7 @@ export default function SettingsScreen() {
   if (loading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme === "light" ? "#fff" : "#353636" }]}>
-        <Text style={{ color: theme === "light" ? "#000" : "#fff" }}>Chargement...</Text>
+        <Text style={{ color: theme === "light" ? "#353636" : "#fff" }}>Chargement...</Text>
       </View>
     );
   }
@@ -61,9 +61,9 @@ export default function SettingsScreen() {
   };
 
   const isDark = theme === "dark";
-  const bgStyle = { backgroundColor: isDark ? "#121212" : "#fff" };
+  const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };
   const textStyle = { color: isDark ? "#fff" : "#000" };
-  const inputBgStyle = { backgroundColor: isDark ? "#333" : "#f9f9f9", borderColor: isDark ? "#555" : "#ccc" };
+  const inputBgStyle = { backgroundColor: isDark ? "#222121" : "#f9f9f9", borderColor: isDark ? "#555" : "#ccc" };
   const sectionTitleColor = { color: isDark ? "#ddd" : "#333" };
   const labelColor = { color: isDark ? "#aaa" : "#555" };
 

@@ -32,7 +32,7 @@ let savedDatas: Record<AgeMode, string> = {
   years: "",
 };
 
-export default function ChildDatas() {
+export default function ChildData() {
   const [theme, setTheme] = useState(sessionStore.theme);
 
   useEffect(() => {
@@ -107,8 +107,9 @@ export default function ChildDatas() {
     /* Weight input state */
   }
   const [weightInput, setWeightInput] = useState("");
+
   const finalWeight = weightInput
-    ? parseFloat(weightInput)
+    ? (parseFloat(weightInput) <= 50 ? parseFloat(weightInput) : 50)
     : calculateWeightFromAge(parsedAge, mode);
 
   const adrenalineDose = finalWeight ? (0.01 * finalWeight).toFixed(2) : null;
@@ -184,9 +185,8 @@ export default function ChildDatas() {
                   keyboardType="numeric"
                   placeholder="Ex: 10"
                   placeholderTextColor="#ccc"
-                  value={mode === "months" ? valeurTemp : ""}
+                  value={valeurTemp}
                   onChangeText={(text) => {
-                    setMode("months");
                     setValeurTemp(text);
                   }}
                 />
@@ -209,12 +209,12 @@ export default function ChildDatas() {
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ex: 12.5"
+                placeholder="Ex: 12,5"
                 placeholderTextColor="#ccc"
                 keyboardType="decimal-pad" // Allow decimals for weight
                 value={weightInput}
                 onChangeText={(text) => {
-                  setWeightInput(text);
+                  setWeightInput(text.replace(",", "."));
                   // If user types here, we probably unset age mode or keep it but rely on weightInput
                 }}
                 maxLength={5} // e.g. 45.5 or 110.2
@@ -224,7 +224,7 @@ export default function ChildDatas() {
 
           {/* ADDED: Adult RCP note */}
           <Text style={styles.infoText}>
-            RCP adulte si gabarit adulte (habituellement à la puberté, vers
+            RCP adulte si le gabarit est celui d'un adulte (habituellement à la puberté, vers
             12-14 ans, ou si plus que 50kg approximativement). Toujours se
             référer aux recommandations et protocoles locaux.
           </Text>

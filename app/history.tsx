@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
-import { Stack } from "expo-router";
+import {router, Stack} from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
 import {
@@ -17,11 +17,21 @@ import { CprSession, sessionStore } from "@/store/sessionStore";
 
 export default function History() {
   const [sessions, setSessions] = useState<CprSession[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedSessionIds, setSelectedSessionIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     // Load history
     const history = sessionStore.getHistory();
     setSessions(history);
+
+    // Subscribe to store updates to reflect deletions immediately
+    const unsubscribe = sessionStore.subscribe(() => {
+      setSessions(sessionStore.getHistory());
+    });
+    return unsubscribe;
   }, []);
 
   const handleExport = async (session: CprSession) => {
@@ -38,40 +48,134 @@ export default function History() {
     }
   };
 
+  const toggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setSelectedSessionIds(new Set());
+  };
+
+  const toggleSessionSelection = (sessionId: string) => {
+    const newSelection = new Set(selectedSessionIds);
+    if (newSelection.has(sessionId)) {
+      newSelection.delete(sessionId);
+    } else {
+      newSelection.add(sessionId);
+    }
+    setSelectedSessionIds(newSelection);
+  };
+
+  const deleteSelectedSessions = async () => {
+    Alert.alert(
+      "Supprimer les sessions",
+      `Voulez-vous vraiment supprimer ${selectedSessionIds.size} session(s) ?`,
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: async () => {
+            const idsToDelete = Array.from(selectedSessionIds);
+            for (const id of idsToDelete) {
+              await sessionStore.deleteSession(id);
+            }
+            setIsSelectionMode(false);
+            setSelectedSessionIds(new Set());
+          },
+        },
+      ],
+    );
+  };
+
   const renderItem = ({ item }: { item: CprSession }) => {
     const date = new Date(item.startTime);
-    return (
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <View>
-            <Text style={styles.cardTitle}>{date.toLocaleDateString()}</Text>
-            <Text style={styles.cardSubtitle}>{date.toLocaleTimeString()}</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.exportButton}
-            onPress={() => handleExport(item)}
-          >
-            <Ionicons name="share-outline" size={24} color="#007BFF" />
-          </TouchableOpacity>
-        </View>
+    const isSelected = selectedSessionIds.has(item.id);
 
-        <View style={styles.cardContent}>
-          {item.pediatricData ? (
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          if (isSelectionMode) {
+            toggleSessionSelection(item.id);
+          } else {
+            handleExport(item);
+          }
+        }}
+        activeOpacity={isSelectionMode ? 0.7 : 1}
+        delayPressIn={0}
+      >
+        <View
+          style={[
+            styles.card,
+            isSelected && { backgroundColor: "#cce5ff", borderColor: "#007BFF", borderWidth: 1 },
+          ]}
+        >
+          <View style={styles.cardHeader}>
+            <View>
+              <Text style={styles.cardTitle}>{date.toLocaleDateString()}</Text>
+              <Text
+                style={styles.cardSubtitle}
+              >{date.toLocaleTimeString()}</Text>
+            </View>
+            {!isSelectionMode && (
+              <TouchableOpacity
+                style={styles.exportButton}
+                onPress={() => handleExport(item)}
+              >
+                <Ionicons name="share-outline" size={24} color="#007BFF" />
+              </TouchableOpacity>
+            )}
+            {isSelectionMode && (
+              <Ionicons
+                name={isSelected ? "checkbox" : "square-outline"}
+                size={24}
+                color={isSelected ? "#007BFF" : "#ccc"}
+              />
+            )}
+          </View>
+
+          <View style={styles.cardContent}>
+            {item.pediatricData ? (
+              <Text style={styles.infoText}>
+                Patient: Enfant ({item.pediatricData.ageValue}{" "}
+                {item.pediatricData.ageMode})
+              </Text>
+            ) : (
+              <Text style={styles.infoText}>Patient: Standard</Text>
+            )}
             <Text style={styles.infoText}>
-              Patient: Enfant ({item.pediatricData.ageValue}{" "}
-              {item.pediatricData.ageMode})
+              Événements: {item.events.length}
             </Text>
-          ) : (
-            <Text style={styles.infoText}>Patient: Standard</Text>
-          )}
-          <Text style={styles.infoText}>Événements: {item.events.length}</Text>
+          </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color={"#000"} />
+      </TouchableOpacity>
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          style={styles.selectButton}
+          onPress={toggleSelectionMode}
+        >
+          <Text style={styles.selectButtonText}>
+            {isSelectionMode ? "Annuler" : "Sélectionner"}
+          </Text>
+        </TouchableOpacity>
+
+        {isSelectionMode && selectedSessionIds.size > 0 && (
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={deleteSelectedSessions}
+          >
+            <Text style={styles.deleteButtonText}>
+              Supprimer ({selectedSessionIds.size})
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
       <Stack.Screen options={{ title: "Historique des sessions" }} />
       {sessions.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -153,6 +257,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    backgroundColor: "#f5f5f5",
+  },
   listContent: {
     padding: 16,
   },
@@ -164,6 +276,37 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     color: "#888",
+  },
+  backButton: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 1,
+    padding: 8,
+  },
+  selectButton: {
+    borderColor: "#007BFF",
+    justifyContent: "flex-start",
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+  },
+  selectButtonText: {
+    color: "#007BFF",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
   card: {
     backgroundColor: "#fff",
