@@ -210,7 +210,6 @@ export default function Cpr() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#fff" }}
-      edges={["top", "left", "right"]}
     >
       <View style={styles.container}>
         {/* Top Timer */}
