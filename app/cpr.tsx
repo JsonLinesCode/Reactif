@@ -17,8 +17,8 @@ import ShockTimer from "@/components/ShockTimer";
 import { useCprSettings } from "@/hooks/useCprSettings";
 import { sessionStore } from "@/store/sessionStore";
 
+import { FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 
 // Configure audio session
 const configureAudio = async () => {
@@ -218,26 +218,16 @@ export default function Cpr() {
 
         {/* Shock Circular Timer */}
         {/* Pass shockDuration from settings */}
-        <ShockTimer
-          onShock={handleShock}
-          lastShockTime={lastShockTime}
-          durationSeconds={shockDuration}
-        />
+        <View>
+          <ShockTimer
+            onShock={handleShock}
+            lastShockTime={lastShockTime}
+            durationSeconds={shockDuration}
+          />
+        </View>
 
         {/* Action Progress Bars */}
         <View style={styles.actionsContainer}>
-          <ActionProgressBar
-            label="Choc"
-            count={shockCount}
-            color="#FF5252"
-            icon={<Ionicons name="flash" size={24} />}
-            onPress={handleShock}
-            lastActionTime={lastShockTime}
-            durationSeconds={shockDuration} // Use setting
-            subtitle={doses.energy ? `${doses.energy} J` : undefined}
-            soundSource={require("@/assets/audio/beep_shock.wav")}
-          />
-
           <ActionProgressBar
             label="Cordarone"
             count={cordaroneCount}
