@@ -39,7 +39,7 @@ export default function ActionProgressBar({
   const [elapsed, setElapsed] = useState(0);
   const [width, setWidth] = useState(0);
 
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const blinkAnim = useRef(new Animated.Value(1)).current;
   const soundPlayedRef = useRef(false);
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
@@ -101,13 +101,13 @@ export default function ActionProgressBar({
 
     blinkingRef.current = Animated.loop(
       Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.05,
+        Animated.timing(blinkAnim, {
+          toValue: 0,
           duration: 500,
           useNativeDriver: true,
           easing: Easing.inOut(Easing.ease),
         }),
-        Animated.timing(scaleAnim, {
+        Animated.timing(blinkAnim, {
           toValue: 1,
           duration: 500,
           useNativeDriver: true,
@@ -123,7 +123,7 @@ export default function ActionProgressBar({
       blinkingRef.current.stop();
       blinkingRef.current = null;
     }
-    Animated.timing(scaleAnim, {
+    Animated.timing(blinkAnim, {
       toValue: 1,
       duration: 200,
       useNativeDriver: true,
@@ -133,12 +133,12 @@ export default function ActionProgressBar({
   const handlePress = () => {
     // Bounce on tap
     Animated.sequence([
-      Animated.timing(scaleAnim, {
+      Animated.timing(blinkAnim, {
         toValue: 0.95,
         duration: 100,
         useNativeDriver: true,
       }),
-      Animated.timing(scaleAnim, {
+      Animated.timing(blinkAnim, {
         toValue: 1,
         duration: 100,
         useNativeDriver: true,
@@ -158,66 +158,69 @@ export default function ActionProgressBar({
   );
 
   return (
-    <AnimatedTouchableOpacity
-      onPress={handlePress}
-      activeOpacity={0.8}
-      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
-      style={[
-        styles.container,
-        { borderColor: color, transform: [{ scale: scaleAnim }] },
-      ]}
-    >
-      {/* First layer */}
-      <View style={styles.layer}>
-        <View style={styles.content}>
-          {icon && React.cloneElement(icon, { color: "#fff" } as any)}
-          <View style={styles.labelContainer}>
-            <Text style={[styles.label, { color }]}>{label}</Text>
-            {subtitle && (
-              <Text style={[styles.subtitle, { color }]}>{subtitle}</Text>
-            )}
-          </View>
-          <View style={[styles.badge, { backgroundColor: color }]}>
-            <Text style={[styles.badgeText, { color: "#fff" }]}>{count}</Text>
-          </View>
-        </View>
-      </View>
-      {/* Second layer */}
-
-      <View
-        style={[
-          styles.layer,
-          {
-            width: `${progressPercent}%`,
-            backgroundColor: color,
-            overflow: "hidden",
-          },
-        ]}
+    <View style={[styles.buttonContainer]}>
+      <AnimatedTouchableOpacity
+        onPress={handlePress}
+        activeOpacity={0.8}
+        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+        style={[styles.container, { opacity: blinkAnim, borderColor: color }]}
       >
-        <View style={[styles.content, { width: width - 7 }]}>
-          {icon && React.cloneElement(icon, { color: "#fff" } as any)}
-          <View style={styles.labelContainer}>
-            <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
-            {subtitle && (
-              <Text style={[styles.subtitle, { color: "#fff" }]}>
-                {subtitle}
-              </Text>
-            )}
-          </View>
-          <View style={[styles.badge, { backgroundColor: "#fff" }]}>
-            <Text style={[styles.badgeText, { color }]}>{count}</Text>
+        {/* First layer */}
+        <View style={[styles.layer]}>
+          <View style={styles.content}>
+            {icon && React.cloneElement(icon, { color: "#fff" } as any)}
+            <View style={styles.labelContainer}>
+              <Text style={[styles.label, { color }]}>{label}</Text>
+              {subtitle && (
+                <Text style={[styles.subtitle, { color }]}>{subtitle}</Text>
+              )}
+            </View>
           </View>
         </View>
+        
+        {/* Second layer */}
+        <View
+          style={[
+            styles.layer,
+            {
+              width: `${progressPercent}%`,
+              backgroundColor: color,
+              overflow: "hidden",
+            },
+          ]}
+        >
+          <View style={[styles.content, { width: width - 7 }]}>
+            {icon && React.cloneElement(icon, { color: "#fff" } as any)}
+            <View style={styles.labelContainer}>
+              <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
+              {subtitle && (
+                <Text style={[styles.subtitle, { color: "#fff" }]}>
+                  {subtitle}
+                </Text>
+              )}
+            </View>
+          </View>
+        </View>
+      </AnimatedTouchableOpacity>
+
+      <View style={[styles.badge, { borderColor: color }]}>
+        <Text style={[styles.badgeText, { color: color }]}>{count}</Text>
       </View>
-    </AnimatedTouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
   container: {
-    height: 56,
+    flex: 1,
+    height: 54,
     borderRadius: 28,
-    marginBottom: 8,
     borderWidth: 2,
     position: "relative",
     justifyContent: "center",
@@ -230,13 +233,14 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     borderWidth: 2,
     borderColor: "#fff",
+    flex: 1,
   },
   content: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    height: "100%",
   },
   icon: {
     marginRight: 10,
@@ -258,12 +262,13 @@ const styles = StyleSheet.create({
     fontWeight: "normal",
   },
   badge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    borderWidth: 2,
+    width: 54,
+    height: 54,
+    borderRadius: 1000,
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 10,
+    marginLeft: 5,
   },
   badgeText: {
     fontSize: 18,

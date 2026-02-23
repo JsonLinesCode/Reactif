@@ -39,7 +39,7 @@ export default function Cpr() {
 
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const soundRef = useRef<Audio.Sound | null>(null);
 
   // Shared values for metronome timing
@@ -208,9 +208,7 @@ export default function Cpr() {
   };
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#fff" }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={styles.container}>
         {/* Top Timer */}
         <CprTimer />
@@ -222,6 +220,7 @@ export default function Cpr() {
             onShock={handleShock}
             lastShockTime={lastShockTime}
             durationSeconds={shockDuration}
+            shockCount={shockCount}
           />
         </View>
 
@@ -285,6 +284,8 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   actionsContainer: {
+    flexDirection: "column",
+    flex: 1,
     width: "100%",
   },
 });

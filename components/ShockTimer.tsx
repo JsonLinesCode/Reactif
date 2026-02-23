@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
@@ -14,6 +15,7 @@ interface ShockTimerProps {
   onShock: () => void;
   lastShockTime: number; // timestamp
   durationSeconds?: number;
+  shockCount?: number;
 }
 
 const AnimatedTouchableOpacity =
@@ -23,24 +25,36 @@ export default function ShockTimer({
   onShock,
   lastShockTime,
   durationSeconds = 120, // Default 2 minutes
+  shockCount = 0,
 }: ShockTimerProps) {
+  const { width } = useWindowDimensions();
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const soundPlayedRef = useRef(false);
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
+  // Dynamic Sizing
+  // available width = screen width - parent padding (32) - component padding (20) - gap (10)
+  const availableWidth = width - 32 - 20;
+  const circleSize = Math.min((availableWidth - 20) / 2, 170); // Max 170, but shrink if needed
+
   // SVG Config
-  const size = 160;
-  const strokeWidth = 16;
+  const size = circleSize;
+  const strokeWidth = 12;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const center = size / 2;
 
+  // Inner content size
+  const innerSize = size - 45;
+  const innerRadius = innerSize / 2;
+
   useEffect(() => {
     if (!lastShockTime) {
-      setTimeLeft(durationSeconds);
+      setTimeLeft(0);
       stopBlinking();
+      scaleAnim.setValue(1);
       soundPlayedRef.current = false;
       return;
     }
@@ -106,6 +120,7 @@ export default function ShockTimer({
   };
 
   const handlePress = () => {
+    // Only animate the Choc button on press
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.95,
@@ -119,7 +134,6 @@ export default function ShockTimer({
       }),
     ]).start();
 
-    // Stop blinking immediately on press
     stopBlinking();
     soundPlayedRef.current = false;
 
@@ -132,72 +146,110 @@ export default function ShockTimer({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Progress logic:
-  // Red = Remaining ("decreases progressively")
-  // Blue = Background (Elapsed)
-  // When full (120s), progress = 1, offset = 0 (Full Red)
-  // When empty (0s), progress = 0, offset = circumference (No Red, all Blue)
   const progress = timeLeft / durationSeconds;
   const strokeDashoffset = circumference * (1 - progress);
 
   return (
     <View style={styles.container}>
+      {/* Circle 1: Choc Button with Counter */}
       <AnimatedTouchableOpacity
         onPress={handlePress}
         activeOpacity={0.8}
         style={{ transform: [{ scale: scaleAnim }] }}
       >
-        <View style={styles.svgContainer}>
-          <Svg width={size} height={size}>
-            <G rotation="-90" origin={`${center}, ${center}`}>
-              {/* Background Circle (Blue) */}
-              <Circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="#2979FF"
-                strokeWidth={strokeWidth}
-                fill="none"
-              />
-              {/* Foreground Circle (Red) */}
-              <Circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="#FF5252"
-                strokeWidth={strokeWidth}
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-                fill="none"
-              />
-            </G>
-          </Svg>
-
-          <View style={styles.innerContent}>
-            <Ionicons
-              name="flash"
-              size={32}
-              color="black"
-              style={{ marginBottom: 4 }}
-            />
-            <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-            <Text style={styles.labelText}>CHOC</Text>
+        <View
+          style={[
+            styles.buttonCircle,
+            {
+              width: circleSize - 6,
+              height: circleSize - 6,
+              borderRadius: (circleSize - 6) / 2,
+            },
+          ]}
+        >
+          <Ionicons name="flash" size={32} color="black" />
+          <Text style={styles.labelText}>CHOC</Text>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{shockCount}</Text>
           </View>
         </View>
       </AnimatedTouchableOpacity>
+
+      {/* Circle 2: Analyse Timer */}
+      <View
+        style={[styles.svgContainer, { width: circleSize, height: circleSize }]}
+      >
+        <Svg width={size} height={size}>
+          <G rotation="-90" origin={`${center}, ${center}`}>
+            <Circle
+              cx={center}
+              cy={center}
+              r={radius}
+              stroke="#2979FF"
+              strokeWidth={strokeWidth}
+              fill="none"
+            />
+            <Circle
+              cx={center}
+              cy={center}
+              r={radius}
+              stroke="#FF5252"
+              strokeWidth={strokeWidth}
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="none"
+            />
+          </G>
+        </Svg>
+
+        <View
+          style={[
+            styles.innerContent,
+            {
+              width: innerSize,
+              height: innerSize,
+              borderRadius: innerRadius,
+            },
+          ]}
+        >
+          <Ionicons
+            name="stopwatch-outline"
+            size={32}
+            color="black"
+            style={{ marginBottom: 4 }}
+          />
+          <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+          <Text style={styles.labelText}>ANALYSE</Text>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 10,
+    gap: 10,
+  },
+  buttonCircle: {
+    backgroundColor: "#F5F5F5", // Same bg as inner timer
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    borderWidth: 12,
+    borderColor: "#FF5252", // Outline color for button
   },
   svgContainer: {
     position: "relative",
-    width: 170,
-    height: 170,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -205,26 +257,36 @@ const styles = StyleSheet.create({
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",
-    width: 125,
-    height: 125,
-    borderRadius: 68,
     backgroundColor: "#F5F5F5",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    elevation: 2,
+    zIndex: 1,
   },
   timerText: {
-    fontSize: 37,
+    fontSize: 28, // Adjusted font size
     fontWeight: "bold",
     color: "#000",
-    lineHeight: 52,
   },
   labelText: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "900",
     color: "#000",
     textTransform: "uppercase",
+    marginTop: 4,
+  },
+  badge: {
+    position: "absolute",
+    top: 15,
+    right: 25,
+    width: 28,
+    height: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 1984,
+    backgroundColor: "#FF5252",
+  },
+  badgeText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
   },
 });

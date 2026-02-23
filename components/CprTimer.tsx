@@ -19,7 +19,7 @@ export default function CprTimer() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Temps total écoulé</Text>
+      <Text style={styles.label}>Durée RCP</Text>
       <View style={styles.timerContainer}>
         <Text style={styles.timerText}>{formatTime(seconds)}</Text>
       </View>
