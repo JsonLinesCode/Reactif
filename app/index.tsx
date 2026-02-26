@@ -1,10 +1,9 @@
 import { sessionStore } from "@/store/sessionStore";
+import Feather from "@expo/vector-icons/Feather";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Feather from '@expo/vector-icons/Feather';
 import React, { useEffect, useState } from "react";
-
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Index() {
   const router = useRouter();
@@ -31,40 +30,46 @@ export default function Index() {
   };
 
   return (
-    <View style={[styles.container, bgStyle]}>
-
+    <View id="coucou" style={[styles.container, bgStyle]}>
       <Image
-        source={isDark ? require("@/assets/images/logoWhite.png") : require("@/assets/images/logo.png")}
+        source={
+          isDark
+            ? require("@/assets/images/logoWhite.png")
+            : require("@/assets/images/logo.png")
+        }
         style={styles.logo}
       />
-      <View style={{ height: 20 }} />
-      <TouchableOpacity style={styles.menuButton} onPress={startAdultCpr}>
-        <Text style={styles.menuButtonText}>RCP Adulte</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.menuButton} onPress={startPediatricCpr}>
-        <Text style={styles.menuButtonText}>RCP pédiatrique</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.menuButton}
-        onPress={() => router.push("/history")}
-      >
-        <Text style={styles.menuButtonText}>Historique sessions</Text>
-      </TouchableOpacity>
+      <View style={styles.mainButtons}>
+        <TouchableOpacity style={styles.menuButton} onPress={startAdultCpr}>
+          <Text style={styles.menuButtonText}>RCP Adulte</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuButton} onPress={startPediatricCpr}>
+          <Text style={styles.menuButtonText}>RCP pédiatrique</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => router.push("/history")}
+        >
+          <Text style={styles.menuButtonText}>Historique sessions</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.buttonRow}>
         <TouchableOpacity
           style={styles.menuSubButton}
           onPress={() => router.push("/settings")}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <Text style={styles.menuSubButtonText}>Paramètres</Text>
             <Feather name="settings" size={24} color="white" />
           </View>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.aboutButton}
-          onPress={() => router.push({ pathname: "/about", params: { us: "value" } })}
+          onPress={() =>
+            router.push({ pathname: "/about", params: { us: "value" } })
+          }
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <Text style={styles.menuButtonText}>A propos</Text>
             <Feather name="info" size={24} color="white" />
           </View>
@@ -96,9 +101,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 10,
   },
   menuSubButton: {
@@ -119,7 +124,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-    },
+  },
   aboutButton: {
     backgroundColor: "#28a745",
     paddingVertical: 18,
@@ -139,12 +144,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
+  mainButtons: {
+    width: "100%",
+  },
   container: {
     flex: 1,
+    height: "100%",
     paddingTop: 10,
     padding: 20,
-    justifyContent: "flex-start",
     backgroundColor: "#25292e",
     alignItems: "center",
+    justifyContent: "space-between",
   },
 });

@@ -1,138 +1,145 @@
-import {useLocalSearchParams, Stack, router} from "expo-router";
-import {StyleSheet, ScrollView, Text, View, TouchableOpacity} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
-import {Ionicons} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 import React from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 export default function About() {
   const params = useLocalSearchParams();
 
-
   return (
     <SafeAreaView>
-      <Text>A propos </Text>
-      <Text>constructor : {params.usr}</Text>
-        <Stack.Screen
-            options={{ title: "À Propos", headerBackTitle: "Retour" }}
-        />
-        <ScrollView contentContainerStyle={styles.container}>
-            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                <Ionicons name="arrow-back" size={24} color={"#000"} />
-            </TouchableOpacity>
-            <Text style={styles.title}>À propos de cette application</Text>
+      <Stack.Screen
+        options={{ title: "À Propos", headerBackTitle: "Retour" }}
+      />
+      <ScrollView contentContainerStyle={styles.container}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={24} color={"#000"} />
+        </TouchableOpacity>
+        <Text style={styles.title}>À propos de cette application</Text>
 
-            <View style={styles.section}>
-                <Text style={styles.paragraph}>
-                    Cette application est une assistance à la réanimation
-                    cardio-pulmonaire (RCP) de type &#34;time keeper&#34;.
-                </Text>
-                <Text style={styles.paragraph}>
-                    La gestion automatisée des délais lors d&#39;une RCP limite les erreurs
-                    tout en améliorant la sécurité et la qualité des soins conformément
-                    aux dernières recommandations.
-                </Text>
-                <Text style={styles.paragraph}>
-                    Cette application répond au double objectif d&#39;améliorer les
-                    séquences de RCP et donc d&#39;améliorer le pronostic des arrêts
-                    cardiaques (AC), mais aussi d&#39;enregistrer et d&#39;exporter des horaires
-                    précis dans les registres à des fins de recherche.
-                </Text>
-            </View>
+        <View style={styles.section}>
+          <Text style={styles.paragraph}>
+            Cette application est une assistance à la réanimation
+            cardio-pulmonaire (RCP) de type &#34;time keeper&#34;.
+          </Text>
+          <Text style={styles.paragraph}>
+            La gestion automatisée des délais lors d&#39;une RCP limite les
+            erreurs tout en améliorant la sécurité et la qualité des soins
+            conformément aux dernières recommandations.
+          </Text>
+          <Text style={styles.paragraph}>
+            Cette application répond au double objectif d&#39;améliorer les
+            séquences de RCP et donc d&#39;améliorer le pronostic des arrêts
+            cardiaques (AC), mais aussi d&#39;enregistrer et d&#39;exporter des
+            horaires précis dans les registres à des fins de recherche.
+          </Text>
+        </View>
 
-            <View style={styles.section}>
-                <Text style={styles.subHeader}>Protection des données :</Text>
-                <Text style={styles.paragraph}>
-                    Conformément à la réglementation sur les données de santé,
-                    l&#39;application se limite à la saisie des horaires des étapes de la
-                    RCP à des fins d&#39;évaluation des pratiques, excluant toute saisie de
-                    données personnelles concernant les patients. Aucune donnée n&#39;est
-                    transmise en dehors de l&#39;appareil sans une action explicite de
-                    l&#39;utilisateur (ex: export PDF).
-                </Text>
-            </View>
+        <View style={styles.section}>
+          <Text style={styles.subHeader}>Protection des données :</Text>
+          <Text style={styles.paragraph}>
+            Conformément à la réglementation sur les données de santé,
+            l&#39;application se limite à la saisie des horaires des étapes de
+            la RCP à des fins d&#39;évaluation des pratiques, excluant toute
+            saisie de données personnelles concernant les patients. Aucune
+            donnée n&#39;est transmise en dehors de l&#39;appareil sans une
+            action explicite de l&#39;utilisateur (ex: export PDF).
+          </Text>
+        </View>
 
-            <View style={styles.section}>
-                <Text style={styles.subHeader}>Initiateurs et Développement :</Text>
-                <Text style={styles.paragraph}>
-                    Application imaginée et portée par Steven LAGADEC (SAMU 91).
-                </Text>
-                <Text style={styles.paragraph}>
-                    Développement et production : Josselin ROBERT, Jacques ANGLEYS, Othmane QAIBES, Lina ZAROUAL, Nesma
-                    HOUMANI et Mossab HARIZ de Télécom SudParis.
-                </Text>
-            </View>
+        <View style={styles.section}>
+          <Text style={styles.subHeader}>Initiateurs et Développement :</Text>
+          <Text style={styles.paragraph}>
+            Application imaginée et portée par Steven LAGADEC (SAMU 91).
+          </Text>
+          <Text style={styles.paragraph}>
+            Développement et production : Josselin ROBERT, Jacques ANGLEYS,
+            Othmane QAIBES, Lina ZAROUAL, Nesma HOUMANI et Mossab HARIZ de
+            Télécom SudParis.
+          </Text>
+        </View>
 
-            <View style={styles.section}>
-                <Text style={styles.subHeader}>Financement :</Text>
-                <Text style={styles.paragraph}>
-                    Le développement de cette application a profité d’un financement
-                    dans le cadre du 7ème Appel à idées innovantes Genopole en
-                    partenariat avec le Centre Hospitalier Sud Francilien (CHSF).
-                </Text>
-            </View>
-        </ScrollView>
+        <View style={styles.section}>
+          <Text style={styles.subHeader}>Financement :</Text>
+          <Text style={styles.paragraph}>
+            Le développement de cette application a profité d’un financement
+            dans le cadre du 7ème Appel à idées innovantes Genopole en
+            partenariat avec le Centre Hospitalier Sud Francilien (CHSF).
+          </Text>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: "#F0F4F8",
-    },
-    container: {
-        flexGrow: 1,
-        padding: 20,
-        // backgroundColor: '#F0F4F8', // Moved to SafeArea
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "#0A3D62",
-        textAlign: "center",
-        marginBottom: 10,
-    },
-    backButton: {
-        marginRight: 16,
-    },
-    version: {
-        fontSize: 16,
-        color: "#555",
-        textAlign: "center",
-        marginBottom: 20,
-    },
-    section: {
-        marginBottom: 20,
-        padding: 15,
-        backgroundColor: "#FFFFFF",
-        borderRadius: 8,
-        elevation: 1,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-    },
-    subHeader: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: "#1F3A93",
-        marginBottom: 8,
-    },
-    paragraph: {
-        fontSize: 15,
-        lineHeight: 22,
-        color: "#333",
-        marginBottom: 10,
-        textAlign: "justify",
-    },
-    button: {
-        backgroundColor: "#007BFF",
-        padding: 15,
-        borderRadius: 10,
-        alignItems: "center",
-        marginTop: 20,
-    },
-    buttonText: {
-        color: "#fff",
-        fontWeight: "bold",
-        fontSize: 16,
-    },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F0F4F8",
+  },
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    // backgroundColor: '#F0F4F8', // Moved to SafeArea
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#0A3D62",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  backButton: {
+    marginRight: 16,
+  },
+  version: {
+    fontSize: 16,
+    color: "#555",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  section: {
+    marginBottom: 20,
+    padding: 15,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  subHeader: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#1F3A93",
+    marginBottom: 8,
+  },
+  paragraph: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#333",
+    marginBottom: 10,
+    textAlign: "justify",
+  },
+  button: {
+    backgroundColor: "#007BFF",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });
