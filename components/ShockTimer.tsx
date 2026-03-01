@@ -13,7 +13,9 @@ import Svg, { Circle, G } from "react-native-svg";
 
 interface ShockTimerProps {
   onShock: () => void;
-  lastShockTime: number; // timestamp
+  onAnalysis: () => void;
+  lastShockTime?: number | null; // timestamp
+  lastAnalysisTime?: number | null; // timestamp
   durationSeconds?: number;
   shockCount?: number;
 }
@@ -23,7 +25,9 @@ const AnimatedTouchableOpacity =
 
 export default function ShockTimer({
   onShock,
+  onAnalysis,
   lastShockTime,
+  lastAnalysisTime,
   durationSeconds = 120, // Default 2 minutes
   shockCount = 0,
 }: ShockTimerProps) {
@@ -33,6 +37,9 @@ export default function ShockTimer({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const soundPlayedRef = useRef(false);
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
+
+  const shockBounceAnim = useRef(new Animated.Value(1)).current;
+  const analysisBounceAnim = useRef(new Animated.Value(1)).current;
 
   // Dynamic Sizing
   // available width = screen width - parent padding (32) - component padding (20) - gap (10)
@@ -51,7 +58,7 @@ export default function ShockTimer({
   const innerRadius = innerSize / 2;
 
   useEffect(() => {
-    if (!lastShockTime) {
+    if (!lastShockTime && !lastAnalysisTime) {
       setTimeLeft(0);
       stopBlinking();
       scaleAnim.setValue(1);
@@ -61,15 +68,30 @@ export default function ShockTimer({
 
     const updateTimer = () => {
       const now = Date.now();
-      const elapsed = Math.floor((now - lastShockTime) / 1000);
-      const remaining = Math.max(0, durationSeconds - elapsed);
-      setTimeLeft(remaining);
+      if (
+        lastAnalysisTime &&
+        (!lastShockTime || lastAnalysisTime > lastShockTime)
+      ) {
+        const elapsedAnalysis = Math.floor((now - lastAnalysisTime) / 1000);
+        const remainingAnalysis = Math.max(
+          0,
+          durationSeconds - elapsedAnalysis,
+        );
+        setTimeLeft(remainingAnalysis);
+        return;
+      } else if (lastShockTime) {
+        const elapsedShock = Math.floor((now - lastShockTime) / 1000);
+        const remainingShock = Math.max(0, durationSeconds - elapsedShock);
+        setTimeLeft(remainingShock);
+        return;
+      }
+      setTimeLeft(0);
     };
 
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [lastShockTime, durationSeconds]);
+  }, [lastShockTime, lastAnalysisTime, durationSeconds]);
 
   useEffect(() => {
     if (timeLeft === 0) {
@@ -119,25 +141,18 @@ export default function ShockTimer({
     }).start();
   };
 
-  const handlePress = () => {
-    // Only animate the Choc button on press
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
+  const handleShockPress = () => {
     stopBlinking();
     soundPlayedRef.current = false;
 
     onShock();
+  };
+
+  const handleAnalysisPress = () => {
+    stopBlinking();
+    soundPlayedRef.current = false;
+
+    onAnalysis();
   };
 
   const formatTime = (totalSeconds: number) => {
@@ -153,9 +168,23 @@ export default function ShockTimer({
     <View style={styles.container}>
       {/* Circle 1: Choc Button with Counter */}
       <AnimatedTouchableOpacity
-        onPress={handlePress}
+        onPress={handleShockPress}
+        onPressIn={() => {
+          Animated.timing(shockBounceAnim, {
+            toValue: 0.95,
+            duration: 100,
+            useNativeDriver: true,
+          }).start();
+        }}
+        onPressOut={() => {
+          Animated.timing(shockBounceAnim, {
+            toValue: 1,
+            duration: 100,
+            useNativeDriver: true,
+          }).start();
+        }}
         activeOpacity={0.8}
-        style={{ transform: [{ scale: scaleAnim }] }}
+        style={{ transform: [{ scale: Animated.multiply(scaleAnim, shockBounceAnim) }] }}
       >
         <View
           style={[
@@ -179,49 +208,70 @@ export default function ShockTimer({
       <View
         style={[styles.svgContainer, { width: circleSize, height: circleSize }]}
       >
-        <Svg width={size} height={size}>
-          <G rotation="-90" origin={`${center}, ${center}`}>
-            <Circle
-              cx={center}
-              cy={center}
-              r={radius}
-              stroke="#2979FF"
-              strokeWidth={strokeWidth}
-              fill="none"
-            />
-            <Circle
-              cx={center}
-              cy={center}
-              r={radius}
-              stroke="#FF5252"
-              strokeWidth={strokeWidth}
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              fill="none"
-            />
-          </G>
-        </Svg>
-
-        <View
+        <AnimatedTouchableOpacity
+          onPress={handleAnalysisPress}
+          onPressIn={() => {
+            Animated.timing(analysisBounceAnim, {
+              toValue: 0.95,
+              duration: 100,
+              useNativeDriver: true,
+            }).start();
+          }}
+          onPressOut={() => {
+            Animated.timing(analysisBounceAnim, {
+              toValue: 1,
+              duration: 100,
+              useNativeDriver: true,
+            }).start();
+          }}
           style={[
-            styles.innerContent,
-            {
-              width: innerSize,
-              height: innerSize,
-              borderRadius: innerRadius,
-            },
+            styles.analysisContainer,
+            { transform: [{ scale: Animated.multiply(scaleAnim, analysisBounceAnim) }] },
           ]}
         >
-          <Ionicons
-            name="stopwatch-outline"
-            size={32}
-            color="black"
-            style={{ marginBottom: 4 }}
-          />
-          <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-          <Text style={styles.labelText}>ANALYSE</Text>
-        </View>
+          <Svg width={size} height={size}>
+            <G rotation="-90" origin={`${center}, ${center}`}>
+              <Circle
+                cx={center}
+                cy={center}
+                r={radius}
+                stroke="#2979FF"
+                strokeWidth={strokeWidth}
+                fill="none"
+              />
+              <Circle
+                cx={center}
+                cy={center}
+                r={radius}
+                stroke="#FF5252"
+                strokeWidth={strokeWidth}
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                fill="none"
+              />
+            </G>
+          </Svg>
+          <View
+            style={[
+              styles.innerContent,
+              {
+                width: innerSize,
+                height: innerSize,
+                borderRadius: innerRadius,
+              },
+            ]}
+          >
+            <Ionicons
+              name="stopwatch-outline"
+              size={32}
+              color="black"
+              style={{ marginBottom: 4 }}
+            />
+            <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+            <Text style={styles.labelText}>ANALYSE</Text>
+          </View>
+        </AnimatedTouchableOpacity>
       </View>
     </View>
   );
@@ -248,6 +298,12 @@ const styles = StyleSheet.create({
     borderWidth: 12,
     borderColor: "#FF5252", // Outline color for button
   },
+  analysisContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   svgContainer: {
     position: "relative",
     justifyContent: "center",

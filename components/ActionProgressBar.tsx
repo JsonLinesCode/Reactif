@@ -16,7 +16,7 @@ interface ActionProgressBarProps {
   color: string;
   icon?: React.ReactElement; // Should be a valid element we can clone
   onPress: () => void;
-  lastActionTime?: number; // timestamp
+  lastActionTime?: number | null; // timestamp
   durationSeconds?: number;
   subtitle?: string;
   soundSource?: any;
@@ -40,6 +40,8 @@ export default function ActionProgressBar({
   const [width, setWidth] = useState(0);
 
   const blinkAnim = useRef(new Animated.Value(1)).current;
+  const bounceAnim = useRef(new Animated.Value(1)).current;
+
   const soundPlayedRef = useRef(false);
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
@@ -160,10 +162,32 @@ export default function ActionProgressBar({
   return (
     <View style={[styles.buttonContainer]}>
       <AnimatedTouchableOpacity
+        onPressIn={() => {
+          Animated.timing(bounceAnim, {
+            toValue: 0.8,
+            duration: 100,
+            useNativeDriver: true,
+          }).start();
+        }}
+        onPressOut={() => {
+          Animated.timing(bounceAnim, {
+            toValue: 1,
+            duration: 100,
+            useNativeDriver: true,
+          }).start();
+        }}
         onPress={handlePress}
         activeOpacity={0.8}
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
-        style={[styles.container, { opacity: blinkAnim, borderColor: color }]}
+        style={[
+          styles.container,
+          {
+            opacity: blinkAnim,
+            transform: [{ scale: bounceAnim }],
+
+            borderColor: color,
+          },
+        ]}
       >
         {/* First layer */}
         <View style={[styles.layer]}>
@@ -177,7 +201,7 @@ export default function ActionProgressBar({
             </View>
           </View>
         </View>
-        
+
         {/* Second layer */}
         <View
           style={[
