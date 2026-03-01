@@ -135,16 +135,17 @@ export default function Cpr() {
     const relevantLogs = logs.filter((l) => l.type === type);
     return relevantLogs.length > 0
       ? relevantLogs[relevantLogs.length - 1].timestamp
-      : startTime;
+      : null;
   };
 
   // Helper to get counts
   const getCount = (type: string) => {
-    return logs.filter((l) => l.type === type).length + 1;
+    return logs.filter((l) => l.type === type).length;
   };
 
   const shockCount = getCount("shock");
   const lastShockTime = getLastTime("shock");
+  const lastAnalysisTime = getLastTime("analysis");
 
   const cordaroneCount = getCount("cordarone");
   const lastCordaroneTime = getLastTime("cordarone");
@@ -161,7 +162,11 @@ export default function Cpr() {
     setLogs((prev) => [...prev, { type: "shock", timestamp }]);
     sessionStore.logEvent("shock", { timestamp });
   };
-
+  const handleAnalysis = () => {
+    const timestamp = Date.now();
+    setLogs((prev) => [...prev, { type: "analysis", timestamp }]);
+    sessionStore.logEvent("analysis", { timestamp });
+  };
   const handleCordarone = () => {
     const timestamp = Date.now();
     setLogs((prev) => [...prev, { type: "cordarone", timestamp }]);
@@ -218,7 +223,9 @@ export default function Cpr() {
         <View>
           <ShockTimer
             onShock={handleShock}
+            onAnalysis={handleAnalysis}
             lastShockTime={lastShockTime}
+            lastAnalysisTime={lastAnalysisTime}
             durationSeconds={shockDuration}
             shockCount={shockCount}
           />
