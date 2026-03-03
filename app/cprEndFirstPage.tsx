@@ -29,9 +29,9 @@ export default function CprEndFirstPage() {
             <Stack.Screen options={{ headerShown: false }} />
             <View style={styles.contentContainer}>
                 <Text style={styles.title}>Fin de RCP</Text>
-                <Text style={styles.subtitle}>
-                    Résultat de la réanimation
-                </Text>
+                    <Text style={styles.subtitle}>
+                        Résultat de la réanimation
+                    </Text>
 
                 <View style={styles.buttonGroup}>
                     <TouchableOpacity

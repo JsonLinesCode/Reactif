@@ -5,13 +5,13 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface ActionButtonsProps {
   onEnd: () => void;
-  onEvent: () => void;
+  //onEvent: () => void;
   onCancel: () => void;
 }
 
 export default function ActionButtons({
   onEnd,
-  onEvent,
+  //onEvent,
   onCancel,
 }: ActionButtonsProps) {
   return (
@@ -26,15 +26,15 @@ export default function ActionButtons({
         <Text style={styles.actionLabel}>Fin RCP</Text>
       </View>
 
-      <View style={styles.actionItem}>
+      {/*<View style={styles.actionItem}>
         <TouchableOpacity
-          style={[styles.circleButton, { backgroundColor: "#448AFF" }]}
-          onPress={onEvent}
+            style={[styles.circleButton, {backgroundColor: "#448AFF"}]}
+            onPress={onEvent}
         >
-          <Ionicons name="add" size={48} color="#fff" />
+          <Ionicons name="add" size={48} color="#fff"/>
         </TouchableOpacity>
         <Text style={styles.actionLabel}>Saisie événements</Text>
-      </View>
+      </View>*/}
 
       <View style={styles.actionItem}>
         {/* 

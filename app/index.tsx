@@ -43,42 +43,42 @@ export default function Index() {
       <View style={{gap: 100, justifyContent: 'center', width: '100%', alignItems: 'center'}}>
 
       <View style={{width: '100%', alignItems: 'center'}}>
-      <View style={{ height: 20 }} />
-      <TouchableOpacity style={styles.menuButton} onPress={startAdultCpr}>
-        <Text style={styles.menuButtonText}>RCP Adulte</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.menuButton} onPress={startPediatricCpr}>
-        <Text style={styles.menuButtonText}>RCP pédiatrique</Text>
-      </TouchableOpacity>
-      </View>
-        <View style={{width: '100%', alignItems: 'center'}}>
-      <TouchableOpacity
-          style={styles.buttonHistory}
-          onPress={() => router.push("/history")}
-        >
-          <Text style={styles.buttonHistoryText}>Historique sessions</Text>
-        </TouchableOpacity>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={styles.menuSubButton}
-            onPress={() => router.push("/settings")}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={styles.menuSubButtonText}>Paramètres</Text>
-              <Feather name="settings" size={24} color="white" />
-            </View>
+        <View style={{ height: 20 }} />
+          <TouchableOpacity style={styles.menuButton} onPress={startAdultCpr}>
+            <Text style={styles.menuButtonText}>RCP Adulte</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.aboutButton}
-            onPress={() => router.push({ pathname: "/about", params: { us: "value" } })}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text style={styles.menuButtonText}>A propos</Text>
-              <Feather name="info" size={24} color="white" />
-            </View>
+          <TouchableOpacity style={styles.menuButton} onPress={startPediatricCpr}>
+            <Text style={styles.menuButtonText}>RCP pédiatrique</Text>
           </TouchableOpacity>
         </View>
-      </View>
+        <View style={{width: '100%', alignItems: 'center'}}>
+        <TouchableOpacity
+            style={[styles.buttonHistory, theme === "dark" ? { backgroundColor: "#353636", borderColor: "#fff" } : {}]}
+            onPress={() => router.push("/history")}
+          >
+          <Text style={[styles.buttonHistoryText, theme === "dark" && { color: "#fff" }]}>Historique sessions</Text>
+          </TouchableOpacity>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity
+              style={styles.menuSubButton}
+              onPress={() => router.push("/settings")}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={styles.menuSubButtonText}>Paramètres</Text>
+                <Feather name="settings" size={24} color="white" />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.aboutButton}
+              onPress={() => router.push({ pathname: "/about", params: { us: "value" } })}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Text style={styles.menuButtonText}>A propos</Text>
+                <Feather name="info" size={24} color="white" />
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     </View>
   );

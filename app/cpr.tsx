@@ -1,6 +1,6 @@
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import {StyleSheet, TouchableOpacity, View} from "react-native";
 import {
   runOnJS,
   useFrameCallback,
@@ -228,7 +228,9 @@ export default function Cpr() {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={styles.container}>
         {/* Top Timer */}
-        <CprTimer />
+        <TouchableOpacity onPress={handleEvent}>
+          <CprTimer />
+        </TouchableOpacity>
 
         {/* Shock Circular Timer */}
         {/* Pass shockDuration from settings */}
@@ -239,6 +241,7 @@ export default function Cpr() {
             lastShockTime={lastShockTime}
             lastAnalysisTime={lastAnalysisTime}
             durationSeconds={shockDuration}
+            durationMinutes={shockDuration}
             shockCount={shockCount}
           />
         </View>
@@ -273,7 +276,7 @@ export default function Cpr() {
         {/* Action Buttons Grid */}
         <ActionButtons
           onEnd={handleEnd}
-          onEvent={handleEvent}
+          //onEvent={handleEvent}
           onCancel={handleCancel}
         />
 

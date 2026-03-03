@@ -29,12 +29,22 @@ export default function SettingsScreen() {
 
   const {
     shockDuration,
-    cordaroneDuration,
+    //cordaroneDuration,
     adrenalineDuration,
     updateSettings,
     resetSettings,
     loading,
   } = useCprSettings();
+
+  const [shockInput, setShockInput] = useState("");
+  const [adrenalineInput, setAdrenalineInput] = useState("");
+
+  useEffect(() => {
+    if (!loading) {
+      setShockInput(Math.round(shockDuration / 60).toString());
+      setAdrenalineInput(Math.round(adrenalineDuration / 60).toString());
+    }
+  }, [loading, shockDuration, adrenalineDuration]);
 
   if (loading) {
     return (
@@ -52,12 +62,13 @@ export default function SettingsScreen() {
   }
 
   const handleChange = (
-    key: "shock" | "cordarone" | "adrenaline",
-    text: string,
+    key: "shock" | "adrenaline", // The cordarone doesn't need a timer change, always 2 minutes
+    text: string
   ) => {
-    const value = parseInt(text, 10);
+    const value = parseFloat(text);
     if (!isNaN(value)) {
-      updateSettings(key, value);
+      // Convert minutes to seconds for storage
+      updateSettings(key, Math.round(value * 60));
     }
   };
 
@@ -75,6 +86,7 @@ export default function SettingsScreen() {
   };
   const sectionTitleColor = { color: isDark ? "#ddd" : "#333" };
   const labelColor = { color: isDark ? "#aaa" : "#555" };
+
 
   return (
     <SafeAreaView style={[styles.container, bgStyle]}>
@@ -96,23 +108,29 @@ export default function SettingsScreen() {
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={[styles.sectionTitle, sectionTitleColor]}>
-          Durées par défaut (secondes)
+          Durées par défaut (minutes)
         </Text>
 
         <View style={styles.inputGroup}>
-          <Text style={[styles.label, labelColor]}>Choc (Intervalle)</Text>
+          <Text style={[styles.label, labelColor]}>Analyse (Intervalle)</Text>
           <View style={[styles.inputWrapper, inputBgStyle]}>
             <TextInput
               style={[styles.input, textStyle]}
               keyboardType="numeric"
-              value={shockDuration.toString()}
-              onChangeText={(text) => handleChange("shock", text)}
+              value={shockInput}
+              onChangeText={setShockInput}
             />
-            <Text style={styles.unit}>sec</Text>
+            <Text style={styles.unit}>min</Text>
           </View>
+          <TouchableOpacity
+            style={styles.validationButton}
+            onPress={() => handleChange("shock", shockInput)}
+          >
+            <FontAwesome5 name="check-square" size={16} color="#fff" />
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.inputGroup}>
+        {/*  <View style={styles.inputGroup}>   Cordarone doesn't need a timer change, always 2 minutes
           <Text style={[styles.label, labelColor]}>Cordarone (Intervalle)</Text>
           <View style={[styles.inputWrapper, inputBgStyle]}>
             <TextInput
@@ -124,7 +142,7 @@ export default function SettingsScreen() {
             <Text style={styles.unit}>sec</Text>
           </View>
         </View>
-
+*/}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, labelColor]}>
             Adrénaline (Intervalle)
@@ -133,11 +151,17 @@ export default function SettingsScreen() {
             <TextInput
               style={[styles.input, textStyle]}
               keyboardType="numeric"
-              value={adrenalineDuration.toString()}
-              onChangeText={(text) => handleChange("adrenaline", text)}
+              value={adrenalineInput}
+              onChangeText={setAdrenalineInput}
             />
-            <Text style={styles.unit}>sec</Text>
+            <Text style={styles.unit}>min</Text>
           </View>
+          <TouchableOpacity
+            style={styles.validationButton}
+            onPress={() => handleChange("adrenaline", adrenalineInput)}
+          >
+            <FontAwesome5 name="check-square" size={16} color="#fff" />
+          </TouchableOpacity>
         </View>
 
         <Text
@@ -145,7 +169,7 @@ export default function SettingsScreen() {
         >
           Thème de l&#39;application
         </Text>
-        <View style={{ alignItems: "center", marginBottom: 20 }}>
+        <View style={{ alignItems: 'center', marginBottom: 20 }}>
           <CustomSwitch
             selectionMode={theme === "light" ? 1 : 2}
             roundCorner={true}
@@ -227,6 +251,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#000",
   },
+  validationButton: {
+    alignSelf: "flex-end",
+    padding: 8,
+    maxWidth: 50,
+    width: "100%",
+    backgroundColor: "#28a745",
+    borderRadius: 4,
+    alignItems: "center",
+    marginTop: 8
+  },
   unit: {
     fontSize: 16,
     color: "#888",
@@ -239,12 +273,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
-  switchThemeButtonText: {
+   switchThemeButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },
   resetButton: {
+    marginTop: 40,
     padding: 16,
     backgroundColor: "#FF5252",
     borderRadius: 8,

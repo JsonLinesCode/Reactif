@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import EventSelectionModal from "@/components/EventSelectionModal";
 
 export default function CprTimer() {
   const [seconds, setSeconds] = useState(0);
@@ -17,12 +18,14 @@ export default function CprTimer() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Durée RCP</Text>
       <View style={styles.timerContainer}>
         <Text style={styles.timerText}>{formatTime(seconds)}</Text>
       </View>
+      <Text style={{ color: "#fff", marginTop: 8}}>SAISIE ÉVENEMENTS</Text>
     </View>
   );
 }

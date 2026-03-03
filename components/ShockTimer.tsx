@@ -13,6 +13,8 @@ import Svg, { Circle, G } from "react-native-svg";
 
 interface ShockTimerProps {
   onShock: () => void;
+  lastShockTime: number; // timestamp
+  durationMinutes?: number;
   onAnalysis: () => void;
   lastShockTime?: number | null; // timestamp
   lastAnalysisTime?: number | null; // timestamp
@@ -27,12 +29,14 @@ export default function ShockTimer({
   onShock,
   onAnalysis,
   lastShockTime,
+  durationMinutes = 2, // Default 2 minutes
   lastAnalysisTime,
   durationSeconds = 120, // Default 2 minutes
   shockCount = 0,
 }: ShockTimerProps) {
   const { width } = useWindowDimensions();
-  const [timeLeft, setTimeLeft] = useState(durationSeconds);
+  const [timeLeft, setTimeLeft] = useState(durationMinutes);
+  const [localStartTime, setLocalStartTime] = useState<number | null>(null);
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const soundPlayedRef = useRef(false);
@@ -57,8 +61,18 @@ export default function ShockTimer({
   const innerSize = size - 45;
   const innerRadius = innerSize / 2;
 
+  // Determine the effective start time: either the local override or the prop
+  const effectiveStartTime = localStartTime ?? lastShockTime;
+
+  const updateTimer = () => {
+    const now = Date.now();
+    const elapsed = Math.floor((now - effectiveStartTime) / 1000);
+    const remaining = Math.max(0, durationMinutes - elapsed);
+    setTimeLeft(remaining);
+  };
+
   useEffect(() => {
-    if (!lastShockTime && !lastAnalysisTime) {
+    if (!effectiveStartTime) && !lastAnalysisTime) {
       setTimeLeft(0);
       stopBlinking();
       scaleAnim.setValue(1);
@@ -91,7 +105,14 @@ export default function ShockTimer({
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [lastShockTime, lastAnalysisTime, durationSeconds]);
+  }, [effectiveStartTime, lastAnalysisTime durationMinutes]);
+
+  useEffect(() => {
+    // Sync local state if prop updates (e.g. shock delivered)
+    if (lastShockTime) {
+         setLocalStartTime(null);
+    }
+  }, [lastShockTime]);
 
   useEffect(() => {
     if (timeLeft === 0) {
@@ -161,7 +182,7 @@ export default function ShockTimer({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const progress = timeLeft / durationSeconds;
+  const progress = timeLeft / durationMinutes;
   const strokeDashoffset = circumference * (1 - progress);
 
   return (
@@ -205,8 +226,10 @@ export default function ShockTimer({
       </AnimatedTouchableOpacity>
 
       {/* Circle 2: Analyse Timer */}
-      <View
-        style={[styles.svgContainer, { width: circleSize, height: circleSize }]}
+      <AnimatedTouchableOpacity
+          onPress={handleAnalyse}
+          activeOpacity={0.8}
+          style={[styles.svgContainer, { width: circleSize, height: circleSize }]}
       >
         <AnimatedTouchableOpacity
           onPress={handleAnalysisPress}
