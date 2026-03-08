@@ -55,7 +55,7 @@ export default function ActionButtons({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    justifyContent: "space-around", // Distribute evenly
+    justifyContent: "space-around", 
     alignItems: "flex-start",
     width: "100%",
   },
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     width: 80,
   },
   circleButton: {
-    width: 64, // Reduced size slightly to fit 3 in row comfortably
+    width: 64, 
     height: 64,
     borderRadius: 32,
     justifyContent: "center",

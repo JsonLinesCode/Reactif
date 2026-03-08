@@ -254,7 +254,9 @@ const styles = StyleSheet.create({
   layer: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
-    borderRadius: 28,
+    borderTopLeftRadius: 28,
+    borderBottomLeftRadius: 28,
+
     borderWidth: 2,
     borderColor: "#fff",
     flex: 1,

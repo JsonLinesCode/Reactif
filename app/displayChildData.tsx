@@ -1,4 +1,5 @@
-import { PediatricData, sessionStore } from "@/store/sessionStore";
+import { PediatricData } from "@/models/session";
+import { sessionStore } from "@/store/sessionStore";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -64,12 +65,16 @@ export default function DisplayChildData() {
             {adrenalineDose ? `${adrenalineDose} mg` : "N/A"}
           </Text>
 
-          <Text style={[styles.label, labelStyle]}>Amiodarone (Cordarone):</Text>
+          <Text style={[styles.label, labelStyle]}>
+            Amiodarone (Cordarone):
+          </Text>
           <Text style={[styles.value, textStyle]}>
             {cordaroneDose ? `${cordaroneDose} mg` : "N/A"}
           </Text>
 
-          <Text style={[styles.label, labelStyle]}>Choc électrique (Energie):</Text>
+          <Text style={[styles.label, labelStyle]}>
+            Choc électrique (Energie):
+          </Text>
           <Text style={[styles.value, textStyle]}>
             {energyDose ? `${energyDose} J` : "N/A"}
           </Text>
