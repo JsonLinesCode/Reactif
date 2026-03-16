@@ -66,6 +66,8 @@ export default function ActionProgressBar({
 
   const timeLeft = Math.max(0, durationSeconds - elapsed);
   const isExpired = elapsed >= durationSeconds;
+  const Warns = [15, 10, 5];
+
 
   useEffect(() => {
     if (isExpired) {
@@ -76,17 +78,32 @@ export default function ActionProgressBar({
       }
       startBlinking();
     } else {
-      stopBlinking();
-      if (timeLeft > 0) {
-        soundPlayedRef.current = false; // Reset if time is added back for some reason, or user resets
+      if (Warns.includes(timeLeft)) {
+        playSoundWarning();
+      } else {
+        stopBlinking();
+        if (timeLeft > 0) {
+          soundPlayedRef.current = false; // Reset if time is added back for some reason, or user resets
+        }
       }
     }
   }, [isExpired, timeLeft]);
 
-  const playSound = async () => {
+  const playSoundWarning = async () => {
+    try {
+      const Warns = [15, 10, 5];
+      await Audio.Sound.createAsync(
+          soundSource || require("../assets/audio/beep.wav"),
+          { shouldPlay: true, rate: 1.5 })// Higher pitch
+      } catch (error) {
+          console.log("Error playing sound", error);
+    }
+  };
+
+  const playSound  = async ()  => {
     try {
       const { sound } = await Audio.Sound.createAsync(
-        soundSource || require("../assets/audio/beep.wav"),
+          soundSource || require("../assets/audio/beep.wav"),
       );
       await sound.playAsync();
     } catch (error) {
