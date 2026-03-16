@@ -12,7 +12,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CprSession, sessionStore } from "@/store/sessionStore";
+import { sessionStore } from "@/store/sessionStore";
+import { CprSession } from "@/models/session";
 import {router, Stack, useLocalSearchParams} from "expo-router";
 
 export default function CprEnd() {
@@ -35,7 +36,7 @@ export default function CprEnd() {
 
   const handleResume = () => {
     // "Reprendre la RCP"
-    sessionStore.logEvent("RESUME");
+    sessionStore.logEvent("event", "RESUME");
     router.dismissAll();
     router.replace("/cpr");
   };
@@ -86,19 +87,19 @@ export default function CprEnd() {
   };
 
   const getShockCount = () => {
-    return session?.events.filter((e) => e.type === "shock").length || 0;
+    return session?.events.filter((e: any) => e.type === "shock").length || 0;
   };
 
   const getActions = () => {
     return (
-      session?.events.filter((e) =>
+      session?.events.filter((e: any) =>
         ["cordarone", "adrenaline"].includes(e.type),
       ) || []
     );
   };
 
   const getCustomEvents = () => {
-    return session?.events.filter((e) => e.type === "event") || [];
+    return session?.events.filter((e: any) => e.type === "event") || [];
   };
 
   if (step === "racs") {
@@ -140,7 +141,7 @@ export default function CprEnd() {
 
   const actions = getActions();
   const customEvents = getCustomEvents();
-  const summaryTitle = session?.events.find(e => e.type === "cpr_end")?.details || "Fin de session";
+  const summaryTitle = session?.events.find((e: any) => e.type === "cpr_end")?.details || "Fin de session";
 
   return (
     <SafeAreaView style={[styles.container, styles.summaryBackground]}>
@@ -202,10 +203,10 @@ export default function CprEnd() {
             {customEvents.length === 0 ? (
                 <Text style={styles.emptyText}>Aucun événement.</Text>
             ) : (
-                customEvents.map((evt, i) => (
-                    <Text key={i} style={styles.itemText}>
-                        • {evt.details} ({new Date(evt.timestamp).toLocaleTimeString()})
-                    </Text>
+                customEvents.map((evt: any, i: number) => (
+                  <Text key={i} style={styles.itemText}>
+                    • {String(evt.details)} ({new Date(evt.timestamp).toLocaleTimeString()})
+                  </Text>
                 ))
             )}
         </View>
@@ -242,7 +243,7 @@ function generateHtml(session: CprSession) {
   // Header for first cycle
   eventsHtml += `<tr class="cycle-header"><td colspan="3"><strong>RCP ${cycleCount}</strong></td></tr>`;
 
-  session.events.forEach(evt => {
+  session.events.forEach((evt: any) => {
       const time = new Date(evt.timestamp).toLocaleTimeString();
       const details = evt.details ? (typeof evt.details === "string" ? evt.details : JSON.stringify(evt.details)) : "-";
 
@@ -254,10 +255,10 @@ function generateHtml(session: CprSession) {
         </tr>
       `;
 
-      if (evt.type === "RACS" || evt.type === "racs") {
+        if (evt.type === "event" && String(details).toUpperCase() === "RACS") {
           cycleCount++;
           eventsHtml += `<tr class="cycle-header"><td colspan="3" style="background-color: #e6fffa; text-align: center; padding: 10px;"><strong>RCP ${cycleCount}</strong> (Reprise)</td></tr>`;
-      }
+        }
   });
 
   const pediatricInfo = session.pediatricData

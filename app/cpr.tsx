@@ -1,11 +1,5 @@
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
-import {StyleSheet, TouchableOpacity, View} from "react-native";
-import {
-  runOnJS,
-  useFrameCallback,
-  useSharedValue,
-} from "react-native-reanimated";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import ActionButtons from "@/components/ActionButtons";
@@ -17,35 +11,20 @@ import ShockTimer from "@/components/ShockTimer";
 import { useCprSettings } from "@/hooks/useCprSettings";
 import { sessionStore } from "@/store/sessionStore";
 
+import { metronomeController } from "@/controllers/MetronomeController";
+import { sessionController } from "@/controllers/SessionController";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { router } from "expo-router";
-
-// Configure audio session
-const configureAudio = async () => {
-  await Audio.setAudioModeAsync({
-    allowsRecordingIOS: false,
-    staysActiveInBackground: true,
-    interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-    playsInSilentModeIOS: true,
-    shouldDuckAndroid: true,
-    interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
-    playThroughEarpieceAndroid: false,
-  });
-};
+import { useRouter } from "expo-router";
 
 export default function Cpr() {
+  const router = useRouter();
   const { shockDuration, cordaroneDuration, adrenalineDuration, loading } =
     useCprSettings(); // load settings
 
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
   const [isMuted, setIsMuted] = useState(true);
-  const soundRef = useRef<Audio.Sound | null>(null);
-
-  // Shared values for metronome timing
-  const isPlayingSV = useSharedValue(false);
-  const intervalMsSV = useSharedValue(0);
-  const nextTickSV = useSharedValue(0);
+  const soundRef = useRef(null);
 
   // Doses State
   const [doses, setDoses] = useState({
@@ -54,17 +33,33 @@ export default function Cpr() {
     energy: sessionStore.getEnergyDose(),
   });
 
+  // Re-render when controller notifies so controller getters update
+  const [, setControllerTick] = useState(0);
   useEffect(() => {
-    configureAudio();
-    async function loadSound() {
-      const { sound } = await Audio.Sound.createAsync(
-        require("@/assets/audio/metronome_tick.wav"),
+    const unsubscribe = sessionController.subscribe(() => {
+      // Debug: confirm controller notifications reach this component
+      // eslint-disable-next-line no-console
+      console.log("Cpr: sessionController.notify received");
+      // Debug: inspect session store contents
+      // eslint-disable-next-line no-console
+      console.log(
+        "Cpr: sessionStore events:",
+        sessionStore.getSession()?.events?.length,
+        sessionStore.getSession()?.events?.slice(-3),
       );
-      soundRef.current = sound;
-    }
-    loadSound();
+      setControllerTick((t) => t + 1);
+    });
     return () => {
-      soundRef.current?.unloadAsync();
+      unsubscribe();
+    };
+  }, []);
+
+  // Ensure metronome controller reflects initial UI state
+  useEffect(() => {
+    metronomeController.setBpm(bpm);
+    metronomeController.setMuted(isMuted);
+    return () => {
+      // keep controller alive across screens; do not dispose here
     };
   }, []);
 
@@ -74,41 +69,75 @@ export default function Cpr() {
       const currentSession = sessionStore.getSession();
       if (currentSession?.endTime) {
         setIsMuted(true);
-        isPlayingSV.value = false;
+        metronomeController.setMuted(true);
       }
+      // Keep local doses state in sync with store
       setDoses({
         adrenaline: sessionStore.getAdrenalineDose(),
         cordarone: sessionStore.getCordaroneDose(),
         energy: sessionStore.getEnergyDose(),
       });
     });
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   // Update shared values
   useEffect(() => {
-    isPlayingSV.value = !isMuted;
+    metronomeController.setBpm(bpm);
+  }, [bpm]);
 
-    if (bpm > 0) {
-      intervalMsSV.value = (60 / bpm) * 1000;
-    }
-  }, [bpm, isMuted]);
+  useEffect(() => {
+    metronomeController.setMuted(isMuted);
+  }, [isMuted]);
 
-  const playSound = async () => {
-    if (soundRef.current) {
-      try {
-        await soundRef.current.replayAsync();
-      } catch (error) {
-        console.log("Sound error", error);
-      }
-    }
-  };
+  // metronomeController handles timing and sound
 
-  useFrameCallback((frameInfo) => {
-    if (!isPlayingSV.value || !frameInfo || !frameInfo.timestamp) {
-      return;
-    }
+  const shockCount = sessionController.getCount("shock");
+  const lastShockTime = sessionController.getLastTime("shock");
+  const lastAnalysisTime = sessionController.getLastTime("analysis");
+  const lastCordaroneTime = sessionController.getLastTime("cordarone");
+  const lastAdrenalineTime = sessionController.getLastTime("adrenaline");
+  // Local UI state for medication counts and last timestamps so React updates reliably
+  const [cordaroneCountState, setCordaroneCountState] = useState(
+    sessionController.getCount("cordarone"),
+  );
+  const [adrenalineCountState, setAdrenalineCountState] = useState(
+    sessionController.getCount("adrenaline"),
+  );
+  const [lastCordaroneTimeState, setLastCordaroneTimeState] = useState<
+    number | null
+  >(sessionController.getLastTime("cordarone"));
+  const [lastAdrenalineTimeState, setLastAdrenalineTimeState] = useState<
+    number | null
+  >(sessionController.getLastTime("adrenaline"));
 
+  // Keep these derived values in sync with the session store when controller notifies
+  useEffect(() => {
+    const updateFromStore = () => {
+      const events = sessionStore.getSession()?.events || [];
+      const cordEvents = events.filter((e) => e.type === "cordarone");
+      const adrEvents = events.filter((e) => e.type === "adrenaline");
+
+      setCordaroneCountState(cordEvents.length);
+      setAdrenalineCountState(adrEvents.length);
+      setLastCordaroneTimeState(
+        cordEvents.length ? cordEvents[cordEvents.length - 1].timestamp : null,
+      );
+      setLastAdrenalineTimeState(
+        adrEvents.length ? adrEvents[adrEvents.length - 1].timestamp : null,
+      );
+    };
+
+    // initialize once
+    updateFromStore();
+    const unsubscribe = sessionController.subscribe(() => {
+      updateFromStore();
+    });
+    return () => unsubscribe();
+  }, []);
+  /*
     const now = frameInfo.timestamp;
 
     if (nextTickSV.value === 0) {
@@ -163,65 +192,34 @@ export default function Cpr() {
   const lastCordaroneTime = getLastTime("cordarone");
 
   const adrenalineCount = getCount("adrenaline");
-  const lastAdrenalineTime = getLastTime("adrenaline");
+  const lastAdrenalineTime = getLastTime("adrenaline");*/
+  // use state-backed derived counts
+  const cordaroneCount = cordaroneCountState;
+  const adrenalineCount = adrenalineCountState;
+
+  // Debug: log counts on each render
+  // eslint-disable-next-line no-console
+  console.log("Cpr render counts:", { cordaroneCount, adrenalineCount });
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
-
-  // Actions
-  const handleShock = () => {
-    const timestamp = Date.now();
-    setLogs((prev) => [...prev, { type: "shock", timestamp }]);
-    sessionStore.logEvent("shock", { timestamp });
-  };
-  const handleAnalysis = () => {
-    const timestamp = Date.now();
-    setLogs((prev) => [...prev, { type: "analysis", timestamp }]);
-    sessionStore.logEvent("analysis", { timestamp });
-  };
-  const handleCordarone = () => {
-    const timestamp = Date.now();
-    setLogs((prev) => [...prev, { type: "cordarone", timestamp }]);
-    sessionStore.logEvent("cordarone", { timestamp });
-  };
-
-  const handleAdrenaline = () => {
-    const timestamp = Date.now();
-    setLogs((prev) => [...prev, { type: "adrenaline", timestamp }]);
-    sessionStore.logEvent("adrenaline", { timestamp });
-  };
+  const [cancelResetSignal, setCancelResetSignal] = useState(0);
 
   const handleEnd = () => {
     // Navigate to End Cpr flow
-    router.push("/cprEndFirstPage");
+    router.push("/cprEndFirstPage" as any);
   };
   const handleEvent = () => setModalVisible(true);
 
   const handleSaveEvents = (selectedEvents: string[]) => {
-    const now = Date.now();
-    const newLogs = selectedEvents.map((event) => ({
-      type: "event",
-      timestamp: now,
-      details: event,
-    }));
-    setLogs((prev) => [...prev, ...newLogs]);
-
-    // Log each event to session store
-    selectedEvents.forEach((event) => {
-      sessionStore.logEvent("event", event);
-    });
-
+    sessionController.logEvents(selectedEvents);
     console.log("Logged events:", selectedEvents);
   };
 
   const handleCancel = () => {
-    setLogs((prev) => {
-      if (prev.length === 0) return prev;
-      const newLogs = [...prev];
-      newLogs.pop();
-      return newLogs;
-    });
     console.log("Cancelled last action");
+    sessionController.cancelLast();
+    setCancelResetSignal((v) => v + 1);
   };
 
   return (
@@ -236,13 +234,14 @@ export default function Cpr() {
         {/* Pass shockDuration from settings */}
         <View>
           <ShockTimer
-            onShock={handleShock}
-            onAnalysis={handleAnalysis}
+            onShock={sessionController.logShock}
+            onAnalysis={sessionController.logAnalysis}
             lastShockTime={lastShockTime}
             lastAnalysisTime={lastAnalysisTime}
             durationSeconds={shockDuration}
             durationMinutes={shockDuration}
             shockCount={shockCount}
+            resetSignal={cancelResetSignal}
           />
         </View>
 
@@ -253,11 +252,12 @@ export default function Cpr() {
             count={cordaroneCount}
             color="#448AFF"
             icon={<FontAwesome5 name="syringe" size={24} />}
-            onPress={handleCordarone}
+            onPress={sessionController.logCordarone}
             lastActionTime={lastCordaroneTime}
             durationSeconds={cordaroneDuration} // Use setting
             subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
             soundSource={require("@/assets/audio/beep.wav")}
+            resetSignal={cancelResetSignal}
           />
 
           <ActionProgressBar
@@ -265,11 +265,12 @@ export default function Cpr() {
             count={adrenalineCount}
             color="#448AFF"
             icon={<FontAwesome5 name="syringe" size={24} />}
-            onPress={handleAdrenaline}
+            onPress={sessionController.logAdrenaline}
             lastActionTime={lastAdrenalineTime}
             durationSeconds={adrenalineDuration} // Use setting
             subtitle={doses.adrenaline ? `${doses.adrenaline} mg` : undefined}
             soundSource={require("@/assets/audio/beep.wav")}
+            resetSignal={cancelResetSignal}
           />
         </View>
 

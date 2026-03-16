@@ -13,11 +13,10 @@ import Svg, { Circle, G } from "react-native-svg";
 
 interface ShockTimerProps {
   onShock: () => void;
-  lastShockTime: number; // timestamp
-  durationMinutes?: number;
   onAnalysis: () => void;
   lastShockTime?: number | null; // timestamp
   lastAnalysisTime?: number | null; // timestamp
+  durationMinutes?: number;
   durationSeconds?: number;
   shockCount?: number;
 }
@@ -66,13 +65,13 @@ export default function ShockTimer({
 
   const updateTimer = () => {
     const now = Date.now();
-    const elapsed = Math.floor((now - effectiveStartTime) / 1000);
+    const elapsed = effectiveStartTime ? Math.floor((now - effectiveStartTime) / 1000) : 0;
     const remaining = Math.max(0, durationMinutes - elapsed);
     setTimeLeft(remaining);
   };
 
   useEffect(() => {
-    if (!effectiveStartTime) && !lastAnalysisTime) {
+    if (!effectiveStartTime && !lastAnalysisTime) {
       setTimeLeft(0);
       stopBlinking();
       scaleAnim.setValue(1);
@@ -105,7 +104,7 @@ export default function ShockTimer({
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [effectiveStartTime, lastAnalysisTime durationMinutes]);
+  }, [effectiveStartTime, lastAnalysisTime, durationMinutes]);
 
   useEffect(() => {
     // Sync local state if prop updates (e.g. shock delivered)
@@ -227,75 +226,71 @@ export default function ShockTimer({
 
       {/* Circle 2: Analyse Timer */}
       <AnimatedTouchableOpacity
-          onPress={handleAnalyse}
-          activeOpacity={0.8}
-          style={[styles.svgContainer, { width: circleSize, height: circleSize }]}
+        onPress={handleAnalysisPress}
+        activeOpacity={0.8}
+        onPressIn={() => {
+          Animated.timing(analysisBounceAnim, {
+            toValue: 0.95,
+            duration: 100,
+            useNativeDriver: true,
+          }).start();
+        }}
+        onPressOut={() => {
+          Animated.timing(analysisBounceAnim, {
+            toValue: 1,
+            duration: 100,
+            useNativeDriver: true,
+          }).start();
+        }}
+        style={[
+          styles.svgContainer,
+          { transform: [{ scale: Animated.multiply(scaleAnim, analysisBounceAnim) }] },
+          { width: circleSize, height: circleSize },
+        ]}
       >
-        <AnimatedTouchableOpacity
-          onPress={handleAnalysisPress}
-          onPressIn={() => {
-            Animated.timing(analysisBounceAnim, {
-              toValue: 0.95,
-              duration: 100,
-              useNativeDriver: true,
-            }).start();
-          }}
-          onPressOut={() => {
-            Animated.timing(analysisBounceAnim, {
-              toValue: 1,
-              duration: 100,
-              useNativeDriver: true,
-            }).start();
-          }}
+        <Svg width={size} height={size}>
+          <G rotation="-90" origin={`${center}, ${center}`}>
+            <Circle
+              cx={center}
+              cy={center}
+              r={radius}
+              stroke="#2979FF"
+              strokeWidth={strokeWidth}
+              fill="none"
+            />
+            <Circle
+              cx={center}
+              cy={center}
+              r={radius}
+              stroke="#FF5252"
+              strokeWidth={strokeWidth}
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="none"
+            />
+          </G>
+        </Svg>
+        <View
           style={[
-            styles.analysisContainer,
-            { transform: [{ scale: Animated.multiply(scaleAnim, analysisBounceAnim) }] },
+            styles.innerContent,
+            {
+              width: innerSize,
+              height: innerSize,
+              borderRadius: innerRadius,
+            },
           ]}
         >
-          <Svg width={size} height={size}>
-            <G rotation="-90" origin={`${center}, ${center}`}>
-              <Circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="#2979FF"
-                strokeWidth={strokeWidth}
-                fill="none"
-              />
-              <Circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="#FF5252"
-                strokeWidth={strokeWidth}
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-                fill="none"
-              />
-            </G>
-          </Svg>
-          <View
-            style={[
-              styles.innerContent,
-              {
-                width: innerSize,
-                height: innerSize,
-                borderRadius: innerRadius,
-              },
-            ]}
-          >
-            <Ionicons
-              name="stopwatch-outline"
-              size={32}
-              color="black"
-              style={{ marginBottom: 4 }}
-            />
-            <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-            <Text style={styles.labelText}>ANALYSE</Text>
-          </View>
-        </AnimatedTouchableOpacity>
-      </View>
+          <Ionicons
+            name="stopwatch-outline"
+            size={32}
+            color="black"
+            style={{ marginBottom: 4 }}
+          />
+          <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+          <Text style={styles.labelText}>ANALYSE</Text>
+        </View>
+      </AnimatedTouchableOpacity>
     </View>
   );
 }

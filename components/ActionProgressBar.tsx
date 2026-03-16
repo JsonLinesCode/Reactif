@@ -1,4 +1,4 @@
-import { Audio } from "expo-av";
+import { sessionController } from "@/controllers/SessionController";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -20,6 +20,7 @@ interface ActionProgressBarProps {
   durationSeconds?: number;
   subtitle?: string;
   soundSource?: any;
+  resetSignal?: number;
 }
 
 const AnimatedTouchableOpacity =
@@ -35,9 +36,17 @@ export default function ActionProgressBar({
   durationSeconds = 120, // Default 2 minutes
   subtitle,
   soundSource,
+  resetSignal,
 }: ActionProgressBarProps) {
+  // Debug: log count on render
+  // eslint-disable-next-line no-console
+  console.log("ActionProgressBar render count:", count, label);
   const [elapsed, setElapsed] = useState(0);
   const [width, setWidth] = useState(0);
+  // Local fallback timestamp so UI can start countdown immediately on press
+  const [localLastActionTime, setLocalLastActionTime] = useState<number | null>(
+    null,
+  );
 
   const blinkAnim = useRef(new Animated.Value(1)).current;
   const bounceAnim = useRef(new Animated.Value(1)).current;
@@ -46,7 +55,13 @@ export default function ActionProgressBar({
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
-    if (!lastActionTime) {
+    const effectiveLast = lastActionTime ?? localLastActionTime;
+    // Debugging: log incoming lastActionTime to ensure parent updates
+    // Remove or guard this in production.
+    // eslint-disable-next-line no-console
+    console.log("ActionProgressBar lastActionTime effective:", effectiveLast);
+
+    if (!effectiveLast) {
       setElapsed(0);
       soundPlayedRef.current = false;
       stopBlinking();
@@ -55,14 +70,29 @@ export default function ActionProgressBar({
 
     const updateElapsed = () => {
       const current = Date.now();
-      const diff = Math.floor((current - lastActionTime) / 1000);
+      const diff = Math.floor((current - effectiveLast) / 1000);
       setElapsed(diff);
     };
 
     updateElapsed();
     const interval = setInterval(updateElapsed, 1000);
     return () => clearInterval(interval);
+  }, [lastActionTime, localLastActionTime]);
+
+  // If parent provides an authoritative timestamp, clear local fallback
+  useEffect(() => {
+    // Clear any local fallback whenever the parent `lastActionTime` changes
+    setLocalLastActionTime(null);
   }, [lastActionTime]);
+
+  // Force-reset timer UI when cancel is triggered
+  useEffect(() => {
+    if (resetSignal === undefined) return;
+    setLocalLastActionTime(null);
+    setElapsed(0);
+    soundPlayedRef.current = false;
+    stopBlinking();
+  }, [resetSignal]);
 
   const timeLeft = Math.max(0, durationSeconds - elapsed);
   const isExpired = elapsed >= durationSeconds;
@@ -72,14 +102,15 @@ export default function ActionProgressBar({
   useEffect(() => {
     if (isExpired) {
       if (!soundPlayedRef.current) {
-        playSound();
+        // delegate sound to SessionController (no audio in UI)
+        sessionController.playSound("beep");
         triggerHaptic();
-        soundPlayedRef.current = true;
+       soundPlayedRef.current = true;
       }
       startBlinking();
     } else {
       if (Warns.includes(timeLeft)) {
-        playSoundWarning();
+        //playSoundWarning();
       } else {
         stopBlinking();
         if (timeLeft > 0) {
@@ -88,7 +119,7 @@ export default function ActionProgressBar({
       }
     }
   }, [isExpired, timeLeft]);
-
+/*
   const playSoundWarning = async () => {
     try {
       const Warns = [15, 10, 5];
@@ -110,7 +141,8 @@ export default function ActionProgressBar({
       console.log("Error playing sound", error);
     }
   };
-
+*/
+  // sound playback delegated to SessionController.playSound
   const triggerHaptic = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
   };
@@ -168,7 +200,9 @@ export default function ActionProgressBar({
     stopBlinking();
     soundPlayedRef.current = false;
 
+    // Trigger parent handler and update local timestamp so UI updates immediately
     onPress();
+    setLocalLastActionTime(Date.now());
   };
 
   const progressPercent = Math.min(

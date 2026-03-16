@@ -8,13 +8,11 @@ export interface PediatricData {
   cordaroneDose?: string;
   energyDose?: string;
 }
-
-export interface CprEvent {
-  id: string;
+export type CprEvent = {
+  type: "shock" | "analysis" | "cordarone" | "adrenaline" | "event" | "cpr_end";
   timestamp: number;
-  type: string; // 'shock' | 'cordarone' | 'adrenaline' | 'event' | 'cpr_end' ...
-  details?: any;
-}
+  details?: unknown;
+};
 
 export interface CprSession {
   id: string; // Unique session ID

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
-import {router, Stack} from "expo-router";
+import { router, Stack } from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
 import {
@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CprSession, sessionStore } from "@/store/sessionStore";
+import { CprEvent, CprSession } from "@/models/session";
+import { sessionStore } from "@/store/sessionStore";
 
 export default function History() {
   const [sessions, setSessions] = useState<CprSession[]>([]);
@@ -104,15 +105,19 @@ export default function History() {
         <View
           style={[
             styles.card,
-            isSelected && { backgroundColor: "#cce5ff", borderColor: "#007BFF", borderWidth: 1 },
+            isSelected && {
+              backgroundColor: "#cce5ff",
+              borderColor: "#007BFF",
+              borderWidth: 1,
+            },
           ]}
         >
           <View style={styles.cardHeader}>
             <View>
               <Text style={styles.cardTitle}>{date.toLocaleDateString()}</Text>
-              <Text
-                style={styles.cardSubtitle}
-              >{date.toLocaleTimeString()}</Text>
+              <Text style={styles.cardSubtitle}>
+                {date.toLocaleTimeString()}
+              </Text>
             </View>
             {!isSelectionMode && (
               <TouchableOpacity
@@ -197,7 +202,7 @@ export default function History() {
 function generateHtml(session: CprSession) {
   const eventsHtml = session.events
     .map(
-      (evt) => `
+      (evt: CprEvent) => `
         <tr>
             <td>${new Date(evt.timestamp).toLocaleTimeString()}</td>
             <td>${evt.type}</td>

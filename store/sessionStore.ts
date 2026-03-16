@@ -35,14 +35,28 @@ class SessionStore {
       this.notifyListeners();
     }
   }
+  cancelLast() {
+    if (this.currentSession && this.currentSession.events.length > 0) {
+      this.currentSession.events.pop();
+      this.notifyListeners();
+    }
+  }
 
-  logEvent(type: string, details?: any) {
+  logEvent(
+    type:
+      | "shock"
+      | "analysis"
+      | "cordarone"
+      | "adrenaline"
+      | "event"
+      | "cpr_end",
+    details?: any,
+  ) {
     if (!this.currentSession) {
       this.startNewSession();
     }
     if (this.currentSession) {
       const newEvent: CprEvent = {
-        id: Date.now().toString() + Math.random().toString().slice(2, 5),
         timestamp: Date.now(),
         type,
         details,

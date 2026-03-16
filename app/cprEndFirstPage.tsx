@@ -20,7 +20,7 @@ export default function CprEndFirstPage() {
     };
 
     const handleRacs = () => {
-        sessionStore.logEvent("RACS");
+        sessionStore.logEvent("event", "RACS");
         router.push({ pathname: "/cprEnd", params: { mode: "racs" } });
     };
 
