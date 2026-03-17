@@ -134,10 +134,11 @@ export default function Cpr() {
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
-  const [cancelResetRequest, setCancelResetRequest] = useState<CancelResetRequest>({
-    token: 0,
-    target: null,
-  });
+  const [cancelResetRequest, setCancelResetRequest] =
+    useState<CancelResetRequest>({
+      token: 0,
+      target: null,
+    });
 
   const handleEnd = () => {
     // Navigate to End Cpr flow

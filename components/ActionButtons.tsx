@@ -47,11 +47,7 @@ export default function ActionButtons({
           LongPressButton handles the circular button and gesture.
           We pass size=64 to match other buttons.
       */}
-        <LongPressButton
-          onComplete={onCancel}
-          color="#444"
-          size={64}
-        />
+        <LongPressButton onComplete={onCancel} color="#444" size={64} />
       </View>
     </View>
   );
@@ -60,7 +56,7 @@ export default function ActionButtons({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    justifyContent: "space-around", 
+    justifyContent: "space-around",
     alignItems: "flex-start",
     width: "100%",
   },
@@ -69,7 +65,7 @@ const styles = StyleSheet.create({
     width: 80,
   },
   circleButton: {
-    width: 64, 
+    width: 64,
     height: 64,
     borderRadius: 32,
     justifyContent: "center",
