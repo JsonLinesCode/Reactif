@@ -18,7 +18,12 @@
       "extends": "production"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "JAVA_HOME": "/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home",
+        "ANDROID_HOME": "/Users/work/Library/Android/sdk",
+        "ANDROID_SDK_ROOT": "/Users/work/Library/Android/sdk"
+      }
     }
   },
   "submit": {
@@ -28,7 +33,6 @@
         "track": "internal",
         "releaseStatus": "draft"
       }
-    
     }
   }
 }
