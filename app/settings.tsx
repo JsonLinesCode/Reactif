@@ -1,4 +1,4 @@
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -64,6 +64,12 @@ export default function SettingsScreen() {
   }
 
   const handleDurationChange = (key: "shock" | "adrenaline", text: string) => {
+    if (key === "shock") {
+      setShockInput(text);
+    } else {
+      setAdrenalineInput(text);
+    }
+
     const value = parseFloat(text);
     if (!isNaN(value)) {
       // Convert minutes to seconds for storage
@@ -72,6 +78,8 @@ export default function SettingsScreen() {
   };
 
   const handleWarningChange = (text: string) => {
+    setWarningInput(text);
+
     const value = parseInt(text, 10);
     if (!isNaN(value)) {
       updateSettings("warning", value);
@@ -123,16 +131,10 @@ export default function SettingsScreen() {
               style={[styles.input, textStyle]}
               keyboardType="numeric"
               value={shockInput}
-              onChangeText={setShockInput}
+              onChangeText={(text) => handleDurationChange("shock", text)}
             />
             <Text style={styles.unit}>min</Text>
           </View>
-          <TouchableOpacity
-            style={styles.validationButton}
-            onPress={() => handleDurationChange("shock", shockInput)}
-          >
-            <FontAwesome5 name="check-square" size={16} color="#fff" />
-          </TouchableOpacity>
         </View>
 
         <View style={styles.inputGroup}>
@@ -144,16 +146,10 @@ export default function SettingsScreen() {
               style={[styles.input, textStyle]}
               keyboardType="numeric"
               value={adrenalineInput}
-              onChangeText={setAdrenalineInput}
+              onChangeText={(text) => handleDurationChange("adrenaline", text)}
             />
             <Text style={styles.unit}>min</Text>
           </View>
-          <TouchableOpacity
-            style={styles.validationButton}
-            onPress={() => handleDurationChange("adrenaline", adrenalineInput)}
-          >
-            <FontAwesome5 name="check-square" size={16} color="#fff" />
-          </TouchableOpacity>
         </View>
 
         <View style={styles.inputGroup}>
@@ -163,16 +159,10 @@ export default function SettingsScreen() {
               style={[styles.input, textStyle]}
               keyboardType="numeric"
               value={warningInput}
-              onChangeText={setWarningInput}
+              onChangeText={handleWarningChange}
             />
             <Text style={styles.unit}>sec</Text>
           </View>
-          <TouchableOpacity
-            style={styles.validationButton}
-            onPress={() => handleWarningChange(warningInput)}
-          >
-            <FontAwesome5 name="check-square" size={16} color="#fff" />
-          </TouchableOpacity>
         </View>
 
         <Text
@@ -261,16 +251,6 @@ const styles = StyleSheet.create({
     height: 48,
     fontSize: 16,
     color: "#000",
-  },
-  validationButton: {
-    alignSelf: "flex-end",
-    padding: 8,
-    maxWidth: 50,
-    width: "100%",
-    backgroundColor: "#28a745",
-    borderRadius: 4,
-    alignItems: "center",
-    marginTop: 8,
   },
   unit: {
     fontSize: 16,

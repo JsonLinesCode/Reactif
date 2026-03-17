@@ -18,8 +18,12 @@ import { useRouter } from "expo-router";
 
 export default function Cpr() {
   const router = useRouter();
-  const { shockDuration, cordaroneDuration, adrenalineDuration, warningSeconds } =
-    useCprSettings();
+  const {
+    shockDuration,
+    cordaroneDuration,
+    adrenalineDuration,
+    warningSeconds,
+  } = useCprSettings();
 
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
