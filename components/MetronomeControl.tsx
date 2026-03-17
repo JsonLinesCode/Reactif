@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import React from "react";
 import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 
@@ -15,8 +16,14 @@ export default function MetronomeControl({
   isMuted,
   setIsMuted,
 }: MetronomeControlProps) {
-  const decreaseBpm = () => setBpm(Math.max(30, bpm - 10)); // Steps of 10 usually? Or 5? Or 1? Screenshot is just +/-. Assume standard.
-  const increaseBpm = () => setBpm(Math.min(240, bpm + 10));
+  const decreaseBpm = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setBpm(Math.max(30, bpm - 10));
+  }; // Steps of 10 usually? Or 5? Or 1? Screenshot is just +/-. Assume standard.
+  const increaseBpm = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setBpm(Math.min(240, bpm + 10));
+  };
 
   return (
     <View style={styles.container}>

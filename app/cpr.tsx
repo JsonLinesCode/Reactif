@@ -16,6 +16,13 @@ import { sessionController } from "@/controllers/SessionController";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
+type ResetTarget = "shockTimer" | "cordarone" | "adrenaline";
+
+interface CancelResetRequest {
+  token: number;
+  target: ResetTarget | null;
+}
+
 export default function Cpr() {
   const router = useRouter();
   const {
@@ -127,7 +134,10 @@ export default function Cpr() {
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
-  const [cancelResetSignal, setCancelResetSignal] = useState(0);
+  const [cancelResetRequest, setCancelResetRequest] = useState<CancelResetRequest>({
+    token: 0,
+    target: null,
+  });
 
   const handleEnd = () => {
     // Navigate to End Cpr flow
@@ -140,8 +150,24 @@ export default function Cpr() {
   };
 
   const handleCancel = () => {
+    const lastEventType = sessionStore.getSession()?.events.at(-1)?.type;
+    let target: ResetTarget | null = null;
+
+    if (lastEventType === "shock" || lastEventType === "analysis") {
+      target = "shockTimer";
+    }
+    if (lastEventType === "cordarone") {
+      target = "cordarone";
+    }
+    if (lastEventType === "adrenaline") {
+      target = "adrenaline";
+    }
+
     sessionController.cancelLast();
-    setCancelResetSignal((v) => v + 1);
+    setCancelResetRequest((prev) => ({
+      token: prev.token + 1,
+      target,
+    }));
   };
 
   return (
@@ -162,7 +188,7 @@ export default function Cpr() {
             lastAnalysisTime={lastAnalysisTime}
             durationSeconds={shockDuration}
             shockCount={shockCount}
-            resetSignal={cancelResetSignal}
+            resetRequest={cancelResetRequest}
             warningSeconds={warningSeconds}
           />
         </View>
@@ -178,7 +204,8 @@ export default function Cpr() {
             lastActionTime={lastCordaroneTimeState}
             durationSeconds={cordaroneDuration} // Use setting
             subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
-            resetSignal={cancelResetSignal}
+            resetRequest={cancelResetRequest}
+            resetKey="cordarone"
             warningSeconds={warningSeconds}
           />
 
@@ -191,7 +218,8 @@ export default function Cpr() {
             lastActionTime={lastAdrenalineTimeState}
             durationSeconds={adrenalineDuration} // Use setting
             subtitle={doses.adrenaline ? `${doses.adrenaline} mg` : undefined}
-            resetSignal={cancelResetSignal}
+            resetRequest={cancelResetRequest}
+            resetKey="adrenaline"
             warningSeconds={warningSeconds}
           />
         </View>

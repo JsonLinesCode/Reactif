@@ -1,5 +1,6 @@
 import { sessionController } from "@/controllers/SessionController";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -20,7 +21,10 @@ interface ShockTimerProps {
   durationSeconds?: number;
   warningSeconds?: number;
   shockCount?: number;
-  resetSignal?: number;
+  resetRequest?: {
+    token: number;
+    target: "shockTimer" | "cordarone" | "adrenaline" | null;
+  };
 }
 
 const AnimatedTouchableOpacity =
@@ -34,7 +38,7 @@ export default function ShockTimer({
   durationSeconds = 120,
   warningSeconds = 10,
   shockCount = 0,
-  resetSignal,
+  resetRequest,
 }: ShockTimerProps) {
   const { width } = useWindowDimensions();
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
@@ -130,9 +134,9 @@ export default function ShockTimer({
     setLocalLastAnalysisTime(null);
   }, [lastAnalysisTime]);
 
-  // Force-reset timer UI when cancel is triggered
+  // Reset this timer only when cancel targets the shock/analyse timer
   useEffect(() => {
-    if (resetSignal === undefined) return;
+    if (!resetRequest || resetRequest.target !== "shockTimer") return;
     setLocalStartTime(null);
     setLocalLastAnalysisTime(null);
     setTimeLeft(durationSeconds);
@@ -140,7 +144,7 @@ export default function ShockTimer({
     scaleAnim.setValue(1);
     soundPlayedRef.current = false;
     warningPlayedRef.current = false;
-  }, [resetSignal, durationSeconds]);
+  }, [resetRequest, durationSeconds]);
 
   useEffect(() => {
     if (timeLeft === 0) {
@@ -204,6 +208,7 @@ export default function ShockTimer({
   };
 
   const handleShockPress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     stopBlinking();
     soundPlayedRef.current = false;
     warningPlayedRef.current = false;
@@ -217,6 +222,7 @@ export default function ShockTimer({
   };
 
   const handleAnalysisPress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     stopBlinking();
     soundPlayedRef.current = false;
     warningPlayedRef.current = false;

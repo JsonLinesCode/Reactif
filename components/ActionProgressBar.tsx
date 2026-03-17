@@ -20,7 +20,11 @@ interface ActionProgressBarProps {
   durationSeconds?: number;
   warningSeconds?: number;
   subtitle?: string;
-  resetSignal?: number;
+  resetRequest?: {
+    token: number;
+    target: "shockTimer" | "cordarone" | "adrenaline" | null;
+  };
+  resetKey?: "cordarone" | "adrenaline";
 }
 
 const AnimatedTouchableOpacity =
@@ -36,7 +40,8 @@ export default function ActionProgressBar({
   durationSeconds = 120,
   warningSeconds = 10,
   subtitle,
-  resetSignal,
+  resetRequest,
+  resetKey,
 }: ActionProgressBarProps) {
   const [elapsed, setElapsed] = useState(0);
   const [width, setWidth] = useState(0);
@@ -77,15 +82,15 @@ export default function ActionProgressBar({
     setLocalLastActionTime(null);
   }, [lastActionTime]);
 
-  // Force-reset timer UI when cancel is triggered
+  // Reset only when cancel targets this specific medication timer
   useEffect(() => {
-    if (resetSignal === undefined) return;
+    if (!resetRequest || !resetKey || resetRequest.target !== resetKey) return;
     setLocalLastActionTime(null);
     setElapsed(0);
     soundPlayedRef.current = false;
     warningPlayedRef.current = false;
     stopBlinking();
-  }, [resetSignal]);
+  }, [resetRequest, resetKey]);
 
   const timeLeft = Math.max(0, durationSeconds - elapsed);
   const isExpired = elapsed >= durationSeconds;
@@ -157,6 +162,7 @@ export default function ActionProgressBar({
   };
 
   const handlePress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Animated.sequence([
       Animated.timing(blinkAnim, {
         toValue: 0.95,

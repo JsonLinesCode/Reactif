@@ -1,5 +1,6 @@
 import LongPressButton from "@/components/LongPressButton";
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -14,12 +15,17 @@ export default function ActionButtons({
   //onEvent,
   onCancel,
 }: ActionButtonsProps) {
+  const handleEndPress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onEnd();
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.actionItem}>
         <TouchableOpacity
           style={[styles.circleButton, { backgroundColor: "#FF5252" }]}
-          onPress={onEnd}
+          onPress={handleEndPress}
         >
           <Ionicons name="close" size={40} color="#fff" />
         </TouchableOpacity>
@@ -43,7 +49,6 @@ export default function ActionButtons({
       */}
         <LongPressButton
           onComplete={onCancel}
-          label=""
           color="#444"
           size={64}
         />
