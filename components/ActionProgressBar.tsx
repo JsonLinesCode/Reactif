@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    flex: 1,
+    width: "100%",
   },
   container: {
     flex: 1,
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 28,
     borderBottomLeftRadius: 28,
 
-    borderWidth: 2,
+    borderWidth: 0,
     borderColor: "#fff",
     flex: 1,
   },

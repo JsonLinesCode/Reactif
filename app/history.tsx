@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
-import { router, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
 import {
@@ -156,9 +156,6 @@ export default function History() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={24} color={"#000"} />
-      </TouchableOpacity>
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.selectButton}

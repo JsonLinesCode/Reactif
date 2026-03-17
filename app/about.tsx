@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, router, useLocalSearchParams } from "expo-router";
+import { Stack, router } from "expo-router";
 import React from "react";
 import {
   ScrollView,
@@ -10,14 +10,15 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function About() {
-  const params = useLocalSearchParams();
-
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.safeArea}>
       <Stack.Screen
         options={{ title: "À Propos", headerBackTitle: "Retour" }}
       />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.container}
+      >
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backButton}
@@ -88,7 +89,10 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    // backgroundColor: '#F0F4F8', // Moved to SafeArea
+    paddingBottom: 24,
+  },
+  scrollView: {
+    flex: 1,
   },
   title: {
     fontSize: 24,

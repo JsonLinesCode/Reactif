@@ -232,5 +232,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     flex: 1,
     width: "100%",
+    gap: 8,
+    justifyContent: "center",
   },
 });
