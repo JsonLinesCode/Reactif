@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { sessionController } from "@/controllers/SessionController";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -18,7 +19,9 @@ interface ShockTimerProps {
   lastAnalysisTime?: number | null; // timestamp
   durationMinutes?: number;
   durationSeconds?: number;
+  warningSeconds?: number;
   shockCount?: number;
+  resetSignal?: number;
 }
 
 const AnimatedTouchableOpacity =
@@ -31,14 +34,18 @@ export default function ShockTimer({
   durationMinutes = 2, // Default 2 minutes
   lastAnalysisTime,
   durationSeconds = 120, // Default 2 minutes
+  warningSeconds = 10,
   shockCount = 0,
+  resetSignal,
 }: ShockTimerProps) {
   const { width } = useWindowDimensions();
-  const [timeLeft, setTimeLeft] = useState(durationMinutes);
+  // timeLeft is tracked in seconds; initialize from `durationSeconds`
+  const [timeLeft, setTimeLeft] = useState(durationSeconds);
   const [localStartTime, setLocalStartTime] = useState<number | null>(null);
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const soundPlayedRef = useRef(false);
+  const warningPlayedRef = useRef(false);
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
   const shockBounceAnim = useRef(new Animated.Value(1)).current;
@@ -62,70 +69,115 @@ export default function ShockTimer({
 
   // Determine the effective start time: either the local override or the prop
   const effectiveStartTime = localStartTime ?? lastShockTime;
-
-  const updateTimer = () => {
-    const now = Date.now();
-    const elapsed = effectiveStartTime ? Math.floor((now - effectiveStartTime) / 1000) : 0;
-    const remaining = Math.max(0, durationMinutes - elapsed);
-    setTimeLeft(remaining);
-  };
+  const [localShockCount, setLocalShockCount] = useState<number>(
+    shockCount || 0,
+  );
+  const [localLastAnalysisTime, setLocalLastAnalysisTime] = useState<
+    number | null
+  >(null);
+  const effectiveAnalysisStart = localLastAnalysisTime ?? lastAnalysisTime;
 
   useEffect(() => {
-    if (!effectiveStartTime && !lastAnalysisTime) {
-      setTimeLeft(0);
+    // If there's no start time for shock or analysis, show full duration
+    if (!effectiveStartTime && !effectiveAnalysisStart) {
+      setTimeLeft(durationSeconds);
       stopBlinking();
       scaleAnim.setValue(1);
       soundPlayedRef.current = false;
+      warningPlayedRef.current = false;
       return;
     }
 
     const updateTimer = () => {
       const now = Date.now();
       if (
-        lastAnalysisTime &&
-        (!lastShockTime || lastAnalysisTime > lastShockTime)
+        effectiveAnalysisStart &&
+        (!lastShockTime || effectiveAnalysisStart > lastShockTime)
       ) {
-        const elapsedAnalysis = Math.floor((now - lastAnalysisTime) / 1000);
+        const elapsedAnalysis = Math.floor(
+          (now - effectiveAnalysisStart) / 1000,
+        );
         const remainingAnalysis = Math.max(
           0,
           durationSeconds - elapsedAnalysis,
         );
         setTimeLeft(remainingAnalysis);
         return;
-      } else if (lastShockTime) {
-        const elapsedShock = Math.floor((now - lastShockTime) / 1000);
+      } else if (lastShockTime || effectiveStartTime) {
+        const shockBase = lastShockTime ?? effectiveStartTime;
+        if (!shockBase) {
+          setTimeLeft(durationSeconds);
+          return;
+        }
+        const elapsedShock = Math.floor((now - shockBase) / 1000);
         const remainingShock = Math.max(0, durationSeconds - elapsedShock);
         setTimeLeft(remainingShock);
         return;
       }
-      setTimeLeft(0);
+      setTimeLeft(durationSeconds);
     };
 
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [effectiveStartTime, lastAnalysisTime, durationMinutes]);
+  }, [
+    effectiveStartTime,
+    effectiveAnalysisStart,
+    durationSeconds,
+    lastShockTime,
+  ]);
 
   useEffect(() => {
-    // Sync local state if prop updates (e.g. shock delivered)
-    if (lastShockTime) {
-         setLocalStartTime(null);
-    }
-  }, [lastShockTime]);
+    // Sync local state if prop updates (e.g. shock delivered or cancelled)
+    setLocalStartTime(null);
+    // Keep localShockCount in sync with prop updates
+    setLocalShockCount(shockCount || 0);
+  }, [lastShockTime, shockCount]);
+
+  // Clear local analysis override when parent prop updates (e.g. after cancel)
+  useEffect(() => {
+    // Clear the local analysis override whenever parent analysis time changes
+    setLocalLastAnalysisTime(null);
+  }, [lastAnalysisTime]);
+
+  // Force-reset timer UI when cancel is triggered
+  useEffect(() => {
+    if (resetSignal === undefined) return;
+    setLocalStartTime(null);
+    setLocalLastAnalysisTime(null);
+    setTimeLeft(durationSeconds);
+    stopBlinking();
+    scaleAnim.setValue(1);
+    soundPlayedRef.current = false;
+    warningPlayedRef.current = false;
+  }, [resetSignal, durationSeconds]);
 
   useEffect(() => {
     if (timeLeft === 0) {
       if (!soundPlayedRef.current) {
+        sessionController.playSound("beep");
         soundPlayedRef.current = true;
       }
       startBlinking();
     } else {
+      if (
+        warningSeconds > 0 &&
+        timeLeft === warningSeconds &&
+        !warningPlayedRef.current
+      ) {
+        sessionController.playSound("beep");
+        warningPlayedRef.current = true;
+      }
+
       stopBlinking();
       if (timeLeft > 0) {
         soundPlayedRef.current = false;
       }
+      if (timeLeft > warningSeconds) {
+        warningPlayedRef.current = false;
+      }
     }
-  }, [timeLeft]);
+  }, [timeLeft, warningSeconds]);
 
   const startBlinking = () => {
     if (blinkingRef.current) return;
@@ -164,14 +216,26 @@ export default function ShockTimer({
   const handleShockPress = () => {
     stopBlinking();
     soundPlayedRef.current = false;
+    warningPlayedRef.current = false;
 
+    // Update local UI immediately: set shock start, increment badge, reset analysis timer
+    const now = Date.now();
+    setLocalStartTime(now);
+    setLocalShockCount((c) => c + 1);
+    setLocalLastAnalysisTime(null);
+    setTimeLeft(durationSeconds);
     onShock();
   };
 
   const handleAnalysisPress = () => {
     stopBlinking();
     soundPlayedRef.current = false;
+    warningPlayedRef.current = false;
 
+    // Set local analysis start so timer begins immediately
+    const now = Date.now();
+    setLocalLastAnalysisTime(now);
+    setTimeLeft(durationSeconds);
     onAnalysis();
   };
 
@@ -181,7 +245,7 @@ export default function ShockTimer({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const progress = timeLeft / durationMinutes;
+  const progress = durationSeconds > 0 ? timeLeft / durationSeconds : 0;
   const strokeDashoffset = circumference * (1 - progress);
 
   return (
@@ -204,7 +268,9 @@ export default function ShockTimer({
           }).start();
         }}
         activeOpacity={0.8}
-        style={{ transform: [{ scale: Animated.multiply(scaleAnim, shockBounceAnim) }] }}
+        style={{
+          transform: [{ scale: Animated.multiply(scaleAnim, shockBounceAnim) }],
+        }}
       >
         <View
           style={[
@@ -219,7 +285,7 @@ export default function ShockTimer({
           <Ionicons name="flash" size={32} color="black" />
           <Text style={styles.labelText}>CHOC</Text>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>{shockCount}</Text>
+            <Text style={styles.badgeText}>{localShockCount}</Text>
           </View>
         </View>
       </AnimatedTouchableOpacity>
@@ -244,7 +310,11 @@ export default function ShockTimer({
         }}
         style={[
           styles.svgContainer,
-          { transform: [{ scale: Animated.multiply(scaleAnim, analysisBounceAnim) }] },
+          {
+            transform: [
+              { scale: Animated.multiply(scaleAnim, analysisBounceAnim) },
+            ],
+          },
           { width: circleSize, height: circleSize },
         ]}
       >

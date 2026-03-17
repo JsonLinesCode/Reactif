@@ -1,4 +1,4 @@
-import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
@@ -12,9 +12,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { sessionStore } from "@/store/sessionStore";
 import { CprSession } from "@/models/session";
-import {router, Stack, useLocalSearchParams} from "expo-router";
+import { sessionStore } from "@/store/sessionStore";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 
 export default function CprEnd() {
   const params = useLocalSearchParams();
@@ -104,130 +104,139 @@ export default function CprEnd() {
 
   if (step === "racs") {
     return (
-        <SafeAreaView style={styles.container}>
-            <Stack.Screen options={{ headerShown: false }} />
-            <View style={styles.confirmContainer}>
-                <Text style={styles.title}>RACS</Text>
-                <Text style={styles.subtitle}>
-                    Retour d&#39;Activité Circulatoire Spontanée
-                </Text>
+      <SafeAreaView style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.confirmContainer}>
+          <Text style={styles.title}>RACS</Text>
+          <Text style={styles.subtitle}>
+            Retour d&#39;Activité Circulatoire Spontanée
+          </Text>
 
-                <View style={styles.buttonGroupConfirm}>
-                    <TouchableOpacity
-                        style={[styles.buttonConfirm, styles.resumeButton]}
-                        onPress={handleResume}
-                    >
-                        <Text style={styles.buttonText}>Reprendre la RCP</Text>
-                    </TouchableOpacity>
+          <View style={styles.buttonGroupConfirm}>
+            <TouchableOpacity
+              style={[styles.buttonConfirm, styles.resumeButton]}
+              onPress={handleResume}
+            >
+              <Text style={styles.buttonText}>Reprendre la RCP</Text>
+            </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={[styles.buttonConfirm, styles.deathButton]}
-                        onPress={handleDeath}
-                    >
-                        <Text style={styles.buttonText}>Décès</Text>
-                    </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.buttonConfirm, styles.deathButton]}
+              onPress={handleDeath}
+            >
+              <Text style={styles.buttonText}>Décès</Text>
+            </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={[styles.buttonConfirm, styles.stopButton]}
-                        onPress={handleConfirmEnd}
-                    >
-                        <Text style={styles.buttonText}>Arrêter définitivement</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </SafeAreaView>
+            <TouchableOpacity
+              style={[styles.buttonConfirm, styles.stopButton]}
+              onPress={handleConfirmEnd}
+            >
+              <Text style={styles.buttonText}>Arrêter définitivement</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
     );
   }
 
   const actions = getActions();
   const customEvents = getCustomEvents();
-  const summaryTitle = session?.events.find((e: any) => e.type === "cpr_end")?.details || "Fin de session";
+  const summaryTitle =
+    session?.events.find((e: any) => e.type === "cpr_end")?.details ||
+    "Fin de session";
 
   return (
     <SafeAreaView style={[styles.container, styles.summaryBackground]}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.summaryScroll}>
         <View style={styles.header}>
-            <Text style={styles.headerTitle}> {summaryTitle === "Décès" ? "Patient décédé" : "Résumé de la RCP"}</Text>
+          <Text style={styles.headerTitle}>
+            {" "}
+            {summaryTitle === "Décès" ? "Patient décédé" : "Résumé de la RCP"}
+          </Text>
         </View>
 
         {/* Stats Card */}
         <View style={styles.card}>
-            <View style={styles.cardRow}>
-                <FontAwesome5
-                    name="hourglass-half"
-                    size={18}
-                    color="black"
-                    style={styles.iconWidth}
-                />
-                <Text style={styles.cardText}>
-                    Durée totale: {getDurationString()}
-                </Text>
-            </View>
-            <View style={[styles.cardRow, { marginTop: 8 }]}>
-                <FontAwesome5
-                    name="bolt"
-                    size={18}
-                    color="black"
-                    style={styles.iconWidth}
-                />
-                <Text style={styles.cardText}>
-                    Chocs délivrés: {getShockCount()}
-                </Text>
-            </View>
+          <View style={styles.cardRow}>
+            <FontAwesome5
+              name="hourglass-half"
+              size={18}
+              color="black"
+              style={styles.iconWidth}
+            />
+            <Text style={styles.cardText}>
+              Durée totale: {getDurationString()}
+            </Text>
+          </View>
+          <View style={[styles.cardRow, { marginTop: 8 }]}>
+            <FontAwesome5
+              name="bolt"
+              size={18}
+              color="black"
+              style={styles.iconWidth}
+            />
+            <Text style={styles.cardText}>
+              Chocs délivrés: {getShockCount()}
+            </Text>
+          </View>
         </View>
 
         {/* Actions Card */}
         <View style={styles.card}>
-            <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardTitle}> Actions réalisées:</Text>
-            </View>
-            <View style={styles.divider} />
-            {actions.length === 0 ? (
-                <Text style={styles.emptyText}>Aucune action.</Text>
-            ) : (
-                actions.map((act, i) => (
-                    <Text key={i} style={styles.itemText}>
-                        • {act.type} ({new Date(act.timestamp).toLocaleTimeString()})
-                    </Text>
-                ))
-            )}
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardTitle}> Actions réalisées:</Text>
+          </View>
+          <View style={styles.divider} />
+          {actions.length === 0 ? (
+            <Text style={styles.emptyText}>Aucune action.</Text>
+          ) : (
+            actions.map((act, i) => (
+              <Text key={i} style={styles.itemText}>
+                • {act.type} ({new Date(act.timestamp).toLocaleTimeString()})
+              </Text>
+            ))
+          )}
         </View>
 
         {/* Events Card */}
         <View style={styles.card}>
-            <View style={styles.cardHeaderRow}>
-                <Text style={styles.cardTitle}> Événements saisis:</Text>
-            </View>
-            <View style={styles.divider} />
-            {customEvents.length === 0 ? (
-                <Text style={styles.emptyText}>Aucun événement.</Text>
-            ) : (
-                customEvents.map((evt: any, i: number) => (
-                  <Text key={i} style={styles.itemText}>
-                    • {String(evt.details)} ({new Date(evt.timestamp).toLocaleTimeString()})
-                  </Text>
-                ))
-            )}
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardTitle}> Événements saisis:</Text>
+          </View>
+          <View style={styles.divider} />
+          {customEvents.length === 0 ? (
+            <Text style={styles.emptyText}>Aucun événement.</Text>
+          ) : (
+            customEvents.map((evt: any, i: number) => (
+              <Text key={i} style={styles.itemText}>
+                • {String(evt.details)} (
+                {new Date(evt.timestamp).toLocaleTimeString()})
+              </Text>
+            ))
+          )}
         </View>
 
         {/* Buttons */}
         <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity
-                style={[styles.actionButton, styles.greyButton]}
-                onPress={handleExportPdf}
-            >
-                <FontAwesome5 name="file-pdf" size={18} color="#fff" />
-                <Text style={styles.actionButtonText}> Exporter en PDF</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.greyButton]}
+            onPress={handleExportPdf}
+          >
+            <FontAwesome5 name="file-pdf" size={18} color="#fff" />
+            <Text style={styles.actionButtonText}> Exporter en PDF</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-                style={[styles.actionButton, styles.greyButton]}
-                onPress={handleGoHome}
-            >
-                <FontAwesome5 name="home" size={18} color="#fff" />
-                <Text style={styles.actionButtonText}> Retour à l&apos;accueil</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.greyButton]}
+            onPress={handleGoHome}
+          >
+            <FontAwesome5 name="home" size={18} color="#fff" />
+            <Text style={styles.actionButtonText}>
+              {" "}
+              Retour à l&apos;accueil
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -236,7 +245,6 @@ export default function CprEnd() {
 
 // Simple HTML generator for the PDF
 function generateHtml(session: CprSession) {
-
   let cycleCount = 1;
   let eventsHtml = "";
 
@@ -244,10 +252,14 @@ function generateHtml(session: CprSession) {
   eventsHtml += `<tr class="cycle-header"><td colspan="3"><strong>RCP ${cycleCount}</strong></td></tr>`;
 
   session.events.forEach((evt: any) => {
-      const time = new Date(evt.timestamp).toLocaleTimeString();
-      const details = evt.details ? (typeof evt.details === "string" ? evt.details : JSON.stringify(evt.details)) : "-";
+    const time = new Date(evt.timestamp).toLocaleTimeString();
+    const details = evt.details
+      ? typeof evt.details === "string"
+        ? evt.details
+        : JSON.stringify(evt.details)
+      : "-";
 
-      eventsHtml += `
+    eventsHtml += `
         <tr>
             <td>${time}</td>
             <td>${evt.type}</td>
@@ -255,10 +267,10 @@ function generateHtml(session: CprSession) {
         </tr>
       `;
 
-        if (evt.type === "event" && String(details).toUpperCase() === "RACS") {
-          cycleCount++;
-          eventsHtml += `<tr class="cycle-header"><td colspan="3" style="background-color: #e6fffa; text-align: center; padding: 10px;"><strong>RCP ${cycleCount}</strong> (Reprise)</td></tr>`;
-        }
+    if (evt.type === "event" && String(details).toUpperCase() === "RACS") {
+      cycleCount++;
+      eventsHtml += `<tr class="cycle-header"><td colspan="3" style="background-color: #e6fffa; text-align: center; padding: 10px;"><strong>RCP ${cycleCount}</strong> (Reprise)</td></tr>`;
+    }
   });
 
   const pediatricInfo = session.pediatricData
@@ -387,15 +399,15 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cycleTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: '#0D47A1',
-      marginTop: 20,
-      marginBottom: 10,
-      marginLeft: 4,
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#0D47A1",
+    marginTop: 20,
+    marginBottom: 10,
+    marginLeft: 4,
   },
   cycleContainer: {
-      marginBottom: 10,
+    marginBottom: 10,
   },
 
   actionButtonsContainer: {

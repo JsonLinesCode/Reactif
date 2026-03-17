@@ -18,6 +18,7 @@ interface ActionProgressBarProps {
   onPress: () => void;
   lastActionTime?: number | null; // timestamp
   durationSeconds?: number;
+  warningSeconds?: number;
   subtitle?: string;
   soundSource?: any;
   resetSignal?: number;
@@ -34,13 +35,11 @@ export default function ActionProgressBar({
   onPress,
   lastActionTime,
   durationSeconds = 120, // Default 2 minutes
+  warningSeconds = 10,
   subtitle,
   soundSource,
   resetSignal,
 }: ActionProgressBarProps) {
-  // Debug: log count on render
-  // eslint-disable-next-line no-console
-  console.log("ActionProgressBar render count:", count, label);
   const [elapsed, setElapsed] = useState(0);
   const [width, setWidth] = useState(0);
   // Local fallback timestamp so UI can start countdown immediately on press
@@ -52,18 +51,16 @@ export default function ActionProgressBar({
   const bounceAnim = useRef(new Animated.Value(1)).current;
 
   const soundPlayedRef = useRef(false);
+  const warningPlayedRef = useRef(false);
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
     const effectiveLast = lastActionTime ?? localLastActionTime;
-    // Debugging: log incoming lastActionTime to ensure parent updates
-    // Remove or guard this in production.
-    // eslint-disable-next-line no-console
-    console.log("ActionProgressBar lastActionTime effective:", effectiveLast);
 
     if (!effectiveLast) {
       setElapsed(0);
       soundPlayedRef.current = false;
+      warningPlayedRef.current = false;
       stopBlinking();
       return;
     }
@@ -91,13 +88,12 @@ export default function ActionProgressBar({
     setLocalLastActionTime(null);
     setElapsed(0);
     soundPlayedRef.current = false;
+    warningPlayedRef.current = false;
     stopBlinking();
   }, [resetSignal]);
 
   const timeLeft = Math.max(0, durationSeconds - elapsed);
   const isExpired = elapsed >= durationSeconds;
-  const Warns = [15, 10, 5];
-
 
   useEffect(() => {
     if (isExpired) {
@@ -105,21 +101,29 @@ export default function ActionProgressBar({
         // delegate sound to SessionController (no audio in UI)
         sessionController.playSound("beep");
         triggerHaptic();
-       soundPlayedRef.current = true;
+        soundPlayedRef.current = true;
       }
       startBlinking();
     } else {
-      if (Warns.includes(timeLeft)) {
-        //playSoundWarning();
-      } else {
-        stopBlinking();
-        if (timeLeft > 0) {
-          soundPlayedRef.current = false; // Reset if time is added back for some reason, or user resets
-        }
+      if (
+        warningSeconds > 0 &&
+        timeLeft === warningSeconds &&
+        !warningPlayedRef.current
+      ) {
+        sessionController.playSound("beep");
+        warningPlayedRef.current = true;
+      }
+
+      stopBlinking();
+      if (timeLeft > 0) {
+        soundPlayedRef.current = false;
+      }
+      if (timeLeft > warningSeconds) {
+        warningPlayedRef.current = false;
       }
     }
-  }, [isExpired, timeLeft]);
-/*
+  }, [isExpired, timeLeft, warningSeconds]);
+  /*
   const playSoundWarning = async () => {
     try {
       const Warns = [15, 10, 5];
@@ -199,6 +203,7 @@ export default function ActionProgressBar({
     // Stop blinking immediately on press (as it resets the timer usually)
     stopBlinking();
     soundPlayedRef.current = false;
+    warningPlayedRef.current = false;
 
     // Trigger parent handler and update local timestamp so UI updates immediately
     onPress();

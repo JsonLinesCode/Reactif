@@ -18,8 +18,13 @@ import { useRouter } from "expo-router";
 
 export default function Cpr() {
   const router = useRouter();
-  const { shockDuration, cordaroneDuration, adrenalineDuration, loading } =
-    useCprSettings(); // load settings
+  const {
+    shockDuration,
+    cordaroneDuration,
+    adrenalineDuration,
+    warningSeconds,
+    loading,
+  } = useCprSettings(); // load settings
 
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
@@ -37,16 +42,6 @@ export default function Cpr() {
   const [, setControllerTick] = useState(0);
   useEffect(() => {
     const unsubscribe = sessionController.subscribe(() => {
-      // Debug: confirm controller notifications reach this component
-      // eslint-disable-next-line no-console
-      console.log("Cpr: sessionController.notify received");
-      // Debug: inspect session store contents
-      // eslint-disable-next-line no-console
-      console.log(
-        "Cpr: sessionStore events:",
-        sessionStore.getSession()?.events?.length,
-        sessionStore.getSession()?.events?.slice(-3),
-      );
       setControllerTick((t) => t + 1);
     });
     return () => {
@@ -135,7 +130,9 @@ export default function Cpr() {
     const unsubscribe = sessionController.subscribe(() => {
       updateFromStore();
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+    };
   }, []);
   /*
     const now = frameInfo.timestamp;
@@ -197,10 +194,6 @@ export default function Cpr() {
   const cordaroneCount = cordaroneCountState;
   const adrenalineCount = adrenalineCountState;
 
-  // Debug: log counts on each render
-  // eslint-disable-next-line no-console
-  console.log("Cpr render counts:", { cordaroneCount, adrenalineCount });
-
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [cancelResetSignal, setCancelResetSignal] = useState(0);
@@ -242,6 +235,7 @@ export default function Cpr() {
             durationMinutes={shockDuration}
             shockCount={shockCount}
             resetSignal={cancelResetSignal}
+            warningSeconds={warningSeconds}
           />
         </View>
 
@@ -258,6 +252,7 @@ export default function Cpr() {
             subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
             soundSource={require("@/assets/audio/beep.wav")}
             resetSignal={cancelResetSignal}
+            warningSeconds={warningSeconds}
           />
 
           <ActionProgressBar
@@ -271,6 +266,7 @@ export default function Cpr() {
             subtitle={doses.adrenaline ? `${doses.adrenaline} mg` : undefined}
             soundSource={require("@/assets/audio/beep.wav")}
             resetSignal={cancelResetSignal}
+            warningSeconds={warningSeconds}
           />
         </View>
 

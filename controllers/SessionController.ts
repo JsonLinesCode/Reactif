@@ -26,8 +26,8 @@ export class SessionController {
     } else {
       sessionStore.logEvent(log.type, { timestamp: log.timestamp });
     }
-    // Play a notification sound for non-event log types
-    if (log.type !== "event") {
+    // Play a notification sound only for critical types (shock/analysis)
+    if (log.type === "shock" || log.type === "analysis") {
       void this.playSound("beep");
     }
     this.notify();

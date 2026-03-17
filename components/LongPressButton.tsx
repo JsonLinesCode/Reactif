@@ -47,12 +47,15 @@ export default function LongPressButton({
   const svgSize = (ringRadius + strokeWidth) * 2;
 
   const handleComplete = () => {
-    console.log("Handle Complete Triggered");
     if (Platform.OS !== "web") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     // Make sure we stop pressing state so subsequent logic doesn't re-trigger
     isPressing.value = false;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     onComplete();
   };
 

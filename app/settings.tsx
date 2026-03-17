@@ -1,4 +1,4 @@
-import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -31,6 +31,7 @@ export default function SettingsScreen() {
     shockDuration,
     //cordaroneDuration,
     adrenalineDuration,
+    warningSeconds,
     updateSettings,
     resetSettings,
     loading,
@@ -38,13 +39,15 @@ export default function SettingsScreen() {
 
   const [shockInput, setShockInput] = useState("");
   const [adrenalineInput, setAdrenalineInput] = useState("");
+  const [warningInput, setWarningInput] = useState("");
 
   useEffect(() => {
     if (!loading) {
       setShockInput(Math.round(shockDuration / 60).toString());
       setAdrenalineInput(Math.round(adrenalineDuration / 60).toString());
+      setWarningInput(warningSeconds.toString());
     }
-  }, [loading, shockDuration, adrenalineDuration]);
+  }, [loading, shockDuration, adrenalineDuration, warningSeconds]);
 
   if (loading) {
     return (
@@ -61,14 +64,18 @@ export default function SettingsScreen() {
     );
   }
 
-  const handleChange = (
-    key: "shock" | "adrenaline", // The cordarone doesn't need a timer change, always 2 minutes
-    text: string
-  ) => {
+  const handleDurationChange = (key: "shock" | "adrenaline", text: string) => {
     const value = parseFloat(text);
     if (!isNaN(value)) {
       // Convert minutes to seconds for storage
       updateSettings(key, Math.round(value * 60));
+    }
+  };
+
+  const handleWarningChange = (text: string) => {
+    const value = parseInt(text, 10);
+    if (!isNaN(value)) {
+      updateSettings("warning", value);
     }
   };
 
@@ -86,7 +93,6 @@ export default function SettingsScreen() {
   };
   const sectionTitleColor = { color: isDark ? "#ddd" : "#333" };
   const labelColor = { color: isDark ? "#aaa" : "#555" };
-
 
   return (
     <SafeAreaView style={[styles.container, bgStyle]}>
@@ -124,7 +130,7 @@ export default function SettingsScreen() {
           </View>
           <TouchableOpacity
             style={styles.validationButton}
-            onPress={() => handleChange("shock", shockInput)}
+            onPress={() => handleDurationChange("shock", shockInput)}
           >
             <FontAwesome5 name="check-square" size={16} color="#fff" />
           </TouchableOpacity>
@@ -158,7 +164,26 @@ export default function SettingsScreen() {
           </View>
           <TouchableOpacity
             style={styles.validationButton}
-            onPress={() => handleChange("adrenaline", adrenalineInput)}
+            onPress={() => handleDurationChange("adrenaline", adrenalineInput)}
+          >
+            <FontAwesome5 name="check-square" size={16} color="#fff" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={[styles.label, labelColor]}>Alerte avant fin</Text>
+          <View style={[styles.inputWrapper, inputBgStyle]}>
+            <TextInput
+              style={[styles.input, textStyle]}
+              keyboardType="numeric"
+              value={warningInput}
+              onChangeText={setWarningInput}
+            />
+            <Text style={styles.unit}>sec</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.validationButton}
+            onPress={() => handleWarningChange(warningInput)}
           >
             <FontAwesome5 name="check-square" size={16} color="#fff" />
           </TouchableOpacity>
@@ -169,7 +194,7 @@ export default function SettingsScreen() {
         >
           Thème de l&#39;application
         </Text>
-        <View style={{ alignItems: 'center', marginBottom: 20 }}>
+        <View style={{ alignItems: "center", marginBottom: 20 }}>
           <CustomSwitch
             selectionMode={theme === "light" ? 1 : 2}
             roundCorner={true}
@@ -259,7 +284,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#28a745",
     borderRadius: 4,
     alignItems: "center",
-    marginTop: 8
+    marginTop: 8,
   },
   unit: {
     fontSize: 16,
@@ -273,7 +298,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
-   switchThemeButtonText: {
+  switchThemeButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
