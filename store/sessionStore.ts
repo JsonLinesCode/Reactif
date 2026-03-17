@@ -63,7 +63,6 @@ class SessionStore {
       };
       this.currentSession.events.push(newEvent);
       this.notifyListeners();
-      console.log(`[SessionStore] Event logged: ${type}`, details);
     }
   }
 

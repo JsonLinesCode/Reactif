@@ -29,7 +29,6 @@ export default function SettingsScreen() {
 
   const {
     shockDuration,
-    //cordaroneDuration,
     adrenalineDuration,
     warningSeconds,
     updateSettings,
@@ -136,19 +135,6 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/*  <View style={styles.inputGroup}>   Cordarone doesn't need a timer change, always 2 minutes
-          <Text style={[styles.label, labelColor]}>Cordarone (Intervalle)</Text>
-          <View style={[styles.inputWrapper, inputBgStyle]}>
-            <TextInput
-              style={[styles.input, textStyle]}
-              keyboardType="numeric"
-              value={cordaroneDuration.toString()}
-              onChangeText={(text) => handleChange("cordarone", text)}
-            />
-            <Text style={styles.unit}>sec</Text>
-          </View>
-        </View>
-*/}
         <View style={styles.inputGroup}>
           <Text style={[styles.label, labelColor]}>
             Adrénaline (Intervalle)
@@ -290,18 +276,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#888",
     marginLeft: 8,
-  },
-  switchThemeButton: {
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: "#007BFF",
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  switchThemeButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
   },
   resetButton: {
     marginTop: 40,

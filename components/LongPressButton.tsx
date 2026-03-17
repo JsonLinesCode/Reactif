@@ -171,7 +171,7 @@ export default function LongPressButton({
           </Svg>
         </View>
       </View>
-      <Text style={styles.label}>Annuler</Text>
+      <Text style={styles.label}>{label}</Text>
     </View>
   );
 }

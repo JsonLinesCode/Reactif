@@ -14,13 +14,12 @@ interface ActionProgressBarProps {
   label: string;
   count: number;
   color: string;
-  icon?: React.ReactElement; // Should be a valid element we can clone
+  icon?: React.ReactElement;
   onPress: () => void;
-  lastActionTime?: number | null; // timestamp
+  lastActionTime?: number | null;
   durationSeconds?: number;
   warningSeconds?: number;
   subtitle?: string;
-  soundSource?: any;
   resetSignal?: number;
 }
 
@@ -34,15 +33,13 @@ export default function ActionProgressBar({
   icon,
   onPress,
   lastActionTime,
-  durationSeconds = 120, // Default 2 minutes
+  durationSeconds = 120,
   warningSeconds = 10,
   subtitle,
-  soundSource,
   resetSignal,
 }: ActionProgressBarProps) {
   const [elapsed, setElapsed] = useState(0);
   const [width, setWidth] = useState(0);
-  // Local fallback timestamp so UI can start countdown immediately on press
   const [localLastActionTime, setLocalLastActionTime] = useState<number | null>(
     null,
   );
@@ -76,9 +73,7 @@ export default function ActionProgressBar({
     return () => clearInterval(interval);
   }, [lastActionTime, localLastActionTime]);
 
-  // If parent provides an authoritative timestamp, clear local fallback
   useEffect(() => {
-    // Clear any local fallback whenever the parent `lastActionTime` changes
     setLocalLastActionTime(null);
   }, [lastActionTime]);
 
@@ -98,7 +93,6 @@ export default function ActionProgressBar({
   useEffect(() => {
     if (isExpired) {
       if (!soundPlayedRef.current) {
-        // delegate sound to SessionController (no audio in UI)
         sessionController.playSound("beep");
         triggerHaptic();
         soundPlayedRef.current = true;
@@ -123,30 +117,7 @@ export default function ActionProgressBar({
       }
     }
   }, [isExpired, timeLeft, warningSeconds]);
-  /*
-  const playSoundWarning = async () => {
-    try {
-      const Warns = [15, 10, 5];
-      await Audio.Sound.createAsync(
-          soundSource || require("../assets/audio/beep.wav"),
-          { shouldPlay: true, rate: 1.5 })// Higher pitch
-      } catch (error) {
-          console.log("Error playing sound", error);
-    }
-  };
 
-  const playSound  = async ()  => {
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-          soundSource || require("../assets/audio/beep.wav"),
-      );
-      await sound.playAsync();
-    } catch (error) {
-      console.log("Error playing sound", error);
-    }
-  };
-*/
-  // sound playback delegated to SessionController.playSound
   const triggerHaptic = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
   };
@@ -186,7 +157,6 @@ export default function ActionProgressBar({
   };
 
   const handlePress = () => {
-    // Bounce on tap
     Animated.sequence([
       Animated.timing(blinkAnim, {
         toValue: 0.95,
@@ -200,12 +170,10 @@ export default function ActionProgressBar({
       }),
     ]).start();
 
-    // Stop blinking immediately on press (as it resets the timer usually)
     stopBlinking();
     soundPlayedRef.current = false;
     warningPlayedRef.current = false;
 
-    // Trigger parent handler and update local timestamp so UI updates immediately
     onPress();
     setLocalLastActionTime(Date.now());
   };
@@ -216,7 +184,7 @@ export default function ActionProgressBar({
   );
 
   return (
-    <View style={[styles.buttonContainer]}>
+    <View style={styles.buttonContainer}>
       <AnimatedTouchableOpacity
         onPressIn={() => {
           Animated.timing(bounceAnim, {

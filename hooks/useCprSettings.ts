@@ -32,9 +32,7 @@ export function useCprSettings(): CprSettings {
   const [adrenalineDuration, setAdrenalineDuration] = useState(
     DEFAULT_ADRENALINE_DURATION,
   );
-  const [warningSeconds, setWarningSeconds] = useState(
-    DEFAULT_WARNING_SECONDS,
-  );
+  const [warningSeconds, setWarningSeconds] = useState(DEFAULT_WARNING_SECONDS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,7 +59,10 @@ export function useCprSettings(): CprSettings {
     }
   };
 
-  const updateSettings = async (key: "shock" | "adrenaline" | "warning", value: number) => {
+  const updateSettings = async (
+    key: "shock" | "adrenaline" | "warning",
+    value: number,
+  ) => {
     try {
       if (key === "shock") {
         setShockDuration(value);

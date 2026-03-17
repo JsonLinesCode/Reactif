@@ -1,5 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
 import { sessionController } from "@/controllers/SessionController";
+import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -15,9 +15,8 @@ import Svg, { Circle, G } from "react-native-svg";
 interface ShockTimerProps {
   onShock: () => void;
   onAnalysis: () => void;
-  lastShockTime?: number | null; // timestamp
-  lastAnalysisTime?: number | null; // timestamp
-  durationMinutes?: number;
+  lastShockTime?: number | null;
+  lastAnalysisTime?: number | null;
   durationSeconds?: number;
   warningSeconds?: number;
   shockCount?: number;
@@ -31,15 +30,13 @@ export default function ShockTimer({
   onShock,
   onAnalysis,
   lastShockTime,
-  durationMinutes = 2, // Default 2 minutes
   lastAnalysisTime,
-  durationSeconds = 120, // Default 2 minutes
+  durationSeconds = 120,
   warningSeconds = 10,
   shockCount = 0,
   resetSignal,
 }: ShockTimerProps) {
   const { width } = useWindowDimensions();
-  // timeLeft is tracked in seconds; initialize from `durationSeconds`
   const [timeLeft, setTimeLeft] = useState(durationSeconds);
   const [localStartTime, setLocalStartTime] = useState<number | null>(null);
 
@@ -51,23 +48,18 @@ export default function ShockTimer({
   const shockBounceAnim = useRef(new Animated.Value(1)).current;
   const analysisBounceAnim = useRef(new Animated.Value(1)).current;
 
-  // Dynamic Sizing
-  // available width = screen width - parent padding (32) - component padding (20) - gap (10)
   const availableWidth = width - 32 - 20;
-  const circleSize = Math.min((availableWidth - 20) / 2, 170); // Max 170, but shrink if needed
+  const circleSize = Math.min((availableWidth - 20) / 2, 170);
 
-  // SVG Config
   const size = circleSize;
   const strokeWidth = 12;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const center = size / 2;
 
-  // Inner content size
   const innerSize = size - 45;
   const innerRadius = innerSize / 2;
 
-  // Determine the effective start time: either the local override or the prop
   const effectiveStartTime = localStartTime ?? lastShockTime;
   const [localShockCount, setLocalShockCount] = useState<number>(
     shockCount || 0,
@@ -134,9 +126,7 @@ export default function ShockTimer({
     setLocalShockCount(shockCount || 0);
   }, [lastShockTime, shockCount]);
 
-  // Clear local analysis override when parent prop updates (e.g. after cancel)
   useEffect(() => {
-    // Clear the local analysis override whenever parent analysis time changes
     setLocalLastAnalysisTime(null);
   }, [lastAnalysisTime]);
 
@@ -218,7 +208,6 @@ export default function ShockTimer({
     soundPlayedRef.current = false;
     warningPlayedRef.current = false;
 
-    // Update local UI immediately: set shock start, increment badge, reset analysis timer
     const now = Date.now();
     setLocalStartTime(now);
     setLocalShockCount((c) => c + 1);
@@ -232,7 +221,6 @@ export default function ShockTimer({
     soundPlayedRef.current = false;
     warningPlayedRef.current = false;
 
-    // Set local analysis start so timer begins immediately
     const now = Date.now();
     setLocalLastAnalysisTime(now);
     setTimeLeft(durationSeconds);
@@ -250,7 +238,6 @@ export default function ShockTimer({
 
   return (
     <View style={styles.container}>
-      {/* Circle 1: Choc Button with Counter */}
       <AnimatedTouchableOpacity
         onPress={handleShockPress}
         onPressIn={() => {
@@ -290,7 +277,6 @@ export default function ShockTimer({
         </View>
       </AnimatedTouchableOpacity>
 
-      {/* Circle 2: Analyse Timer */}
       <AnimatedTouchableOpacity
         onPress={handleAnalysisPress}
         activeOpacity={0.8}
@@ -386,12 +372,6 @@ const styles = StyleSheet.create({
     borderWidth: 12,
     borderColor: "#FF5252", // Outline color for button
   },
-  analysisContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
   svgContainer: {
     position: "relative",
     justifyContent: "center",
