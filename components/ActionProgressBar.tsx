@@ -1,4 +1,5 @@
 import { sessionController } from "@/controllers/SessionController";
+import { formatSecondsToClock } from "@/utils/sessionUtils";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -188,6 +189,7 @@ export default function ActionProgressBar({
     100,
     Math.max(0, (timeLeft / durationSeconds) * 100),
   );
+  const timeLeftText = formatSecondsToClock(timeLeft);
 
   return (
     <View style={styles.buttonContainer}>
@@ -225,9 +227,9 @@ export default function ActionProgressBar({
             {icon && React.cloneElement(icon, { color: "#fff" } as any)}
             <View style={styles.labelContainer}>
               <Text style={[styles.label, { color }]}>{label}</Text>
-              {subtitle && (
-                <Text style={[styles.subtitle, { color }]}>{subtitle}</Text>
-              )}
+              <Text style={[styles.subtitle, { color }]}> 
+                {subtitle ? `${subtitle} - ${timeLeftText}` : timeLeftText}
+              </Text>
             </View>
           </View>
         </View>
@@ -247,11 +249,9 @@ export default function ActionProgressBar({
             {icon && React.cloneElement(icon, { color: "#fff" } as any)}
             <View style={styles.labelContainer}>
               <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
-              {subtitle && (
-                <Text style={[styles.subtitle, { color: "#fff" }]}>
-                  {subtitle}
-                </Text>
-              )}
+              <Text style={[styles.subtitle, { color: "#fff" }]}> 
+                {subtitle ? `${subtitle} - ${timeLeftText}` : timeLeftText}
+              </Text>
             </View>
           </View>
         </View>

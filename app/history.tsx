@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
 import {
@@ -13,8 +13,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CprEvent, CprSession } from "@/models/session";
+import { CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
+import { generateSessionHtml } from "@/utils/sessionUtils";
 
 export default function History() {
   const [sessions, setSessions] = useState<CprSession[]>([]);
@@ -36,7 +37,7 @@ export default function History() {
   }, []);
 
   const handleExport = async (session: CprSession) => {
-    const html = generateHtml(session);
+    const html = generateSessionHtml(session);
     try {
       const { uri } = await Print.printToFileAsync({ html });
       await Sharing.shareAsync(uri, {
@@ -96,7 +97,10 @@ export default function History() {
           if (isSelectionMode) {
             toggleSessionSelection(item.id);
           } else {
-            handleExport(item);
+            router.push({
+              pathname: "/historyDetail",
+              params: { sessionId: item.id },
+            });
           }
         }}
         activeOpacity={isSelectionMode ? 0.7 : 1}
@@ -193,65 +197,6 @@ export default function History() {
       )}
     </SafeAreaView>
   );
-}
-
-// Reusing same HTML generator logic (could be extracted to utils)
-function generateHtml(session: CprSession) {
-  const eventsHtml = session.events
-    .map(
-      (evt: CprEvent) => `
-        <tr>
-            <td>${new Date(evt.timestamp).toLocaleTimeString()}</td>
-            <td>${evt.type}</td>
-            <td>${evt.details ? (typeof evt.details === "string" ? evt.details : JSON.stringify(evt.details)) : "-"}</td>
-        </tr>
-    `,
-    )
-    .join("");
-
-  const pediatricInfo = session.pediatricData
-    ? `<p><strong>Patient:</strong> Enfant (${session.pediatricData.ageValue} ${session.pediatricData.ageMode})</p>`
-    : `<p><strong>Patient:</strong> Adulte (Standard)</p>`;
-
-  return `
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
-        <style>
-            body { font-family: Helvetica, Arial, sans-serif; padding: 20px; }
-            h1 { text-align: center; color: #333; }
-            .info { margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-        </style>
-      </head>
-      <body>
-        <h1>Rapport de Réanimation</h1>
-        <div class="info">
-            <p><strong>Date:</strong> ${new Date(session.startTime).toLocaleDateString()}</p>
-            <p><strong>Heure début:</strong> ${new Date(session.startTime).toLocaleTimeString()}</p>
-            ${session.endTime ? `<p><strong>Heure fin:</strong> ${new Date(session.endTime).toLocaleTimeString()}</p>` : ""}
-            ${pediatricInfo}
-            <p><strong>ID Session:</strong> ${session.id}</p>
-        </div>
-        
-        <h2>Journal des événements</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Heure</th>
-                    <th>Type</th>
-                    <th>Détails</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${eventsHtml}
-            </tbody>
-        </table>
-      </body>
-    </html>
-  `;
 }
 
 const styles = StyleSheet.create({
