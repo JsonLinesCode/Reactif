@@ -30,6 +30,7 @@ export default function Cpr() {
     cordaroneDuration,
     adrenalineDuration,
     warningSeconds,
+    endButtonShortTap,
   } = useCprSettings();
 
   // ----- Metronome State & Logic -----
@@ -85,9 +86,39 @@ export default function Cpr() {
 
   // metronomeController handles timing and sound
 
+  const getLastResumeTimestamp = () => {
+    const events = sessionStore.getSession()?.events || [];
+    for (let i = events.length - 1; i >= 0; i -= 1) {
+      const event = events[i];
+      if (
+        event.type === "event" &&
+        String(event.details || "").toUpperCase() === "RESUME"
+      ) {
+        return event.timestamp;
+      }
+    }
+    return null;
+  };
+
+  const getLastTimeSinceResume = (
+    type: "shock" | "analysis" | "cordarone" | "adrenaline",
+  ) => {
+    const events = sessionStore.getSession()?.events || [];
+    const resumeTs = getLastResumeTimestamp();
+    for (let i = events.length - 1; i >= 0; i -= 1) {
+      const event = events[i];
+      if (event.type !== type) continue;
+      if (resumeTs && event.timestamp <= resumeTs) {
+        return null;
+      }
+      return event.timestamp;
+    }
+    return null;
+  };
+
   const shockCount = sessionController.getCount("shock");
-  const lastShockTime = sessionController.getLastTime("shock");
-  const lastAnalysisTime = sessionController.getLastTime("analysis");
+  const lastShockTime = getLastTimeSinceResume("shock");
+  const lastAnalysisTime = getLastTimeSinceResume("analysis");
   // Local UI state for medication counts and last timestamps so React updates reliably
   const [cordaroneCountState, setCordaroneCountState] = useState(
     sessionController.getCount("cordarone"),
@@ -97,25 +128,36 @@ export default function Cpr() {
   );
   const [lastCordaroneTimeState, setLastCordaroneTimeState] = useState<
     number | null
-  >(sessionController.getLastTime("cordarone"));
+  >(getLastTimeSinceResume("cordarone"));
   const [lastAdrenalineTimeState, setLastAdrenalineTimeState] = useState<
     number | null
-  >(sessionController.getLastTime("adrenaline"));
+  >(getLastTimeSinceResume("adrenaline"));
 
   // Keep these derived values in sync with the session store when controller notifies
   useEffect(() => {
     const updateFromStore = () => {
       const events = sessionStore.getSession()?.events || [];
+      const resumeTs = getLastResumeTimestamp();
       const cordEvents = events.filter((e) => e.type === "cordarone");
       const adrEvents = events.filter((e) => e.type === "adrenaline");
+      const cordEventsSinceResume = resumeTs
+        ? cordEvents.filter((e) => e.timestamp > resumeTs)
+        : cordEvents;
+      const adrEventsSinceResume = resumeTs
+        ? adrEvents.filter((e) => e.timestamp > resumeTs)
+        : adrEvents;
 
       setCordaroneCountState(cordEvents.length);
       setAdrenalineCountState(adrEvents.length);
       setLastCordaroneTimeState(
-        cordEvents.length ? cordEvents[cordEvents.length - 1].timestamp : null,
+        cordEventsSinceResume.length
+          ? cordEventsSinceResume[cordEventsSinceResume.length - 1].timestamp
+          : null,
       );
       setLastAdrenalineTimeState(
-        adrEvents.length ? adrEvents[adrEvents.length - 1].timestamp : null,
+        adrEventsSinceResume.length
+          ? adrEventsSinceResume[adrEventsSinceResume.length - 1].timestamp
+          : null,
       );
     };
 
@@ -141,6 +183,9 @@ export default function Cpr() {
     });
 
   const handleEnd = () => {
+    setIsMuted(true);
+    metronomeController.setMuted(true);
+    void sessionController.stopAllSounds();
     // Navigate to End Cpr flow
     router.push("/cprEndFirstPage" as any);
   };
@@ -230,6 +275,7 @@ export default function Cpr() {
           onEnd={handleEnd}
           //onEvent={handleEvent}
           onCancel={handleCancel}
+          useShortTapEndButton={endButtonShortTap}
         />
 
         {/* Metronome */}

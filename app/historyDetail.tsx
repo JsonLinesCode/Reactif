@@ -28,7 +28,8 @@ export default function HistoryDetail() {
   useEffect(() => {
     const loadSession = () => {
       const id = typeof sessionId === "string" ? sessionId : "";
-      const found = sessionStore.getHistory().find((item) => item.id === id) || null;
+      const found =
+        sessionStore.getHistory().find((item) => item.id === id) || null;
       setSession(found);
     };
 
@@ -44,14 +45,17 @@ export default function HistoryDetail() {
 
   const shockCount = useMemo(() => {
     if (!session) return 0;
-    return session.events.filter((evt: CprEvent) => evt.type === "shock").length;
+    return session.events.filter((evt: CprEvent) => evt.type === "shock")
+      .length;
   }, [session]);
 
   const handleExport = async () => {
     if (!session) return;
 
     try {
-      const { uri } = await Print.printToFileAsync({ html: generateSessionHtml(session) });
+      const { uri } = await Print.printToFileAsync({
+        html: generateSessionHtml(session),
+      });
       await Sharing.shareAsync(uri, {
         UTI: ".pdf",
         mimeType: "application/pdf",
@@ -68,7 +72,10 @@ export default function HistoryDetail() {
         <Stack.Screen options={{ title: "Detail session" }} />
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Session introuvable.</Text>
-          <TouchableOpacity style={styles.primaryButton} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => router.back()}
+          >
             <Text style={styles.primaryButtonText}>Retour</Text>
           </TouchableOpacity>
         </View>
@@ -85,8 +92,12 @@ export default function HistoryDetail() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.headerCard}>
           <Text style={styles.headerTitle}>Session CPR complete</Text>
-          <Text style={styles.headerLine}>Date: {startDate.toLocaleDateString()}</Text>
-          <Text style={styles.headerLine}>Debut: {startDate.toLocaleTimeString()}</Text>
+          <Text style={styles.headerLine}>
+            Date: {startDate.toLocaleDateString()}
+          </Text>
+          <Text style={styles.headerLine}>
+            Debut: {startDate.toLocaleTimeString()}
+          </Text>
           <Text style={styles.headerLine}>
             Fin: {endDate ? endDate.toLocaleTimeString() : "Session en cours"}
           </Text>
@@ -97,13 +108,17 @@ export default function HistoryDetail() {
             Duree: {formatDuration(session.startTime, session.endTime)}
           </Text>
           <Text style={styles.headerLine}>Chocs: {shockCount}</Text>
-          <Text style={styles.headerLine}>Evenements: {session.events.length}</Text>
+          <Text style={styles.headerLine}>
+            Evenements: {session.events.length}
+          </Text>
         </View>
 
         <View style={styles.timelineCard}>
           <Text style={styles.sectionTitle}>Chronologie complete</Text>
           {sortedEvents.length === 0 ? (
-            <Text style={styles.emptyTimeline}>Aucun evenement enregistre.</Text>
+            <Text style={styles.emptyTimeline}>
+              Aucun evenement enregistre.
+            </Text>
           ) : (
             sortedEvents.map((event, index) => (
               <View key={`${event.timestamp}-${index}`} style={styles.eventRow}>
@@ -113,8 +128,12 @@ export default function HistoryDetail() {
                   </Text>
                 </View>
                 <View style={styles.eventContent}>
-                  <Text style={styles.eventType}>{formatEventType(event.type)}</Text>
-                  <Text style={styles.eventDetails}>{formatEventDetails(event.details)}</Text>
+                  <Text style={styles.eventType}>
+                    {formatEventType(event.type)}
+                  </Text>
+                  <Text style={styles.eventDetails}>
+                    {formatEventDetails(event.details)}
+                  </Text>
                 </View>
               </View>
             ))
@@ -123,7 +142,10 @@ export default function HistoryDetail() {
       </ScrollView>
 
       <View style={styles.actionBar}>
-        <TouchableOpacity style={styles.secondaryButton} onPress={() => router.back()}>
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => router.back()}
+        >
           <Ionicons name="arrow-back" size={18} color="#334155" />
           <Text style={styles.secondaryButtonText}>Retour</Text>
         </TouchableOpacity>

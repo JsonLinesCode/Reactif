@@ -227,7 +227,7 @@ export default function ActionProgressBar({
             {icon && React.cloneElement(icon, { color: "#fff" } as any)}
             <View style={styles.labelContainer}>
               <Text style={[styles.label, { color }]}>{label}</Text>
-              <Text style={[styles.subtitle, { color }]}> 
+              <Text style={[styles.subtitle, { color }]}>
                 {subtitle ? `${subtitle} - ${timeLeftText}` : timeLeftText}
               </Text>
             </View>
@@ -249,7 +249,7 @@ export default function ActionProgressBar({
             {icon && React.cloneElement(icon, { color: "#fff" } as any)}
             <View style={styles.labelContainer}>
               <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
-              <Text style={[styles.subtitle, { color: "#fff" }]}> 
+              <Text style={[styles.subtitle, { color: "#fff" }]}>
                 {subtitle ? `${subtitle} - ${timeLeftText}` : timeLeftText}
               </Text>
             </View>

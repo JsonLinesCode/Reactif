@@ -5,6 +5,7 @@ const STORAGE_KEY_SHOCK = "@cpr_settings_shock_duration";
 const STORAGE_KEY_CORDARONE = "@cpr_settings_cordarone_duration";
 const STORAGE_KEY_ADRENALINE = "@cpr_settings_adrenaline_duration";
 const STORAGE_KEY_WARNING = "@cpr_settings_warning_seconds";
+const STORAGE_KEY_END_BUTTON_SHORT_TAP = "@cpr_settings_end_button_short_tap";
 
 export const DEFAULT_SHOCK_DURATION = 120;
 export const DEFAULT_CORDARONE_DURATION = 240;
@@ -16,11 +17,13 @@ export interface CprSettings {
   cordaroneDuration: number;
   adrenalineDuration: number;
   warningSeconds: number;
+  endButtonShortTap: boolean;
   loading: boolean;
   updateSettings: (
     key: "shock" | "adrenaline" | "warning",
     value: number,
   ) => Promise<void>;
+  setEndButtonShortTap: (enabled: boolean) => Promise<void>;
   resetSettings: () => Promise<void>;
 }
 
@@ -33,6 +36,7 @@ export function useCprSettings(): CprSettings {
     DEFAULT_ADRENALINE_DURATION,
   );
   const [warningSeconds, setWarningSeconds] = useState(DEFAULT_WARNING_SECONDS);
+  const [endButtonShortTap, setEndButtonShortTapState] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,21 +45,35 @@ export function useCprSettings(): CprSettings {
 
   const loadSettings = async () => {
     try {
-      const [shock, cordarone, adrenaline, warning] = await Promise.all([
+      const [shock, adrenaline, warning, endButtonMode] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEY_SHOCK),
-        AsyncStorage.getItem(STORAGE_KEY_CORDARONE),
         AsyncStorage.getItem(STORAGE_KEY_ADRENALINE),
         AsyncStorage.getItem(STORAGE_KEY_WARNING),
+        AsyncStorage.getItem(STORAGE_KEY_END_BUTTON_SHORT_TAP),
       ]);
 
       if (shock) setShockDuration(parseInt(shock, 10));
-      if (cordarone) setCordaroneDuration(parseInt(cordarone, 10));
+      // Cordarone is fixed to 4 minutes by default.
+      setCordaroneDuration(DEFAULT_CORDARONE_DURATION);
       if (adrenaline) setAdrenalineDuration(parseInt(adrenaline, 10));
       if (warning) setWarningSeconds(parseInt(warning, 10));
+      if (endButtonMode) setEndButtonShortTapState(endButtonMode === "true");
     } catch (e) {
       console.error("Failed to load settings", e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const setEndButtonShortTap = async (enabled: boolean) => {
+    try {
+      setEndButtonShortTapState(enabled);
+      await AsyncStorage.setItem(
+        STORAGE_KEY_END_BUTTON_SHORT_TAP,
+        enabled ? "true" : "false",
+      );
+    } catch (e) {
+      console.error("Failed to save end button mode", e);
     }
   };
 
@@ -87,11 +105,13 @@ export function useCprSettings(): CprSettings {
         STORAGE_KEY_CORDARONE,
         STORAGE_KEY_ADRENALINE,
         STORAGE_KEY_WARNING,
+        STORAGE_KEY_END_BUTTON_SHORT_TAP,
       ]);
       setShockDuration(DEFAULT_SHOCK_DURATION);
       setCordaroneDuration(DEFAULT_CORDARONE_DURATION);
       setAdrenalineDuration(DEFAULT_ADRENALINE_DURATION);
       setWarningSeconds(DEFAULT_WARNING_SECONDS);
+      setEndButtonShortTapState(false);
     } catch (e) {
       console.error("Failed to reset settings", e);
     }
@@ -102,8 +122,10 @@ export function useCprSettings(): CprSettings {
     cordaroneDuration,
     adrenalineDuration,
     warningSeconds,
+    endButtonShortTap,
     loading,
     updateSettings,
+    setEndButtonShortTap,
     resetSettings,
   };
 }

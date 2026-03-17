@@ -37,6 +37,14 @@ export class SessionController {
     }
   }
 
+  async stopAllSounds() {
+    try {
+      await this.soundController.stopAll();
+    } catch (e) {
+      // ignore
+    }
+  }
+
   startSession = () => {
     sessionStore.startNewSession();
   };

@@ -31,7 +31,9 @@ export default function SettingsScreen() {
     shockDuration,
     adrenalineDuration,
     warningSeconds,
+    endButtonShortTap,
     updateSettings,
+    setEndButtonShortTap,
     resetSettings,
     loading,
   } = useCprSettings();
@@ -119,10 +121,11 @@ export default function SettingsScreen() {
         <Text style={[styles.title, textStyle]}>Paramètres</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.sectionTitle, sectionTitleColor]}>
-          Durées par défaut (minutes)
-        </Text>
+      <View style={styles.body}>
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={[styles.sectionTitle, sectionTitleColor]}>
+            Durées par défaut (minutes)
+          </Text>
 
         <View style={styles.inputGroup}>
           <Text style={[styles.label, labelColor]}>Analyse (Intervalle)</Text>
@@ -180,17 +183,58 @@ export default function SettingsScreen() {
             selectionColor={"#007BFF"}
           />
         </View>
-        <View style={styles.bottomButtons}>
-          <TouchableOpacity style={styles.saveButton} onPress={router.back}>
-            <Text style={styles.saveButtonText}>
-              Sauvegarder les paramètres
+
+        <Text style={[styles.sectionTitle, sectionTitleColor]}>
+          Sécurité - Fin de la RCP
+        </Text>
+        <TouchableOpacity
+          style={[
+            styles.toggleRow,
+            { borderColor: isDark ? "#444" : "#d1d5db" },
+          ]}
+          onPress={() => setEndButtonShortTap(!endButtonShortTap)}
+        >
+          <View style={styles.toggleTextBlock}>
+            <Text style={[styles.toggleTitle, textStyle]}>
+              Mode urgence: bouton Fin RCP en appui court
             </Text>
-          </TouchableOpacity>
+            <Text style={[styles.toggleSubtitle, labelColor]}>
+              Activé : appui court, désactivé : appui long (par défaut)
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.pill,
+              {
+                backgroundColor: endButtonShortTap ? "#22c55e" : "#9ca3af",
+              },
+            ]}
+          >
+            <Text style={styles.pillText}>
+              {endButtonShortTap ? "ACTIF" : "INACTIF"}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
           <TouchableOpacity style={styles.resetButton} onPress={resetSettings}>
             <Text style={styles.resetButtonText}>Réinitialiser par défaut</Text>
           </TouchableOpacity>
+        </ScrollView>
+
+        <View
+          style={[
+            styles.stickyFooter,
+            {
+              backgroundColor: isDark ? "#2b2c2d" : "#fff",
+              borderTopColor: isDark ? "#444" : "#e5e7eb",
+            },
+          ]}
+        >
+          <TouchableOpacity style={styles.saveButton} onPress={router.back}>
+            <Text style={styles.saveButtonText}>Sauvegarder les paramètres</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -199,7 +243,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    justifyContent: "space-between",
+  },
+  body: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -222,6 +268,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+    paddingBottom: 120,
   },
   sectionTitle: {
     fontSize: 18,
@@ -258,7 +305,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   resetButton: {
-    marginTop: 40,
+    marginTop: 28,
     padding: 16,
     backgroundColor: "#FF5252",
     borderRadius: 8,
@@ -280,9 +327,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  bottomButtons: {
-    flexDirection: "column",
-    justifyContent: "flex-end",
+  stickyFooter: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+  },
+  toggleRow: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     gap: 12,
+  },
+  toggleTextBlock: {
+    flex: 1,
+    minWidth: 0,
+    paddingRight: 4,
+  },
+  toggleTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  toggleSubtitle: {
+    fontSize: 12,
+  },
+  pill: {
+    minWidth: 70,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    alignItems: "center",
+    flexShrink: 0,
+  },
+  pillText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "800",
   },
 });

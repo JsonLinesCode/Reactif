@@ -51,6 +51,16 @@ export class SoundController {
     return this.play("tick");
   }
 
+  async stopAll() {
+    for (const k of Object.keys(this.sounds) as SoundName[]) {
+      try {
+        await this.sounds[k]?.stopAsync();
+      } catch (e) {
+        // ignore stop errors
+      }
+    }
+  }
+
   async dispose() {
     for (const k of Object.keys(this.sounds) as SoundName[]) {
       try {

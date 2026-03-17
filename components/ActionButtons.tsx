@@ -8,12 +8,14 @@ interface ActionButtonsProps {
   onEnd: () => void;
   //onEvent: () => void;
   onCancel: () => void;
+  useShortTapEndButton?: boolean;
 }
 
 export default function ActionButtons({
   onEnd,
   //onEvent,
   onCancel,
+  useShortTapEndButton = false,
 }: ActionButtonsProps) {
   const handleEndPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -23,13 +25,23 @@ export default function ActionButtons({
   return (
     <View style={styles.container}>
       <View style={styles.actionItem}>
-        <TouchableOpacity
-          style={[styles.circleButton, { backgroundColor: "#FF5252" }]}
-          onPress={handleEndPress}
-        >
-          <Ionicons name="close" size={40} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.actionLabel}>Fin RCP</Text>
+        {useShortTapEndButton ? (
+          <TouchableOpacity
+            style={[styles.circleButton, { backgroundColor: "#FF5252" }]}
+            onPress={handleEndPress}
+          >
+            <Ionicons name="close" size={40} color="#fff" />
+          </TouchableOpacity>
+        ) : (
+          <LongPressButton
+            onComplete={handleEndPress}
+            color="#FF5252"
+            size={64}
+            iconName="close"
+            label="Fin RCP"
+          />
+        )}
+        {useShortTapEndButton && <Text style={styles.actionLabel}>Fin RCP</Text>}
       </View>
 
       {/*<View style={styles.actionItem}>
