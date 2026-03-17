@@ -1,7 +1,10 @@
+import { useKeepAwake } from "expo-keep-awake";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function RootLayout() {
+  useKeepAwake();
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack>
