@@ -41,7 +41,9 @@ export default function ActionButtons({
             label="Fin RCP"
           />
         )}
-        {useShortTapEndButton && <Text style={styles.actionLabel}>Fin RCP</Text>}
+        {useShortTapEndButton && (
+          <Text style={styles.actionLabel}>Fin RCP</Text>
+        )}
       </View>
 
       {/*<View style={styles.actionItem}>

@@ -16,6 +16,7 @@ import Svg, { Circle, G } from "react-native-svg";
 interface ShockTimerProps {
   onShock: () => void;
   onAnalysis: () => void;
+  isActive?: boolean;
   lastShockTime?: number | null;
   lastAnalysisTime?: number | null;
   durationSeconds?: number;
@@ -33,6 +34,7 @@ const AnimatedTouchableOpacity =
 export default function ShockTimer({
   onShock,
   onAnalysis,
+  isActive = true,
   lastShockTime,
   lastAnalysisTime,
   durationSeconds = 120,
@@ -74,6 +76,8 @@ export default function ShockTimer({
   const effectiveAnalysisStart = localLastAnalysisTime ?? lastAnalysisTime;
 
   useEffect(() => {
+    if (!isActive) return;
+
     // If there's no start time for shock or analysis, show full duration
     if (!effectiveStartTime && !effectiveAnalysisStart) {
       setTimeLeft(durationSeconds);
@@ -117,6 +121,7 @@ export default function ShockTimer({
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
   }, [
+    isActive,
     effectiveStartTime,
     effectiveAnalysisStart,
     durationSeconds,
@@ -147,6 +152,11 @@ export default function ShockTimer({
   }, [resetRequest, durationSeconds]);
 
   useEffect(() => {
+    if (!isActive) {
+      stopBlinking();
+      return;
+    }
+
     if (timeLeft === 0) {
       if (!soundPlayedRef.current) {
         sessionController.playSound("beep");
@@ -171,7 +181,7 @@ export default function ShockTimer({
         warningPlayedRef.current = false;
       }
     }
-  }, [timeLeft, warningSeconds]);
+  }, [isActive, timeLeft, warningSeconds]);
 
   const startBlinking = () => {
     if (blinkingRef.current) return;

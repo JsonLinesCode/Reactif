@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -36,6 +37,7 @@ export default function Cpr() {
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
   const [isMuted, setIsMuted] = useState(true);
+  const [isScreenActive, setIsScreenActive] = useState(true);
 
   // Doses State
   const [doses, setDoses] = useState({
@@ -83,6 +85,17 @@ export default function Cpr() {
   useEffect(() => {
     metronomeController.setMuted(isMuted);
   }, [isMuted]);
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsScreenActive(true);
+      return () => {
+        setIsScreenActive(false);
+        metronomeController.stop();
+        void sessionController.stopAllSounds();
+      };
+    }, []),
+  );
 
   // metronomeController handles timing and sound
 
@@ -221,7 +234,7 @@ export default function Cpr() {
       <View style={styles.container}>
         {/* Top Timer */}
         <TouchableOpacity onPress={handleEvent}>
-          <CprTimer />
+          <CprTimer isActive={isScreenActive} />
         </TouchableOpacity>
 
         {/* Shock Circular Timer */}
@@ -236,6 +249,7 @@ export default function Cpr() {
             shockCount={shockCount}
             resetRequest={cancelResetRequest}
             warningSeconds={warningSeconds}
+            isActive={isScreenActive}
           />
         </View>
 
@@ -253,6 +267,7 @@ export default function Cpr() {
             resetRequest={cancelResetRequest}
             resetKey="cordarone"
             warningSeconds={warningSeconds}
+            isActive={isScreenActive}
           />
 
           <ActionProgressBar
@@ -267,6 +282,7 @@ export default function Cpr() {
             resetRequest={cancelResetRequest}
             resetKey="adrenaline"
             warningSeconds={warningSeconds}
+            isActive={isScreenActive}
           />
         </View>
 

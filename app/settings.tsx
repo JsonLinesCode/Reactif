@@ -127,94 +127,96 @@ export default function SettingsScreen() {
             Durées par défaut (minutes)
           </Text>
 
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, labelColor]}>Analyse (Intervalle)</Text>
-          <View style={[styles.inputWrapper, inputBgStyle]}>
-            <TextInput
-              style={[styles.input, textStyle]}
-              keyboardType="numeric"
-              value={shockInput}
-              onChangeText={(text) => handleDurationChange("shock", text)}
-            />
-            <Text style={styles.unit}>min</Text>
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, labelColor]}>Analyse (Intervalle)</Text>
+            <View style={[styles.inputWrapper, inputBgStyle]}>
+              <TextInput
+                style={[styles.input, textStyle]}
+                keyboardType="numeric"
+                value={shockInput}
+                onChangeText={(text) => handleDurationChange("shock", text)}
+              />
+              <Text style={styles.unit}>min</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, labelColor]}>
-            Adrénaline (Intervalle)
-          </Text>
-          <View style={[styles.inputWrapper, inputBgStyle]}>
-            <TextInput
-              style={[styles.input, textStyle]}
-              keyboardType="numeric"
-              value={adrenalineInput}
-              onChangeText={(text) => handleDurationChange("adrenaline", text)}
-            />
-            <Text style={styles.unit}>min</Text>
-          </View>
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={[styles.label, labelColor]}>Alerte avant fin</Text>
-          <View style={[styles.inputWrapper, inputBgStyle]}>
-            <TextInput
-              style={[styles.input, textStyle]}
-              keyboardType="numeric"
-              value={warningInput}
-              onChangeText={handleWarningChange}
-            />
-            <Text style={styles.unit}>sec</Text>
-          </View>
-        </View>
-
-        <Text
-          style={[styles.sectionTitle, sectionTitleColor, { marginTop: 20 }]}
-        >
-          Thème de l&#39;application
-        </Text>
-        <View style={{ alignItems: "center", marginBottom: 20 }}>
-          <CustomSwitch
-            selectionMode={theme === "light" ? 1 : 2}
-            roundCorner={true}
-            option1={"Clair"}
-            option2={"Sombre"}
-            onSelectSwitch={onSelectSwitch}
-            selectionColor={"#007BFF"}
-          />
-        </View>
-
-        <Text style={[styles.sectionTitle, sectionTitleColor]}>
-          Sécurité - Fin de la RCP
-        </Text>
-        <TouchableOpacity
-          style={[
-            styles.toggleRow,
-            { borderColor: isDark ? "#444" : "#d1d5db" },
-          ]}
-          onPress={() => setEndButtonShortTap(!endButtonShortTap)}
-        >
-          <View style={styles.toggleTextBlock}>
-            <Text style={[styles.toggleTitle, textStyle]}>
-              Mode urgence: bouton Fin RCP en appui court
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, labelColor]}>
+              Adrénaline (Intervalle)
             </Text>
-            <Text style={[styles.toggleSubtitle, labelColor]}>
-              Activé : appui court, désactivé : appui long (par défaut)
-            </Text>
+            <View style={[styles.inputWrapper, inputBgStyle]}>
+              <TextInput
+                style={[styles.input, textStyle]}
+                keyboardType="numeric"
+                value={adrenalineInput}
+                onChangeText={(text) =>
+                  handleDurationChange("adrenaline", text)
+                }
+              />
+              <Text style={styles.unit}>min</Text>
+            </View>
           </View>
-          <View
-            style={[
-              styles.pill,
-              {
-                backgroundColor: endButtonShortTap ? "#22c55e" : "#9ca3af",
-              },
-            ]}
+
+          <View style={styles.inputGroup}>
+            <Text style={[styles.label, labelColor]}>Alerte avant fin</Text>
+            <View style={[styles.inputWrapper, inputBgStyle]}>
+              <TextInput
+                style={[styles.input, textStyle]}
+                keyboardType="numeric"
+                value={warningInput}
+                onChangeText={handleWarningChange}
+              />
+              <Text style={styles.unit}>sec</Text>
+            </View>
+          </View>
+
+          <Text
+            style={[styles.sectionTitle, sectionTitleColor, { marginTop: 20 }]}
           >
-            <Text style={styles.pillText}>
-              {endButtonShortTap ? "ACTIF" : "INACTIF"}
-            </Text>
+            Thème de l&#39;application
+          </Text>
+          <View style={{ alignItems: "center", marginBottom: 20 }}>
+            <CustomSwitch
+              selectionMode={theme === "light" ? 1 : 2}
+              roundCorner={true}
+              option1={"Clair"}
+              option2={"Sombre"}
+              onSelectSwitch={onSelectSwitch}
+              selectionColor={"#007BFF"}
+            />
           </View>
-        </TouchableOpacity>
+
+          <Text style={[styles.sectionTitle, sectionTitleColor]}>
+            Sécurité - Fin de la RCP
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.toggleRow,
+              { borderColor: isDark ? "#444" : "#d1d5db" },
+            ]}
+            onPress={() => setEndButtonShortTap(!endButtonShortTap)}
+          >
+            <View style={styles.toggleTextBlock}>
+              <Text style={[styles.toggleTitle, textStyle]}>
+                Mode urgence: bouton Fin RCP en appui court
+              </Text>
+              <Text style={[styles.toggleSubtitle, labelColor]}>
+                Activé : appui court, désactivé : appui long (par défaut)
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.pill,
+                {
+                  backgroundColor: endButtonShortTap ? "#22c55e" : "#9ca3af",
+                },
+              ]}
+            >
+              <Text style={styles.pillText}>
+                {endButtonShortTap ? "ACTIF" : "INACTIF"}
+              </Text>
+            </View>
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.resetButton} onPress={resetSettings}>
             <Text style={styles.resetButtonText}>Réinitialiser par défaut</Text>
@@ -231,7 +233,9 @@ export default function SettingsScreen() {
           ]}
         >
           <TouchableOpacity style={styles.saveButton} onPress={router.back}>
-            <Text style={styles.saveButtonText}>Sauvegarder les paramètres</Text>
+            <Text style={styles.saveButtonText}>
+              Sauvegarder les paramètres
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -9,7 +9,10 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="cpr" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="cpr"
+          options={{ headerShown: false, freezeOnBlur: true }}
+        />
         <Stack.Screen name="about" options={{ headerShown: false }} />
         <Stack.Screen name="childData" options={{ headerShown: false }} />
         <Stack.Screen name="cprPediatric" options={{ headerShown: false }} />

@@ -15,6 +15,7 @@ interface ActionProgressBarProps {
   label: string;
   count: number;
   color: string;
+  isActive?: boolean;
   icon?: React.ReactElement;
   onPress: () => void;
   lastActionTime?: number | null;
@@ -35,6 +36,7 @@ export default function ActionProgressBar({
   label,
   count,
   color,
+  isActive = true,
   icon,
   onPress,
   lastActionTime,
@@ -58,6 +60,8 @@ export default function ActionProgressBar({
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
+    if (!isActive) return;
+
     const effectiveLast = lastActionTime ?? localLastActionTime;
 
     if (!effectiveLast) {
@@ -77,7 +81,7 @@ export default function ActionProgressBar({
     updateElapsed();
     const interval = setInterval(updateElapsed, 1000);
     return () => clearInterval(interval);
-  }, [lastActionTime, localLastActionTime]);
+  }, [isActive, lastActionTime, localLastActionTime]);
 
   useEffect(() => {
     setLocalLastActionTime(null);
@@ -97,6 +101,11 @@ export default function ActionProgressBar({
   const isExpired = elapsed >= durationSeconds;
 
   useEffect(() => {
+    if (!isActive) {
+      stopBlinking();
+      return;
+    }
+
     if (isExpired) {
       if (!soundPlayedRef.current) {
         sessionController.playSound("beep");
@@ -122,7 +131,7 @@ export default function ActionProgressBar({
         warningPlayedRef.current = false;
       }
     }
-  }, [isExpired, timeLeft, warningSeconds]);
+  }, [isActive, isExpired, timeLeft, warningSeconds]);
 
   const triggerHaptic = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
