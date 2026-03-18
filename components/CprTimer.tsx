@@ -13,7 +13,9 @@ export default function CprTimer({ isActive = true }: CprTimerProps) {
   const getElapsedSeconds = (session: CprSession | null, now: number) => {
     if (!session) return 0;
 
-    const events = [...session.events].sort((a, b) => a.timestamp - b.timestamp);
+    const events = [...session.events].sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
     let pausedMs = 0;
     let pauseStart: number | null = null;
 
@@ -30,7 +32,8 @@ export default function CprTimer({ isActive = true }: CprTimerProps) {
     }
 
     const rawEnd = session.endTime ?? now;
-    const effectiveEnd = pauseStart !== null ? Math.min(rawEnd, pauseStart) : rawEnd;
+    const effectiveEnd =
+      pauseStart !== null ? Math.min(rawEnd, pauseStart) : rawEnd;
     const elapsedMs = Math.max(0, effectiveEnd - session.startTime - pausedMs);
     return Math.floor(elapsedMs / 1000);
   };
