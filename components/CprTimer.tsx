@@ -1,13 +1,21 @@
 import { sessionStore } from "@/store/sessionStore";
 import { getCurrentCycleElapsedSeconds } from "@/utils/sessionUtils";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import EventSelectionModal from "@/components/EventSelectionModal";
+import Svg, { Text as SvgText } from "react-native-svg";
 
-interface CprTimerProps {
-  isActive?: boolean;
-}
+export default function CprTimer() {
 
-export default function CprTimer({ isActive = true }: CprTimerProps) {
+  const [theme, setTheme] = useState(sessionStore.theme);
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+        setTheme(sessionStore.theme);
+    })
+  });
+
+  const textStyleColor = {color: theme === "dark" ? "#ccc" : "#000"};
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
@@ -35,11 +43,12 @@ export default function CprTimer({ isActive = true }: CprTimerProps) {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Durée RCP</Text>
-      <View style={styles.timerContainer}>
-        <Text style={styles.timerText}>{formatTime(seconds)}</Text>
+    <View style={[styles.container, theme === "dark" ? {backgroundColor: "#333", borderColor: "#ccc"} : {}]}>
+      <Text style={[styles.label, textStyleColor]}>Durée RCP</Text>
+      <View style={[styles.timerContainer, theme === "dark" ? {backgroundColor: "#333", borderColor: "#ccc"} : {}]}>
+        <Text style={[styles.timerText, textStyleColor]}>{formatTime(seconds)}</Text>
       </View>
       <Text style={{ color: "#fff", marginTop: 8 }}>SAISIE ÉVENEMENTS</Text>
     </View>
@@ -48,14 +57,16 @@ export default function CprTimer({ isActive = true }: CprTimerProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#333",
+    backgroundColor: "#fff",
+    borderWidth: 4,
+    borderColor: '#333',
     borderRadius: 25,
     padding: 16,
     alignItems: "center",
     width: "100%",
   },
   label: {
-    color: "#fff",
+    color: "black",
     fontSize: 20,
     marginBottom: 4,
   },
@@ -64,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   timerText: {
-    color: "#fff",
+    color: "black",
     fontSize: 48,
     fontWeight: "bold",
   },

@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { sessionController } from "@/controllers/SessionController";
+import {sessionStore} from "@/store/sessionStore";
 
 interface MetronomeControlProps {
   bpm: number;
@@ -25,15 +27,17 @@ export default function MetronomeControl({
     setBpm(Math.min(240, bpm + 10));
   };
 
+  const theme = sessionStore.theme;
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, theme === "dark" ? {backgroundColor: "#333", borderColor: "#ccc"} : {}]}>
       {/* BPM Control */}
       <View style={styles.bpmContainer}>
         <TouchableOpacity style={styles.bpmButton} onPress={decreaseBpm}>
           <Ionicons name="remove" size={24} color="#000" />
         </TouchableOpacity>
         <View style={styles.bpmDisplay}>
-          <Text style={styles.bpmValue}>{bpm}</Text>
+          <Text style={[styles.bpmValue, theme === "dark" ? {color: "#ccc"}:{color: "#333"}]}>{bpm}</Text>
           <Text style={styles.bpmLabel}>BPM</Text>
         </View>
 
@@ -61,12 +65,15 @@ export default function MetronomeControl({
   );
 }
 
+// @ts-ignore
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#333",
+    backgroundColor: "#fff",
+    borderWidth : 4,
+    borderColor: "#333",
     borderRadius: 25,
     padding: 15,
     width: "100%",
@@ -93,7 +100,7 @@ const styles = StyleSheet.create({
   bpmValue: {
     fontSize: 35,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#333",
   },
   bpmLabel: {
     fontSize: 25,
@@ -102,7 +109,7 @@ const styles = StyleSheet.create({
   muteContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff", // Toggle background
+    backgroundColor: "#ccc", // Toggle background
     borderRadius: 20,
     paddingHorizontal: 8,
     paddingVertical: 4,

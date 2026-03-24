@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
+import {sessionStore} from "@/store/sessionStore";
 
 interface ShockTimerProps {
   onShock: () => void;
@@ -76,6 +77,10 @@ export default function ShockTimer({
     number | null
   >(null);
   const effectiveAnalysisStart = localLastAnalysisTime ?? lastAnalysisTime;
+
+  const [theme, setTheme] = useState(sessionStore.theme);
+
+  const colorIcon = theme === "dark" ? "grey" : "black";
 
   useEffect(() => {
     if (!isActive) return;
@@ -290,9 +295,11 @@ export default function ShockTimer({
               width: circleSize - 6,
               height: circleSize - 6,
               borderRadius: (circleSize - 6) / 2,
-            },
+            }, theme === "dark" ? { backgroundColor: "#353636" } : { backgroundColor: "#F5F5F5" },
           ]}
         >
+
+
           <Ionicons name="flash" size={32} color="black" />
           <Text style={styles.labelText}>CHOC</Text>
           <TouchableOpacity
@@ -338,7 +345,7 @@ export default function ShockTimer({
               cx={center}
               cy={center}
               r={radius}
-              stroke="#2979FF"
+              stroke="#f5dd4b"
               strokeWidth={strokeWidth}
               fill="none"
             />
@@ -362,17 +369,16 @@ export default function ShockTimer({
               width: innerSize,
               height: innerSize,
               borderRadius: innerRadius,
-            },
+            }, theme === "dark" ? { backgroundColor: "#353636" } : { backgroundColor: "#F5F5F5" },
           ]}
         >
           <Ionicons
             name="stopwatch-outline"
             size={32}
-            color="black"
-            style={{ marginBottom: 4 }}
+            style={[theme === "dark" ? {color: "#ccc", marginBottom: 4}:{color: "#000",  marginBottom: 4}]}
           />
-          <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-          <Text style={styles.labelText}>ANALYSE</Text>
+          <Text style={[styles.timerText, theme === "dark" ? {color: "#ccc"}:{color: "#000"}]}>{formatTime(timeLeft)}</Text>
+          <Text style={[styles.labelText, theme === "dark" ? {color: "#ccc"}:{color: "#000"}]}>ANALYSE</Text>
         </View>
       </AnimatedTouchableOpacity>
     </View>

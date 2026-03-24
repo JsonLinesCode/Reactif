@@ -34,6 +34,16 @@ export default function Cpr() {
     endButtonShortTap,
   } = useCprSettings();
 
+  // ---- Dark Mode State ----
+    const [theme, setTheme] = useState(sessionStore.theme);
+
+    useEffect(()=> {
+      const unsubscribe = sessionStore.subscribe(() => {
+        setTheme(sessionStore.theme);
+      });
+      return () => unsubscribe();
+    });
+
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
   const [isMuted, setIsMuted] = useState(true);
@@ -261,7 +271,6 @@ export default function Cpr() {
             shockCount={shockCount}
             resetRequest={cancelResetRequest}
             warningSeconds={warningSeconds}
-            isActive={isScreenActive}
           />
         </View>
 
@@ -301,7 +310,7 @@ export default function Cpr() {
         {/* Action Buttons Grid */}
         <ActionButtons
           onEnd={handleEnd}
-          //onEvent={handleEvent}
+          onEvent={handleEvent}
           onCancel={handleCancel}
           useShortTapEndButton={endButtonShortTap}
         />

@@ -44,11 +44,11 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     if (!loading) {
-      setShockInput(Math.round(shockDuration / 60).toString());
-      setAdrenalineInput(Math.round(adrenalineDuration / 60).toString());
+      setShockInput((shockDuration / 60).toString());
+      setAdrenalineInput((adrenalineDuration / 60).toString());
       setWarningInput(warningSeconds.toString());
     }
-  }, [loading, shockDuration, adrenalineDuration, warningSeconds]);
+  }, [loading]);
 
   if (loading) {
     return (
@@ -81,11 +81,24 @@ export default function SettingsScreen() {
 
   const handleWarningChange = (text: string) => {
     setWarningInput(text);
+  };
 
-    const value = parseInt(text, 10);
-    if (!isNaN(value)) {
-      updateSettings("warning", value);
+  const handleSave = () => {
+    const shockVal = parseFloat(shockInput);
+    if (!isNaN(shockVal)) {
+      updateSettings("shock", Math.round(shockVal * 60));
     }
+
+    const adrenalineVal = parseFloat(adrenalineInput);
+    if (!isNaN(adrenalineVal)) {
+      updateSettings("adrenaline", Math.round(adrenalineVal * 60));
+    }
+
+    const warningVal = parseInt(warningInput, 10);
+    if (!isNaN(warningVal)) {
+      updateSettings("warning", warningVal);
+    }
+    router.back();
   };
 
   const onSelectSwitch = async (val: number) => {
@@ -350,31 +363,5 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
     gap: 12,
-  },
-  toggleTextBlock: {
-    flex: 1,
-    minWidth: 0,
-    paddingRight: 4,
-  },
-  toggleTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
-  toggleSubtitle: {
-    fontSize: 12,
-  },
-  pill: {
-    minWidth: 70,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    alignItems: "center",
-    flexShrink: 0,
-  },
-  pillText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "800",
   },
 });

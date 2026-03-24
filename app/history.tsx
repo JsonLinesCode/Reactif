@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
-import { router, Stack } from "expo-router";
+import {router, Stack} from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
+import { sessionController } from "@/controllers/SessionController";
+import {sessionStore} from "@/store/sessionStore";
 import {
   Alert,
   FlatList,
@@ -24,6 +26,7 @@ export default function History() {
     new Set(),
   );
 
+    const [theme, setTheme] = useState(sessionStore.theme);
   useEffect(() => {
     // Load history
     const history = sessionStore.getHistory();
@@ -32,6 +35,7 @@ export default function History() {
     // Subscribe to store updates to reflect deletions immediately
     const unsubscribe = sessionStore.subscribe(() => {
       setSessions(sessionStore.getHistory());
+      setTheme(sessionStore.theme);
     });
     return unsubscribe;
   }, []);
@@ -156,29 +160,39 @@ export default function History() {
       </TouchableOpacity>
     );
   };
-
+  const bgStyle = { backgroundColor: theme === "dark" ? "#353636" : "#f5f5f5" };
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.topBar}>
+    <SafeAreaView style={[styles.container, bgStyle]}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={{justifyContent: "flex-start"}}>
         <TouchableOpacity
-          style={styles.selectButton}
-          onPress={toggleSelectionMode}
+            style={[styles.backButton, theme === "dark" ? { backgroundColor: "#555", borderColor : "#fff",borderWidth: 3, borderRadius: 666 } : {}]}
+            onPress={() => router.back()}
         >
-          <Text style={styles.selectButtonText}>
-            {isSelectionMode ? "Annuler" : "Sélectionner"}
-          </Text>
+          <Ionicons name="arrow-back" size={24} color={theme === "dark" ? "#fff" : "#000"} />
         </TouchableOpacity>
+        <View style={[styles.topBar, bgStyle]}>
 
-        {isSelectionMode && selectedSessionIds.size > 0 && (
           <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={deleteSelectedSessions}
+              style={[styles.selectButton, {borderColor: theme === "dark" ? "#fff" : "#007BFF" }]}
+              onPress={toggleSelectionMode}
           >
-            <Text style={styles.deleteButtonText}>
-              Supprimer ({selectedSessionIds.size})
+            <Text style={[styles.selectButtonText, {color: theme === "dark" ? "#fff" : "#007BFF"}]}>
+              {isSelectionMode ? "Annuler" : "Sélectionner"}
             </Text>
           </TouchableOpacity>
-        )}
+
+          {isSelectionMode && selectedSessionIds.size > 0 && (
+              <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={deleteSelectedSessions}
+              >
+                <Text style={styles.deleteButtonText}>
+                  Supprimer ({selectedSessionIds.size})
+                </Text>
+              </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <Stack.Screen options={{ title: "Historique des sessions" }} />
@@ -205,7 +219,7 @@ const styles = StyleSheet.create({
   },
   topBar: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingTop: 10,
@@ -216,7 +230,7 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-end",
     alignItems: "center",
   },
   emptyText: {
@@ -232,7 +246,7 @@ const styles = StyleSheet.create({
   },
   selectButton: {
     borderColor: "#007BFF",
-    justifyContent: "flex-start",
+    justifyContent: "flex-end",
     borderWidth: 1,
     paddingVertical: 8,
     paddingHorizontal: 20,

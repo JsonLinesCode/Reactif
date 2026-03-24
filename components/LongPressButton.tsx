@@ -13,6 +13,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle } from "react-native-svg";
+import { sessionController } from "@/controllers/SessionController";
+import {sessionStore} from "@/store/sessionStore";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -35,6 +37,9 @@ export default function LongPressButton({
   label = "Annuler",
   duration = DURATION,
 }: LongPressButtonProps) {
+
+  const theme = sessionStore.theme;
+
   const progress = useSharedValue(0);
   const scale = useSharedValue(1);
   const isPressing = useSharedValue(false);
@@ -171,7 +176,7 @@ export default function LongPressButton({
           </Svg>
         </View>
       </View>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, theme === "dark" ? {color: "#ccc"}:{color: "black"}]}>{label}</Text>
     </View>
   );
 }

@@ -4,8 +4,11 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { sessionStore } from "@/store/sessionStore";
+import { sessionController} from "@/controllers/SessionController";
 
 export default function CprEndFirstPage() {
+  const theme = sessionStore.theme;
+
   const handleDeath = async () => {
     await sessionStore.saveCurrentSession("Décès");
     router.push({ pathname: "/cprEnd", params: { mode: "death" } });
@@ -16,16 +19,18 @@ export default function CprEndFirstPage() {
     router.push({ pathname: "/cprEnd", params: { mode: "racs" } });
   };
 
+  const bgStyle = theme === "dark" ? { backgroundColor: "#353636" } : { backgroundColor: "#fff" };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, bgStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>Fin de RCP</Text>
-        <Text style={styles.subtitle}>Résultat de la réanimation</Text>
+        <Text style={[styles.title, theme === "dark" ? {color: "#ccc"}:{}]}>Fin de RCP</Text>
+        <Text style={[styles.subtitle, theme === "dark" ? {color: "#ddd"}:{}]}>Résultat de la réanimation</Text>
 
         <View style={styles.buttonGroup}>
           <TouchableOpacity
-            style={[styles.button, styles.deathButton]}
+            style={[styles.button, styles.deathButton, theme === "dark" ? { backgroundColor: "#555", borderColor : "#fff",borderWidth: 3 } : {}]}
             onPress={handleDeath}
           >
             <Text style={styles.buttonText}>Décès</Text>

@@ -6,14 +6,14 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface ActionButtonsProps {
   onEnd: () => void;
-  //onEvent: () => void;
+  onEvent: () => void;
   onCancel: () => void;
   useShortTapEndButton?: boolean;
 }
 
 export default function ActionButtons({
   onEnd,
-  //onEvent,
+  onEvent,
   onCancel,
   useShortTapEndButton = false,
 }: ActionButtonsProps) {
@@ -21,6 +21,8 @@ export default function ActionButtons({
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onEnd();
   };
+
+  const theme = sessionStore.theme;
 
   return (
     <View style={styles.container}>
@@ -46,24 +48,24 @@ export default function ActionButtons({
         )}
       </View>
 
-      {/*<View style={styles.actionItem}>
-        <TouchableOpacity
-            style={[styles.circleButton, {backgroundColor: "#448AFF"}]}
-            onPress={onEvent}
-        >
-          <Ionicons name="add" size={48} color="#fff"/>
-        </TouchableOpacity>
-        <Text style={styles.actionLabel}>Saisie événements</Text>
-      </View>*/}
+          <View style={styles.actionItem}>
+            <TouchableOpacity
+                style={[styles.circleButton, {backgroundColor: "#f5dd4b", width: 75, height: 75, borderRadius: 88}]}
+                onPress={onEvent}
+            >
+              <Ionicons name="add" size={48} color="#fff"/>
+            </TouchableOpacity>
+            <Text style={[styles.actionLabel, theme === "dark" ? {color : "#ccc"}:{color: "#000"}]}>Saisie événements</Text>
+          </View>
 
-      <View style={styles.actionItem}>
-        {/* 
-          LongPressButton handles the circular button and gesture.
-          We pass size=64 to match other buttons.
-      */}
-        <LongPressButton onComplete={onCancel} color="#444" size={64} />
+            {/*
+              LongPressButton handles the circular button and gesture.
+              We pass size=64 to match other buttons.
+          */}
+            <LongPressButton onComplete={onCancel} color="#444" size={64} />
+        </View>
+
       </View>
-    </View>
   );
 }
 

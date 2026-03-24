@@ -22,6 +22,8 @@ import {
 import { router, Stack, useLocalSearchParams } from "expo-router";
 
 export default function CprEnd() {
+  const theme = sessionStore.theme;
+  const bgStyle = theme === "dark" ? { backgroundColor: "#353636" } : {};
   const params = useLocalSearchParams();
   const initialMode = params.mode === "death" ? "summary" : "racs";
 
@@ -111,11 +113,11 @@ export default function CprEnd() {
 
   if (step === "racs") {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, bgStyle]}>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.confirmContainer}>
-          <Text style={styles.title}>RACS</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, theme === "dark" ? {color: "#ccc"}:{}]}>RACS</Text>
+          <Text style={[styles.subtitle, theme === "dark" ? {color: "#fff"}:{}]}>
             Retour d&#39;Activité Circulatoire Spontanée
           </Text>
 
@@ -128,7 +130,7 @@ export default function CprEnd() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.deathButton]}
+              style={[styles.buttonConfirm, styles.deathButton, theme === "dark" ? { backgroundColor: "#353636", borderColor : "#fff",borderWidth: 3 } : {}]}
               onPress={handleDeath}
             >
               <Text style={styles.buttonText}>Décès</Text>
@@ -153,19 +155,19 @@ export default function CprEnd() {
     "Fin de session";
 
   return (
-    <SafeAreaView style={[styles.container, styles.summaryBackground]}>
+    <SafeAreaView style={[styles.container, styles.summaryBackground, bgStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.summaryScroll}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>
+          <Text style={[styles.headerTitle, theme === "dark" ? { color: "#ccc" } : {}]}>
             {" "}
             {summaryTitle === "Décès" ? "Patient décédé" : "Résumé de la RCP"}
           </Text>
         </View>
 
         {/* Stats Card */}
-        <View style={styles.card}>
-          <View style={styles.cardRow}>
+        <View style={[styles.card, theme === "dark" ? { backgroundColor: "#999" } : {}]}>
+          <View style={[styles.cardRow]}>
             <FontAwesome5
               name="hourglass-half"
               size={18}
@@ -190,13 +192,13 @@ export default function CprEnd() {
         </View>
 
         {/* Actions Card */}
-        <View style={styles.card}>
+        <View style={[styles.card, theme === "dark" ? { backgroundColor: "#999" } : {}]}>
           <View style={styles.cardHeaderRow}>
             <Text style={styles.cardTitle}> Actions réalisées:</Text>
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, theme === "dark" ? {backgroundColor: "black"}:{}]} />
           {actions.length === 0 ? (
-            <Text style={styles.emptyText}>Aucune action.</Text>
+            <Text style={[styles.emptyText, theme === "dark" ? {color: "#555"}:{}]}>Aucune action.</Text>
           ) : (
             actions.map(({ event, cycle }, i) => (
               <Text key={i} style={styles.itemText}>
@@ -207,13 +209,13 @@ export default function CprEnd() {
         </View>
 
         {/* Events Card */}
-        <View style={styles.card}>
+        <View style={[styles.card, theme === "dark" ? { backgroundColor: "#999" } : {}]}>
           <View style={styles.cardHeaderRow}>
             <Text style={styles.cardTitle}> Événements saisis:</Text>
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, theme === "dark" ? {backgroundColor: "black"}:{}]} />
           {customEvents.length === 0 ? (
-            <Text style={styles.emptyText}>Aucun événement.</Text>
+            <Text style={[styles.emptyText, theme === "dark" ? {color: "#555"}:{}]}>Aucun événement.</Text>
           ) : (
             customEvents.map(({ event, cycle }, i: number) => (
               <Text key={i} style={styles.itemText}>
