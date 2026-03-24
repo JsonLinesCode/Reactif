@@ -251,7 +251,7 @@ export default function Cpr() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: "#fff" }, theme === "dark" ? { backgroundColor: "#353636" } : {}]}>
       <View style={styles.container}>
         {/* Top Timer */}
         <TouchableOpacity onPress={handleEvent}>

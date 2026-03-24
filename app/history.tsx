@@ -4,7 +4,6 @@ import {router, Stack} from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
 import { sessionController } from "@/controllers/SessionController";
-import {sessionStore} from "@/store/sessionStore";
 import {
   Alert,
   FlatList,

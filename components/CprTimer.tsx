@@ -1,9 +1,7 @@
 import { sessionStore } from "@/store/sessionStore";
 import { getCurrentCycleElapsedSeconds } from "@/utils/sessionUtils";
 import React, { useEffect, useState } from "react";
-import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import EventSelectionModal from "@/components/EventSelectionModal";
-import Svg, { Text as SvgText } from "react-native-svg";
+import {StyleSheet, Text, View} from "react-native";
 
 export default function CprTimer() {
 
@@ -28,14 +26,13 @@ export default function CprTimer() {
     update();
     const unsubscribe = sessionStore.subscribe(update);
     const interval = setInterval(() => {
-      if (!isActive) return;
       update();
     }, 1000);
     return () => {
       unsubscribe();
       clearInterval(interval);
     };
-  }, [isActive]);
+  }, []);
 
   const formatTime = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);

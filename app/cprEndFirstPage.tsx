@@ -30,7 +30,7 @@ export default function CprEndFirstPage() {
 
         <View style={styles.buttonGroup}>
           <TouchableOpacity
-            style={[styles.button, styles.deathButton, theme === "dark" ? { backgroundColor: "#555", borderColor : "#fff",borderWidth: 3 } : {}]}
+            style={[styles.button, styles.deathButton, theme === "dark" ? { borderColor : "#fff",borderWidth: 3 } : {}]}
             onPress={handleDeath}
           >
             <Text style={styles.buttonText}>Décès</Text>

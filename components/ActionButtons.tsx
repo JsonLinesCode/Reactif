@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { sessionStore } from "@/store/sessionStore";
 
 interface ActionButtonsProps {
   onEnd: () => void;
@@ -65,7 +66,6 @@ export default function ActionButtons({
             <LongPressButton onComplete={onCancel} color="#444" size={64} />
         </View>
 
-      </View>
   );
 }
 
