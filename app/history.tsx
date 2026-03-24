@@ -87,9 +87,10 @@ export default function History() {
     );
   };
 
-  const renderItem = ({ item }: { item: CprSession }) => {
+  const renderItem = ({ item, index }: { item: CprSession; index: number }) => {
     const date = new Date(item.startTime);
     const isSelected = selectedSessionIds.has(item.id);
+    const sessionNumber = sessions.length - index;
 
     return (
       <TouchableOpacity
@@ -118,10 +119,8 @@ export default function History() {
         >
           <View style={styles.cardHeader}>
             <View>
-              <Text style={styles.cardTitle}>{date.toLocaleDateString()}</Text>
-              <Text style={styles.cardSubtitle}>
-                {date.toLocaleTimeString()}
-              </Text>
+              <Text style={styles.cardTitle}>Session #{sessionNumber}</Text>
+              <Text style={styles.infoText}>{date.toLocaleDateString()}</Text>
             </View>
             {!isSelectionMode && (
               <TouchableOpacity
@@ -279,10 +278,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: "#666",
   },
   exportButton: {
     padding: 8,

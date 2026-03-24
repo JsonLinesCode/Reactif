@@ -1,5 +1,5 @@
-import { CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
+import { getCurrentCycleElapsedSeconds } from "@/utils/sessionUtils";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
@@ -10,37 +10,11 @@ interface CprTimerProps {
 export default function CprTimer({ isActive = true }: CprTimerProps) {
   const [seconds, setSeconds] = useState(0);
 
-  const getElapsedSeconds = (session: CprSession | null, now: number) => {
-    if (!session) return 0;
-
-    const events = [...session.events].sort(
-      (a, b) => a.timestamp - b.timestamp,
-    );
-    let pausedMs = 0;
-    let pauseStart: number | null = null;
-
-    for (const evt of events) {
-      if (evt.type !== "event") continue;
-      const label = String(evt.details || "").toUpperCase();
-      if (label === "RACS" && pauseStart === null) {
-        pauseStart = evt.timestamp;
-      }
-      if (label === "RESUME" && pauseStart !== null) {
-        pausedMs += Math.max(0, evt.timestamp - pauseStart);
-        pauseStart = null;
-      }
-    }
-
-    const rawEnd = session.endTime ?? now;
-    const effectiveEnd =
-      pauseStart !== null ? Math.min(rawEnd, pauseStart) : rawEnd;
-    const elapsedMs = Math.max(0, effectiveEnd - session.startTime - pausedMs);
-    return Math.floor(elapsedMs / 1000);
-  };
-
   useEffect(() => {
     const update = () => {
-      setSeconds(getElapsedSeconds(sessionStore.getSession(), Date.now()));
+      setSeconds(
+        getCurrentCycleElapsedSeconds(sessionStore.getSession(), Date.now()),
+      );
     };
 
     update();

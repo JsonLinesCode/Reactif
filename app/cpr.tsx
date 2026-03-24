@@ -1,6 +1,6 @@
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import ActionButtons from "@/components/ActionButtons";
@@ -89,8 +89,10 @@ export default function Cpr() {
   useFocusEffect(
     useCallback(() => {
       setIsScreenActive(true);
+      StatusBar.setHidden(false, "none");
       return () => {
         setIsScreenActive(false);
+        StatusBar.setHidden(false, "none");
         metronomeController.stop();
         void sessionController.stopAllSounds();
       };
@@ -229,6 +231,15 @@ export default function Cpr() {
     }));
   };
 
+  const handleCancelLastShock = () => {
+    const removed = sessionController.cancelLastOfType("shock");
+    if (!removed) return;
+    setCancelResetRequest((prev) => ({
+      token: prev.token + 1,
+      target: "shockTimer",
+    }));
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={styles.container}>
@@ -243,6 +254,7 @@ export default function Cpr() {
           <ShockTimer
             onShock={sessionController.logShock}
             onAnalysis={sessionController.logAnalysis}
+            onCancelLastShock={handleCancelLastShock}
             lastShockTime={lastShockTime}
             lastAnalysisTime={lastAnalysisTime}
             durationSeconds={shockDuration}

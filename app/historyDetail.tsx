@@ -5,6 +5,7 @@ import {
   formatEventDetails,
   formatEventType,
   generateSessionHtml,
+  getEventsWithCycles,
 } from "@/utils/sessionUtils";
 import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
@@ -38,9 +39,9 @@ export default function HistoryDetail() {
     return unsubscribe;
   }, [sessionId]);
 
-  const sortedEvents = useMemo(() => {
+  const eventsWithCycles = useMemo(() => {
     if (!session) return [];
-    return [...session.events].sort((a, b) => a.timestamp - b.timestamp);
+    return getEventsWithCycles(session);
   }, [session]);
 
   const shockCount = useMemo(() => {
@@ -84,7 +85,6 @@ export default function HistoryDetail() {
   }
 
   const startDate = new Date(session.startTime);
-  const endDate = session.endTime ? new Date(session.endTime) : null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -94,12 +94,6 @@ export default function HistoryDetail() {
           <Text style={styles.headerTitle}>Session CPR complete</Text>
           <Text style={styles.headerLine}>
             Date: {startDate.toLocaleDateString()}
-          </Text>
-          <Text style={styles.headerLine}>
-            Debut: {startDate.toLocaleTimeString()}
-          </Text>
-          <Text style={styles.headerLine}>
-            Fin: {endDate ? endDate.toLocaleTimeString() : "Session en cours"}
           </Text>
           <Text style={styles.headerLine}>
             Patient: {session.pediatricData ? "Enfant" : "Standard"}
@@ -115,19 +109,15 @@ export default function HistoryDetail() {
 
         <View style={styles.timelineCard}>
           <Text style={styles.sectionTitle}>Chronologie complete</Text>
-          {sortedEvents.length === 0 ? (
+          {eventsWithCycles.length === 0 ? (
             <Text style={styles.emptyTimeline}>
               Aucun evenement enregistre.
             </Text>
           ) : (
-            sortedEvents.map((event, index) => (
+            eventsWithCycles.map(({ event, cycle }, index) => (
               <View key={`${event.timestamp}-${index}`} style={styles.eventRow}>
-                <View style={styles.eventTimeContainer}>
-                  <Text style={styles.eventTime}>
-                    {new Date(event.timestamp).toLocaleTimeString()}
-                  </Text>
-                </View>
                 <View style={styles.eventContent}>
+                  <Text style={styles.eventCycle}>RCP {cycle}</Text>
                   <Text style={styles.eventType}>
                     {formatEventType(event.type)}
                   </Text>
@@ -200,22 +190,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   eventRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#f1f5f9",
   },
-  eventTimeContainer: {
-    width: 90,
-  },
-  eventTime: {
+  eventCycle: {
     fontSize: 12,
     color: "#64748b",
     fontWeight: "600",
+    marginBottom: 3,
   },
   eventContent: {
-    flex: 1,
     gap: 2,
   },
   eventType: {

@@ -16,6 +16,7 @@ import Svg, { Circle, G } from "react-native-svg";
 interface ShockTimerProps {
   onShock: () => void;
   onAnalysis: () => void;
+  onCancelLastShock?: () => void;
   isActive?: boolean;
   lastShockTime?: number | null;
   lastAnalysisTime?: number | null;
@@ -34,6 +35,7 @@ const AnimatedTouchableOpacity =
 export default function ShockTimer({
   onShock,
   onAnalysis,
+  onCancelLastShock,
   isActive = true,
   lastShockTime,
   lastAnalysisTime,
@@ -243,6 +245,12 @@ export default function ShockTimer({
     onAnalysis();
   };
 
+  const handleShockBadgePress = () => {
+    if (!onCancelLastShock) return;
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onCancelLastShock();
+  };
+
   const formatTime = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
@@ -287,9 +295,13 @@ export default function ShockTimer({
         >
           <Ionicons name="flash" size={32} color="black" />
           <Text style={styles.labelText}>CHOC</Text>
-          <View style={styles.badge}>
+          <TouchableOpacity
+            style={styles.badge}
+            onPress={handleShockBadgePress}
+            activeOpacity={0.75}
+          >
             <Text style={styles.badgeText}>{localShockCount}</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </AnimatedTouchableOpacity>
 

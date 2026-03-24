@@ -42,6 +42,22 @@ class SessionStore {
     }
   }
 
+  cancelLastOfType(type: CprEvent["type"]) {
+    if (!this.currentSession || this.currentSession.events.length === 0) {
+      return null;
+    }
+
+    for (let i = this.currentSession.events.length - 1; i >= 0; i -= 1) {
+      if (this.currentSession.events[i].type === type) {
+        const [removed] = this.currentSession.events.splice(i, 1);
+        this.notifyListeners();
+        return removed;
+      }
+    }
+
+    return null;
+  }
+
   logEvent(
     type:
       | "shock"

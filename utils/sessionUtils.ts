@@ -1,5 +1,24 @@
 import { CprEvent, CprSession } from "@/models/session";
 
+interface EventWithCycle {
+  event: CprEvent;
+  cycle: number;
+}
+
+function isRacsEvent(event: CprEvent): boolean {
+  return (
+    event.type === "event" &&
+    String(event.details || "").toUpperCase() === "RACS"
+  );
+}
+
+function isResumeEvent(event: CprEvent): boolean {
+  return (
+    event.type === "event" &&
+    String(event.details || "").toUpperCase() === "RESUME"
+  );
+}
+
 export function formatSecondsToClock(totalSeconds: number): string {
   const safeSeconds = Math.max(0, Math.floor(totalSeconds));
   const minutes = Math.floor(safeSeconds / 60);
@@ -48,14 +67,54 @@ export function formatEventDetails(details: unknown): string {
   }
 }
 
+export function getEventsWithCycles(session: CprSession): EventWithCycle[] {
+  const sortedEvents = [...session.events].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
+  const eventsWithCycles: EventWithCycle[] = [];
+  let cycle = 1;
+
+  for (const event of sortedEvents) {
+    eventsWithCycles.push({ event, cycle });
+    if (isRacsEvent(event)) {
+      cycle += 1;
+    }
+  }
+
+  return eventsWithCycles;
+}
+
+export function getCurrentCycleElapsedSeconds(
+  session: CprSession | null,
+  now: number,
+): number {
+  if (!session) return 0;
+
+  const sortedEvents = [...session.events].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
+
+  let cycleStart = session.startTime;
+  for (const event of sortedEvents) {
+    if (isResumeEvent(event)) {
+      cycleStart = event.timestamp;
+    }
+  }
+
+  const rawEnd = session.endTime ?? now;
+  const elapsedMs = Math.max(0, rawEnd - cycleStart);
+  return Math.floor(elapsedMs / 1000);
+}
+
 export function generateSessionHtml(session: CprSession): string {
-  const eventsHtml = session.events
+  const eventsWithCycles = getEventsWithCycles(session);
+  const eventsHtml = eventsWithCycles
     .map(
-      (evt: CprEvent) => `
+      ({ event, cycle }) => `
         <tr>
-            <td>${new Date(evt.timestamp).toLocaleTimeString()}</td>
-            <td>${formatEventType(evt.type)}</td>
-            <td>${formatEventDetails(evt.details)}</td>
+            <td>RCP ${cycle}</td>
+            <td>${formatEventType(event.type)}</td>
+            <td>${formatEventDetails(event.details)}</td>
         </tr>
     `,
     )
@@ -82,8 +141,6 @@ export function generateSessionHtml(session: CprSession): string {
         <h1>Rapport de Reanimation</h1>
         <div class="info">
             <p><strong>Date:</strong> ${new Date(session.startTime).toLocaleDateString()}</p>
-            <p><strong>Heure debut:</strong> ${new Date(session.startTime).toLocaleTimeString()}</p>
-            ${session.endTime ? `<p><strong>Heure fin:</strong> ${new Date(session.endTime).toLocaleTimeString()}</p>` : ""}
             ${pediatricInfo}
             <p><strong>Duree:</strong> ${formatDuration(session.startTime, session.endTime)}</p>
             <p><strong>ID Session:</strong> ${session.id}</p>
@@ -93,7 +150,7 @@ export function generateSessionHtml(session: CprSession): string {
         <table>
             <thead>
                 <tr>
-                    <th>Heure</th>
+                <th>Cycle</th>
                     <th>Type</th>
                     <th>Details</th>
                 </tr>

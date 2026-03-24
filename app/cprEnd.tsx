@@ -14,6 +14,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
+import {
+  formatEventDetails,
+  formatEventType,
+  getEventsWithCycles,
+} from "@/utils/sessionUtils";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 
 export default function CprEnd() {
@@ -91,15 +96,17 @@ export default function CprEnd() {
   };
 
   const getActions = () => {
-    return (
-      session?.events.filter((e: any) =>
-        ["cordarone", "adrenaline"].includes(e.type),
-      ) || []
+    if (!session) return [];
+    return getEventsWithCycles(session).filter(({ event }) =>
+      ["cordarone", "adrenaline"].includes(event.type),
     );
   };
 
   const getCustomEvents = () => {
-    return session?.events.filter((e: any) => e.type === "event") || [];
+    if (!session) return [];
+    return getEventsWithCycles(session).filter(
+      ({ event }) => event.type === "event",
+    );
   };
 
   if (step === "racs") {
@@ -191,9 +198,9 @@ export default function CprEnd() {
           {actions.length === 0 ? (
             <Text style={styles.emptyText}>Aucune action.</Text>
           ) : (
-            actions.map((act, i) => (
+            actions.map(({ event, cycle }, i) => (
               <Text key={i} style={styles.itemText}>
-                • {act.type} ({new Date(act.timestamp).toLocaleTimeString()})
+                • [RCP {cycle}] {formatEventType(event.type)}
               </Text>
             ))
           )}
@@ -208,10 +215,9 @@ export default function CprEnd() {
           {customEvents.length === 0 ? (
             <Text style={styles.emptyText}>Aucun événement.</Text>
           ) : (
-            customEvents.map((evt: any, i: number) => (
+            customEvents.map(({ event, cycle }, i: number) => (
               <Text key={i} style={styles.itemText}>
-                • {String(evt.details)} (
-                {new Date(evt.timestamp).toLocaleTimeString()})
+                • [RCP {cycle}] {formatEventDetails(event.details)}
               </Text>
             ))
           )}
@@ -245,33 +251,17 @@ export default function CprEnd() {
 
 // Simple HTML generator for the PDF
 function generateHtml(session: CprSession) {
-  let cycleCount = 1;
-  let eventsHtml = "";
-
-  // Header for first cycle
-  eventsHtml += `<tr class="cycle-header"><td colspan="3"><strong>RCP ${cycleCount}</strong></td></tr>`;
-
-  session.events.forEach((evt: any) => {
-    const time = new Date(evt.timestamp).toLocaleTimeString();
-    const details = evt.details
-      ? typeof evt.details === "string"
-        ? evt.details
-        : JSON.stringify(evt.details)
-      : "-";
-
-    eventsHtml += `
+  const eventsHtml = getEventsWithCycles(session)
+    .map(
+      ({ event, cycle }) => `
         <tr>
-            <td>${time}</td>
-            <td>${evt.type}</td>
-            <td>${details}</td>
+            <td>RCP ${cycle}</td>
+            <td>${formatEventType(event.type)}</td>
+            <td>${formatEventDetails(event.details)}</td>
         </tr>
-      `;
-
-    if (evt.type === "event" && String(details).toUpperCase() === "RACS") {
-      cycleCount++;
-      eventsHtml += `<tr class="cycle-header"><td colspan="3" style="background-color: #e6fffa; text-align: center; padding: 10px;"><strong>RCP ${cycleCount}</strong> (Reprise)</td></tr>`;
-    }
-  });
+      `,
+    )
+    .join("");
 
   const pediatricInfo = session.pediatricData
     ? `<p><strong>Patient:</strong> Enfant (${session.pediatricData.ageValue} ${session.pediatricData.ageMode})</p>`
@@ -295,8 +285,6 @@ function generateHtml(session: CprSession) {
         <h1>Rapport de Réanimation</h1>
         <div class="info">
             <p><strong>Date:</strong> ${new Date(session.startTime).toLocaleDateString()}</p>
-            <p><strong>Heure début:</strong> ${new Date(session.startTime).toLocaleTimeString()}</p>
-            ${session.endTime ? `<p><strong>Heure fin:</strong> ${new Date(session.endTime).toLocaleTimeString()}</p>` : ""}
             ${pediatricInfo}
             <p><strong>ID Session:</strong> ${session.id}</p>
         </div>
@@ -305,7 +293,7 @@ function generateHtml(session: CprSession) {
         <table>
             <thead>
                 <tr>
-                    <th>Heure</th>
+                  <th>Cycle</th>
                     <th>Type</th>
                     <th>Détails</th>
                 </tr>

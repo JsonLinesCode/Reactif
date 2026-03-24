@@ -76,6 +76,10 @@ export class SessionController {
     sessionStore.cancelLast();
   };
 
+  cancelLastOfType = (type: CprEvent["type"]) => {
+    return sessionStore.cancelLastOfType(type);
+  };
+
   getCount = (type: CprEvent["type"]) => {
     return (
       sessionStore.getSession()?.events.filter((l) => l.type === type).length ||
