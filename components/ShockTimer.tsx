@@ -1,10 +1,13 @@
 import { sessionController } from "@/controllers/SessionController";
+import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
+  GestureResponderEvent,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,12 +15,11 @@ import {
   View,
 } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
-import {sessionStore} from "@/store/sessionStore";
 
 interface ShockTimerProps {
   onShock: () => void;
   onAnalysis: () => void;
-  onCancelLastShock?: () => void;
+  onCancelLastShock?: () => boolean;
   isActive?: boolean;
   lastShockTime?: number | null;
   lastAnalysisTime?: number | null;
@@ -27,6 +29,7 @@ interface ShockTimerProps {
   resetRequest?: {
     token: number;
     target: "shockTimer" | "cordarone" | "adrenaline" | null;
+    sourceEventType?: "shock" | "analysis" | "cordarone" | "adrenaline" | null;
   };
 }
 
@@ -76,6 +79,8 @@ export default function ShockTimer({
   const [localLastAnalysisTime, setLocalLastAnalysisTime] = useState<
     number | null
   >(null);
+  const [analysisSuppressedByShock, setAnalysisSuppressedByShock] =
+    useState(false);
   const effectiveAnalysisStart = localLastAnalysisTime ?? lastAnalysisTime;
 
   const [theme, setTheme] = useState(sessionStore.theme);
@@ -98,6 +103,7 @@ export default function ShockTimer({
     const updateTimer = () => {
       const now = Date.now();
       if (
+        !analysisSuppressedByShock &&
         effectiveAnalysisStart &&
         (!lastShockTime || effectiveAnalysisStart > lastShockTime)
       ) {
@@ -131,6 +137,7 @@ export default function ShockTimer({
     isActive,
     effectiveStartTime,
     effectiveAnalysisStart,
+    analysisSuppressedByShock,
     durationSeconds,
     lastShockTime,
   ]);
@@ -144,13 +151,22 @@ export default function ShockTimer({
 
   useEffect(() => {
     setLocalLastAnalysisTime(null);
+    setAnalysisSuppressedByShock(false);
   }, [lastAnalysisTime]);
+
+  useEffect(() => {
+    // Once store catches up with a persisted shock timestamp, normal precedence logic is enough.
+    setAnalysisSuppressedByShock(false);
+  }, [lastShockTime]);
 
   // Reset this timer only when cancel targets the shock/analyse timer
   useEffect(() => {
     if (!resetRequest || resetRequest.target !== "shockTimer") return;
     setLocalStartTime(null);
     setLocalLastAnalysisTime(null);
+    if (resetRequest.sourceEventType === "shock") {
+      setLocalShockCount((c) => Math.max(0, c - 1));
+    }
     setTimeLeft(durationSeconds);
     stopBlinking();
     scaleAnim.setValue(1);
@@ -234,6 +250,7 @@ export default function ShockTimer({
     setLocalStartTime(now);
     setLocalShockCount((c) => c + 1);
     setLocalLastAnalysisTime(null);
+    setAnalysisSuppressedByShock(true);
     setTimeLeft(durationSeconds);
     onShock();
   };
@@ -245,12 +262,14 @@ export default function ShockTimer({
     warningPlayedRef.current = false;
 
     const now = Date.now();
+    setAnalysisSuppressedByShock(false);
     setLocalLastAnalysisTime(now);
     setTimeLeft(durationSeconds);
     onAnalysis();
   };
 
-  const handleShockBadgePress = () => {
+  const handleShockBadgePress = (event: GestureResponderEvent) => {
+    event.stopPropagation();
     if (!onCancelLastShock) return;
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onCancelLastShock();
@@ -295,20 +314,22 @@ export default function ShockTimer({
               width: circleSize - 6,
               height: circleSize - 6,
               borderRadius: (circleSize - 6) / 2,
-            }, theme === "dark" ? { backgroundColor: "#353636" } : { backgroundColor: "#F5F5F5" },
+            },
+            theme === "dark"
+              ? { backgroundColor: "#353636" }
+              : { backgroundColor: "#F5F5F5" },
           ]}
         >
-
-
           <Ionicons name="flash" size={32} color="black" />
           <Text style={styles.labelText}>CHOC</Text>
-          <TouchableOpacity
+          <Pressable
             style={styles.badge}
             onPress={handleShockBadgePress}
-            activeOpacity={0.75}
+            onPressIn={(event) => event.stopPropagation()}
+            hitSlop={10}
           >
             <Text style={styles.badgeText}>{localShockCount}</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </AnimatedTouchableOpacity>
 
@@ -369,16 +390,37 @@ export default function ShockTimer({
               width: innerSize,
               height: innerSize,
               borderRadius: innerRadius,
-            }, theme === "dark" ? { backgroundColor: "#353636" } : { backgroundColor: "#F5F5F5" },
+            },
+            theme === "dark"
+              ? { backgroundColor: "#353636" }
+              : { backgroundColor: "#F5F5F5" },
           ]}
         >
           <Ionicons
             name="stopwatch-outline"
             size={32}
-            style={[theme === "dark" ? {color: "#ccc", marginBottom: 4}:{color: "#000",  marginBottom: 4}]}
+            style={[
+              theme === "dark"
+                ? { color: "#ccc", marginBottom: 4 }
+                : { color: "#000", marginBottom: 4 },
+            ]}
           />
-          <Text style={[styles.timerText, theme === "dark" ? {color: "#ccc"}:{color: "#000"}]}>{formatTime(timeLeft)}</Text>
-          <Text style={[styles.labelText, theme === "dark" ? {color: "#ccc"}:{color: "#000"}]}>ANALYSE</Text>
+          <Text
+            style={[
+              styles.timerText,
+              theme === "dark" ? { color: "#ccc" } : { color: "#000" },
+            ]}
+          >
+            {formatTime(timeLeft)}
+          </Text>
+          <Text
+            style={[
+              styles.labelText,
+              theme === "dark" ? { color: "#ccc" } : { color: "#000" },
+            ]}
+          >
+            ANALYSE
+          </Text>
         </View>
       </AnimatedTouchableOpacity>
     </View>

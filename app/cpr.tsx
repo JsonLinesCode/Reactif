@@ -22,6 +22,7 @@ type ResetTarget = "shockTimer" | "cordarone" | "adrenaline";
 interface CancelResetRequest {
   token: number;
   target: ResetTarget | null;
+  sourceEventType: "shock" | "analysis" | "cordarone" | "adrenaline" | null;
 }
 
 export default function Cpr() {
@@ -35,14 +36,14 @@ export default function Cpr() {
   } = useCprSettings();
 
   // ---- Dark Mode State ----
-    const [theme, setTheme] = useState(sessionStore.theme);
+  const [theme, setTheme] = useState(sessionStore.theme);
 
-    useEffect(()=> {
-      const unsubscribe = sessionStore.subscribe(() => {
-        setTheme(sessionStore.theme);
-      });
-      return () => unsubscribe();
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
     });
+    return () => unsubscribe();
+  });
 
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
@@ -205,6 +206,7 @@ export default function Cpr() {
     useState<CancelResetRequest>({
       token: 0,
       target: null,
+      sourceEventType: null,
     });
 
   const handleEnd = () => {
@@ -238,24 +240,38 @@ export default function Cpr() {
     setCancelResetRequest((prev) => ({
       token: prev.token + 1,
       target,
+      sourceEventType:
+        lastEventType === "shock" ||
+        lastEventType === "analysis" ||
+        lastEventType === "cordarone" ||
+        lastEventType === "adrenaline"
+          ? lastEventType
+          : null,
     }));
   };
 
   const handleCancelLastShock = () => {
     const removed = sessionController.cancelLastOfType("shock");
-    if (!removed) return;
+    if (!removed) return false;
     setCancelResetRequest((prev) => ({
       token: prev.token + 1,
       target: "shockTimer",
+      sourceEventType: "shock",
     }));
+    return true;
   };
 
   return (
-    <SafeAreaView style={[{ flex: 1, backgroundColor: "#fff" }, theme === "dark" ? { backgroundColor: "#353636" } : {}]}>
+    <SafeAreaView
+      style={[
+        { flex: 1, backgroundColor: "#fff" },
+        theme === "dark" ? { backgroundColor: "#353636" } : {},
+      ]}
+    >
       <View style={styles.container}>
         {/* Top Timer */}
         <TouchableOpacity onPress={handleEvent}>
-          <CprTimer isActive={isScreenActive} />
+          <CprTimer />
         </TouchableOpacity>
 
         {/* Shock Circular Timer */}
