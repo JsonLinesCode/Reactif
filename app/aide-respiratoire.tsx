@@ -1,17 +1,20 @@
-import React, {useMemo, useState} from "react";
-import {Stack} from "expo-router";
-import {SafeAreaView, useSafeAreaInsets} from "react-native-safe-area-context";
+import CustomSwitch from "@/components/CustomSwitch";
+import * as Clipboard from "expo-clipboard";
+import { Stack } from "expo-router";
+import React, { useMemo, useState } from "react";
 import {
+  Alert,
+  StatusBar,
   StyleSheet,
-  View,
   Text,
   TextInput,
   TouchableOpacity,
-  StatusBar,
-  Alert,
+  View,
 } from "react-native";
-import CustomSwitch from "@/components/CustomSwitch";
-import * as Clipboard from "expo-clipboard";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function AideRespiratoire() {
   const insets = useSafeAreaInsets();
@@ -33,10 +36,10 @@ export default function AideRespiratoire() {
   }, [parsedHeight, sex]);
 
   const vtRange = useMemo(() => {
-    if (!Number.isFinite(pit)) return {min: NaN, max: NaN};
+    if (!Number.isFinite(pit)) return { min: NaN, max: NaN };
     const min = Math.round(pit * 6);
     const max = Math.round(pit * 8);
-    return {min, max};
+    return { min, max };
   }, [pit]);
 
   const validateAndCompute = () => {
@@ -67,9 +70,9 @@ export default function AideRespiratoire() {
   const displayPit = Number.isFinite(pit) ? pit.toFixed(1) : "—";
 
   return (
-    <SafeAreaView style={[styles.container, {paddingTop: insets.top}] }>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" />
-      <Stack.Screen options={{title: "Aide respiratoire"}} />
+      <Stack.Screen options={{ title: "Aide respiratoire" }} />
 
       <View style={styles.inner}>
         <Text style={styles.label}>Sexe</Text>
@@ -82,7 +85,7 @@ export default function AideRespiratoire() {
           selectionColor={"#0D47A1"}
         />
 
-        <Text style={[styles.label, {marginTop: 18}]}>Taille (cm)</Text>
+        <Text style={[styles.label, { marginTop: 18 }]}>Taille (cm)</Text>
         <TextInput
           value={heightCm}
           onChangeText={setHeightCm}
@@ -93,7 +96,10 @@ export default function AideRespiratoire() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={styles.buttonsRow}>
-          <TouchableOpacity style={styles.calcButton} onPress={validateAndCompute}>
+          <TouchableOpacity
+            style={styles.calcButton}
+            onPress={validateAndCompute}
+          >
             <Text style={styles.calcButtonText}>Calculer</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.resetButton} onPress={onReset}>
@@ -109,7 +115,11 @@ export default function AideRespiratoire() {
           </View>
           <View style={styles.resultRow}>
             <Text style={styles.resultLabel}>Vt (mL)</Text>
-            <Text style={styles.resultValue}>{Number.isFinite(vtRange.min) ? `${vtRange.min} – ${vtRange.max}` : "—"}</Text>
+            <Text style={styles.resultValue}>
+              {Number.isFinite(vtRange.min)
+                ? `${vtRange.min} – ${vtRange.max}`
+                : "—"}
+            </Text>
           </View>
           <Text style={styles.note}>Plage: 6–8 mL/kg de PIT</Text>
           <View style={styles.resultActions}>
@@ -124,9 +134,9 @@ export default function AideRespiratoire() {
 }
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: "#F5F5F5"},
-  inner: {padding: 16},
-  label: {fontSize: 16, color: "#111827", marginBottom: 8},
+  container: { flex: 1, backgroundColor: "#F5F5F5" },
+  inner: { padding: 16 },
+  label: { fontSize: 16, color: "#111827", marginBottom: 8 },
   input: {
     backgroundColor: "#fff",
     borderRadius: 8,
@@ -135,8 +145,8 @@ const styles = StyleSheet.create({
     borderColor: "#E5E7EB",
     fontSize: 16,
   },
-  error: {color: "#b91c1c", marginTop: 8},
-  buttonsRow: {flexDirection: "row", gap: 12, marginTop: 16},
+  error: { color: "#b91c1c", marginTop: 8 },
+  buttonsRow: { flexDirection: "row", gap: 12, marginTop: 16 },
   calcButton: {
     flex: 1,
     backgroundColor: "#0D47A1",
@@ -144,7 +154,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  calcButtonText: {color: "#fff", fontWeight: "bold"},
+  calcButtonText: { color: "#fff", fontWeight: "bold" },
   resetButton: {
     backgroundColor: "#fff",
     borderWidth: 1,
@@ -154,7 +164,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 14,
   },
-  resetButtonText: {color: "#374151", fontWeight: "600"},
+  resetButtonText: { color: "#374151", fontWeight: "600" },
   resultCard: {
     marginTop: 20,
     backgroundColor: "#fff",
@@ -163,16 +173,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E7EB",
   },
-  resultTitle: {fontSize: 18, fontWeight: "700", marginBottom: 8},
+  resultTitle: { fontSize: 18, fontWeight: "700", marginBottom: 8 },
   resultRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 8,
   },
-  resultLabel: {color: "#374151"},
-  resultValue: {fontWeight: "700", color: "#111827"},
-  note: {color: "#6b7280", marginTop: 6},
-  resultActions: {marginTop: 12, alignItems: "flex-end"},
+  resultLabel: { color: "#374151" },
+  resultValue: { fontWeight: "700", color: "#111827" },
+  note: { color: "#6b7280", marginTop: 6 },
+  resultActions: { marginTop: 12, alignItems: "flex-end" },
   copyButton: {
     backgroundColor: "#fff",
     borderWidth: 1,
@@ -181,5 +191,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
   },
-  copyButtonText: {color: "#0D47A1", fontWeight: "600"},
+  copyButtonText: { color: "#0D47A1", fontWeight: "600" },
 });
