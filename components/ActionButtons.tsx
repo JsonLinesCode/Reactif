@@ -102,7 +102,6 @@ export default function ActionButtons({
           Aide cognitive
         </Text>
       </View>
-
       <View style={styles.actionItem}>
         <LongPressButton
           onComplete={onCancel}
@@ -132,6 +131,7 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     justifyContent: "center",
     alignItems: "center",
+    alignSelf: "center",
     marginBottom: 8,
   },
 

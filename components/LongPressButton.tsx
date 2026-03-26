@@ -116,10 +116,11 @@ export default function LongPressButton({
     <View style={styles.container}>
       <View
         style={{
-          width: svgSize,
-          height: svgSize,
+          width: size,
+          height: size,
           justifyContent: "center",
           alignItems: "center",
+          position: "relative",
         }}
       >
         <Pressable
@@ -144,14 +145,16 @@ export default function LongPressButton({
         </Pressable>
 
         <View
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              justifyContent: "center",
-              alignItems: "center",
-              pointerEvents: "none",
-            },
-          ]}
+          style={{
+            position: "absolute",
+            left: (size - svgSize) / 2,
+            top: (size - svgSize) / 2,
+            width: svgSize,
+            height: svgSize,
+            justifyContent: "center",
+            alignItems: "center",
+            pointerEvents: "none",
+          }}
         >
           <Svg
             width={svgSize}
@@ -188,7 +191,9 @@ export default function LongPressButton({
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: "column",
     alignItems: "center",
+    alignSelf: "center",
   },
   pressableContainer: {
     zIndex: 10,

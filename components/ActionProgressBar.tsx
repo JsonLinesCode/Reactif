@@ -292,7 +292,7 @@ export default function ActionProgressBar({
 const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "center",
     width: "100%",
   },
