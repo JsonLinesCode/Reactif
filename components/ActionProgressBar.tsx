@@ -250,9 +250,24 @@ export default function ActionProgressBar({
         <View style={[styles.layer]}>
           <View style={styles.content}>
             {icon && React.cloneElement(icon, { color: "#fff" } as any)}
-            <View style={styles.labelContainer}>
-              <Text style={[styles.label, { color }]}>{label}</Text>
-              <Text style={[styles.subtitle, { color }]}>{subtitle || ""}</Text>
+            <View
+              style={[
+                styles.labelContainer,
+                !subtitle ? styles.labelContainerCenter : undefined,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.label,
+                  { color },
+                  !subtitle ? styles.labelCenter : undefined,
+                ]}
+              >
+                {label}
+              </Text>
+              {subtitle ? (
+                <Text style={[styles.subtitle, { color }]}>{subtitle}</Text>
+              ) : null}
             </View>
             <Text style={[styles.timerRight, { color }]}>{timeLeftText}</Text>
           </View>
@@ -271,11 +286,26 @@ export default function ActionProgressBar({
         >
           <View style={[styles.content, { width: width - 7 }]}>
             {icon && React.cloneElement(icon, { color: "#fff" } as any)}
-            <View style={styles.labelContainer}>
-              <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
-              <Text style={[styles.subtitle, { color: "#fff" }]}>
-                {subtitle || ""}
+            <View
+              style={[
+                styles.labelContainer,
+                !subtitle ? styles.labelContainerCenter : undefined,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.label,
+                  { color: "#fff" },
+                  !subtitle ? styles.labelCenter : undefined,
+                ]}
+              >
+                {label}
               </Text>
+              {subtitle ? (
+                <Text style={[styles.subtitle, { color: "#fff" }]}>
+                  {subtitle}
+                </Text>
+              ) : null}
             </View>
             <Text style={styles.timerRight}>{timeLeftText}</Text>
           </View>
@@ -333,10 +363,17 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     paddingLeft: 10,
   },
+  labelContainerCenter: {
+    alignItems: "center",
+    paddingLeft: 0,
+  },
   label: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "left",
+  },
+  labelCenter: {
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 15,
