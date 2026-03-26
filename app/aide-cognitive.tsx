@@ -1,6 +1,6 @@
 import ImageViewer from "@/components/ImageViewer";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   ImageSourcePropType,
@@ -48,6 +48,7 @@ const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
 ];
 
 export default function AideCognitive() {
+  const router = useRouter();
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
@@ -70,6 +71,14 @@ export default function AideCognitive() {
         </View>
 
         <View style={styles.optionsList}>
+          <TouchableOpacity
+            style={styles.optionItem}
+            onPress={() => router.push("/aide-respiratoire")}
+          >
+            <Text style={styles.optionText}>Calculateur respiratoire</Text>
+            <Ionicons name="chevron-forward" size={22} color="#0D47A1" />
+          </TouchableOpacity>
+
           {COGNITIVE_DOCUMENTS.map((item) => (
             <TouchableOpacity
               key={item.id}
