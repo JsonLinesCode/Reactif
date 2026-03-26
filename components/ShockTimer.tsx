@@ -1,6 +1,7 @@
 import { sessionController } from "@/controllers/SessionController";
 import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -54,7 +55,8 @@ export default function ShockTimer({
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const soundPlayedRef = useRef(false);
-  const warningPlayedRef = useRef(false);
+  const firstReminderPlayedRef = useRef(false);
+  const midReminderPlayedRef = useRef(false);
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
   const shockBounceAnim = useRef(new Animated.Value(1)).current;
@@ -85,8 +87,6 @@ export default function ShockTimer({
 
   const [theme, setTheme] = useState(sessionStore.theme);
 
-  const colorIcon = theme === "dark" ? "grey" : "black";
-
   useEffect(() => {
     if (!isActive) return;
 
@@ -96,7 +96,8 @@ export default function ShockTimer({
       stopBlinking();
       scaleAnim.setValue(1);
       soundPlayedRef.current = false;
-      warningPlayedRef.current = false;
+      firstReminderPlayedRef.current = false;
+      midReminderPlayedRef.current = false;
       return;
     }
 
@@ -171,8 +172,11 @@ export default function ShockTimer({
     stopBlinking();
     scaleAnim.setValue(1);
     soundPlayedRef.current = false;
-    warningPlayedRef.current = false;
+    firstReminderPlayedRef.current = false;
+    midReminderPlayedRef.current = false;
   }, [resetRequest, durationSeconds]);
+
+  const midpointWarning = Math.max(1, Math.floor(warningSeconds / 2));
 
   useEffect(() => {
     if (!isActive) {
@@ -182,7 +186,7 @@ export default function ShockTimer({
 
     if (timeLeft === 0) {
       if (!soundPlayedRef.current) {
-        sessionController.playSound("beep");
+        sessionController.playReminderPattern("end");
         soundPlayedRef.current = true;
       }
       startBlinking();
@@ -190,10 +194,20 @@ export default function ShockTimer({
       if (
         warningSeconds > 0 &&
         timeLeft === warningSeconds &&
-        !warningPlayedRef.current
+        !firstReminderPlayedRef.current
       ) {
-        sessionController.playSound("beep");
-        warningPlayedRef.current = true;
+        sessionController.playReminderPattern("first");
+        firstReminderPlayedRef.current = true;
+      }
+
+      if (
+        warningSeconds > 1 &&
+        timeLeft === midpointWarning &&
+        timeLeft < warningSeconds &&
+        !midReminderPlayedRef.current
+      ) {
+        sessionController.playReminderPattern("mid");
+        midReminderPlayedRef.current = true;
       }
 
       stopBlinking();
@@ -201,10 +215,11 @@ export default function ShockTimer({
         soundPlayedRef.current = false;
       }
       if (timeLeft > warningSeconds) {
-        warningPlayedRef.current = false;
+        firstReminderPlayedRef.current = false;
+        midReminderPlayedRef.current = false;
       }
     }
-  }, [isActive, timeLeft, warningSeconds]);
+  }, [isActive, midpointWarning, timeLeft, warningSeconds]);
 
   const startBlinking = () => {
     if (blinkingRef.current) return;
@@ -244,7 +259,8 @@ export default function ShockTimer({
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     stopBlinking();
     soundPlayedRef.current = false;
-    warningPlayedRef.current = false;
+    firstReminderPlayedRef.current = false;
+    midReminderPlayedRef.current = false;
 
     const now = Date.now();
     setLocalStartTime(now);
@@ -259,7 +275,8 @@ export default function ShockTimer({
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     stopBlinking();
     soundPlayedRef.current = false;
-    warningPlayedRef.current = false;
+    firstReminderPlayedRef.current = false;
+    midReminderPlayedRef.current = false;
 
     const now = Date.now();
     setAnalysisSuppressedByShock(false);
@@ -320,7 +337,7 @@ export default function ShockTimer({
               : { backgroundColor: "#F5F5F5" },
           ]}
         >
-          <Ionicons name="flash" size={32} color="black" />
+          <Ionicons name="flash" size={40} color="black" />
           <Text style={styles.labelText}>CHOC</Text>
           <Pressable
             style={styles.badge}
@@ -396,9 +413,9 @@ export default function ShockTimer({
               : { backgroundColor: "#F5F5F5" },
           ]}
         >
-          <Ionicons
-            name="stopwatch-outline"
-            size={32}
+          <MaterialCommunityIcons
+            name="heart-pulse"
+            size={40}
             style={[
               theme === "dark"
                 ? { color: "#ccc", marginBottom: 4 }
@@ -430,11 +447,11 @@ export default function ShockTimer({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 10,
-    gap: 10,
+    gap: 16,
   },
   buttonCircle: {
     backgroundColor: "#F5F5F5", // Same bg as inner timer
@@ -462,12 +479,12 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   timerText: {
-    fontSize: 28, // Adjusted font size
+    fontSize: 36,
     fontWeight: "bold",
     color: "#000",
   },
   labelText: {
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: "900",
     color: "#000",
     textTransform: "uppercase",

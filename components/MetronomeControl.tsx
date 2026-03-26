@@ -1,9 +1,8 @@
+import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
-import { sessionController } from "@/controllers/SessionController";
-import {sessionStore} from "@/store/sessionStore";
 
 interface MetronomeControlProps {
   bpm: number;
@@ -20,29 +19,43 @@ export default function MetronomeControl({
 }: MetronomeControlProps) {
   const decreaseBpm = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setBpm(Math.max(30, bpm - 10));
-  }; // Steps of 10 usually? Or 5? Or 1? Screenshot is just +/-. Assume standard.
+    setBpm(Math.max(100, bpm - 5));
+  };
   const increaseBpm = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setBpm(Math.min(240, bpm + 10));
+    setBpm(Math.min(120, bpm + 5));
   };
 
   const theme = sessionStore.theme;
 
   return (
-    <View style={[styles.container, theme === "dark" ? {backgroundColor: "#333", borderColor: "#ccc"} : {}]}>
+    <View
+      style={[
+        styles.container,
+        theme === "dark"
+          ? { backgroundColor: "#333", borderColor: "#ccc" }
+          : {},
+      ]}
+    >
       {/* BPM Control */}
       <View style={styles.bpmContainer}>
         <TouchableOpacity style={styles.bpmButton} onPress={decreaseBpm}>
-          <Ionicons name="remove" size={24} color="#000" />
+          <Ionicons name="remove" size={20} color="#000" />
         </TouchableOpacity>
         <View style={styles.bpmDisplay}>
-          <Text style={[styles.bpmValue, theme === "dark" ? {color: "#ccc"}:{color: "#333"}]}>{bpm}</Text>
+          <Text
+            style={[
+              styles.bpmValue,
+              theme === "dark" ? { color: "#ccc" } : { color: "#333" },
+            ]}
+          >
+            {bpm}
+          </Text>
           <Text style={styles.bpmLabel}>BPM</Text>
         </View>
 
         <TouchableOpacity style={styles.bpmButton} onPress={increaseBpm}>
-          <Ionicons name="add" size={24} color="#000" />
+          <Ionicons name="add" size={20} color="#000" />
         </TouchableOpacity>
       </View>
 
@@ -72,10 +85,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderWidth : 4,
+    borderWidth: 4,
     borderColor: "#333",
-    borderRadius: 25,
-    padding: 15,
+    borderRadius: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
     width: "100%",
   },
   bpmContainer: {
@@ -86,32 +100,32 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   bpmButton: {
-    width: 50,
-    height: 50,
+    width: 38,
+    height: 38,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#ccc",
-    borderRadius: 15,
+    borderRadius: 10,
     marginHorizontal: 4,
   },
   bpmDisplay: {
     alignItems: "center",
   },
   bpmValue: {
-    fontSize: 35,
+    fontSize: 28,
     fontWeight: "bold",
     color: "#333",
   },
   bpmLabel: {
-    fontSize: 25,
+    fontSize: 16,
     color: "#ccc",
   },
   muteContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#ccc", // Toggle background
-    borderRadius: 20,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    borderRadius: 14,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
 });

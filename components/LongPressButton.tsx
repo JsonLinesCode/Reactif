@@ -1,3 +1,4 @@
+import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React, { useRef } from "react";
@@ -13,8 +14,6 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle } from "react-native-svg";
-import { sessionController } from "@/controllers/SessionController";
-import {sessionStore} from "@/store/sessionStore";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -37,7 +36,6 @@ export default function LongPressButton({
   label = "Annuler",
   duration = DURATION,
 }: LongPressButtonProps) {
-
   const theme = sessionStore.theme;
 
   const progress = useSharedValue(0);
@@ -176,7 +174,14 @@ export default function LongPressButton({
           </Svg>
         </View>
       </View>
-      <Text style={[styles.label, theme === "dark" ? {color: "#ccc"}:{color: "black"}]}>{label}</Text>
+      <Text
+        style={[
+          styles.label,
+          theme === "dark" ? { color: "#ccc" } : { color: "black" },
+        ]}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
@@ -184,7 +189,6 @@ export default function LongPressButton({
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    transform: [{ translateY: -10 }],
   },
   pressableContainer: {
     zIndex: 10,

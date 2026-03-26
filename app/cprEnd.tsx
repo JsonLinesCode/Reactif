@@ -116,31 +116,53 @@ export default function CprEnd() {
       <SafeAreaView style={[styles.container, bgStyle]}>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.confirmContainer}>
-          <Text style={[styles.title, theme === "dark" ? {color: "#ccc"}:{}]}>RACS</Text>
-          <Text style={[styles.subtitle, theme === "dark" ? {color: "#fff"}:{}]}>
+          <Text
+            style={[styles.title, theme === "dark" ? { color: "#ccc" } : {}]}
+          >
+            RACS
+          </Text>
+          <Text
+            style={[styles.subtitle, theme === "dark" ? { color: "#fff" } : {}]}
+          >
             Retour d&#39;Activité Circulatoire Spontanée
           </Text>
 
           <View style={styles.buttonGroupConfirm}>
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.resumeButton]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                styles.resumeButton,
+              ]}
               onPress={handleResume}
             >
-              <Text style={styles.buttonText}>Reprendre la RCP</Text>
+              <Text style={[styles.buttonText, styles.resumeText]}>
+                Reprendre la RCP
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.deathButton, theme === "dark" ? { backgroundColor: "#353636", borderColor : "#fff",borderWidth: 3 } : {}]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                styles.deathButton,
+              ]}
               onPress={handleDeath}
             >
-              <Text style={styles.buttonText}>Décès</Text>
+              <Text style={[styles.buttonText, styles.deathText]}>Décès</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.stopButton]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                styles.stopButton,
+              ]}
               onPress={handleConfirmEnd}
             >
-              <Text style={styles.buttonText}>Arrêter définitivement</Text>
+              <Text style={[styles.buttonText, styles.stopText]}>
+                Fin d'intervention
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -159,14 +181,24 @@ export default function CprEnd() {
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.summaryScroll}>
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, theme === "dark" ? { color: "#ccc" } : {}]}>
+          <Text
+            style={[
+              styles.headerTitle,
+              theme === "dark" ? { color: "#ccc" } : {},
+            ]}
+          >
             {" "}
             {summaryTitle === "Décès" ? "Patient décédé" : "Résumé de la RCP"}
           </Text>
         </View>
 
         {/* Stats Card */}
-        <View style={[styles.card, theme === "dark" ? { backgroundColor: "#999" } : {}]}>
+        <View
+          style={[
+            styles.card,
+            theme === "dark" ? { backgroundColor: "#999" } : {},
+          ]}
+        >
           <View style={[styles.cardRow]}>
             <FontAwesome5
               name="hourglass-half"
@@ -192,13 +224,30 @@ export default function CprEnd() {
         </View>
 
         {/* Actions Card */}
-        <View style={[styles.card, theme === "dark" ? { backgroundColor: "#999" } : {}]}>
+        <View
+          style={[
+            styles.card,
+            theme === "dark" ? { backgroundColor: "#999" } : {},
+          ]}
+        >
           <View style={styles.cardHeaderRow}>
             <Text style={styles.cardTitle}> Actions réalisées:</Text>
           </View>
-          <View style={[styles.divider, theme === "dark" ? {backgroundColor: "black"}:{}]} />
+          <View
+            style={[
+              styles.divider,
+              theme === "dark" ? { backgroundColor: "black" } : {},
+            ]}
+          />
           {actions.length === 0 ? (
-            <Text style={[styles.emptyText, theme === "dark" ? {color: "#555"}:{}]}>Aucune action.</Text>
+            <Text
+              style={[
+                styles.emptyText,
+                theme === "dark" ? { color: "#555" } : {},
+              ]}
+            >
+              Aucune action.
+            </Text>
           ) : (
             actions.map(({ event, cycle }, i) => (
               <Text key={i} style={styles.itemText}>
@@ -209,13 +258,30 @@ export default function CprEnd() {
         </View>
 
         {/* Events Card */}
-        <View style={[styles.card, theme === "dark" ? { backgroundColor: "#999" } : {}]}>
+        <View
+          style={[
+            styles.card,
+            theme === "dark" ? { backgroundColor: "#999" } : {},
+          ]}
+        >
           <View style={styles.cardHeaderRow}>
             <Text style={styles.cardTitle}> Événements saisis:</Text>
           </View>
-          <View style={[styles.divider, theme === "dark" ? {backgroundColor: "black"}:{}]} />
+          <View
+            style={[
+              styles.divider,
+              theme === "dark" ? { backgroundColor: "black" } : {},
+            ]}
+          />
           {customEvents.length === 0 ? (
-            <Text style={[styles.emptyText, theme === "dark" ? {color: "#555"}:{}]}>Aucun événement.</Text>
+            <Text
+              style={[
+                styles.emptyText,
+                theme === "dark" ? { color: "#555" } : {},
+              ]}
+            >
+              Aucun événement.
+            </Text>
           ) : (
             customEvents.map(({ event, cycle }, i: number) => (
               <Text key={i} style={styles.itemText}>
@@ -228,18 +294,18 @@ export default function CprEnd() {
         {/* Buttons */}
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity
-            style={[styles.actionButton, styles.greyButton]}
+            style={[styles.actionButton, styles.outlineSummaryButton]}
             onPress={handleExportPdf}
           >
-            <FontAwesome5 name="file-pdf" size={18} color="#fff" />
+            <FontAwesome5 name="file-pdf" size={18} color="#546E7A" />
             <Text style={styles.actionButtonText}> Exporter en PDF</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.actionButton, styles.greyButton]}
+            style={[styles.actionButton, styles.outlineSummaryButton]}
             onPress={handleGoHome}
           >
-            <FontAwesome5 name="home" size={18} color="#fff" />
+            <FontAwesome5 name="home" size={18} color="#546E7A" />
             <Text style={styles.actionButtonText}>
               {" "}
               Retour à l&apos;accueil
@@ -411,21 +477,17 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     elevation: 2,
+    borderWidth: 2,
   },
   actionButtonText: {
-    color: "#fff",
+    color: "#546E7A",
     fontSize: 16,
     fontWeight: "bold",
     marginLeft: 10,
   },
-  greyButton: {
-    backgroundColor: "#546E7A",
-  },
-  blueButton: {
-    backgroundColor: "#007BFF",
-  },
-  tealButton: {
-    backgroundColor: "#26A69A",
+  outlineSummaryButton: {
+    backgroundColor: "transparent",
+    borderColor: "#546E7A",
   },
 
   // Confirm styles
@@ -460,19 +522,31 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 2,
   },
+  outlineButton: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+  },
   resumeButton: {
-    backgroundColor: "#28a745",
+    borderColor: "#28a745",
   },
   stopButton: {
-    backgroundColor: "#d9534f",
+    borderColor: "#d9534f",
   },
   deathButton: {
-    backgroundColor: "#333", // Black/Dark Grey for Death
+    borderColor: "#333",
   },
   buttonText: {
-    color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
     marginLeft: 10,
+  },
+  resumeText: {
+    color: "#28a745",
+  },
+  stopText: {
+    color: "#d9534f",
+  },
+  deathText: {
+    color: "#333",
   },
 });

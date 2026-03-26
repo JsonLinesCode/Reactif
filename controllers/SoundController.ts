@@ -1,10 +1,11 @@
 import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
 
-export type SoundName = "tick" | "beep";
+export type SoundName = "tick" | "beep" | "beepLong";
 
 const SOUND_FILES: Record<SoundName, any> = {
   tick: require("@/assets/audio/metronome_tick.wav"),
   beep: require("@/assets/audio/beep.wav"),
+  beepLong: require("@/assets/audio/beep_shock.wav"),
 };
 
 export class SoundController {
@@ -18,7 +19,7 @@ export class SoundController {
       staysActiveInBackground: true,
       interruptionModeIOS: InterruptionModeIOS.DuckOthers,
       playsInSilentModeIOS: true,
-      shouldDuckAndroid: true,
+      shouldDuckAndroid: false,
       interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
       playThroughEarpieceAndroid: false,
     });
@@ -27,6 +28,7 @@ export class SoundController {
     for (const name of Object.keys(SOUND_FILES) as SoundName[]) {
       try {
         const result = await Audio.Sound.createAsync(SOUND_FILES[name]);
+        await result.sound.setVolumeAsync(1);
         this.sounds[name] = result.sound;
       } catch (e) {
         this.sounds[name] = null;
@@ -41,9 +43,29 @@ export class SoundController {
     const sound = this.sounds[name];
     try {
       if (!sound) return;
+      await sound.setVolumeAsync(1);
       await sound.replayAsync();
     } catch (e) {
       // ignore playback errors
+    }
+  }
+
+  private async wait(ms: number) {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async playReminderPattern(kind: "first" | "mid" | "end") {
+    if (kind === "end") {
+      await this.play("beepLong");
+      return;
+    }
+
+    const count = kind === "first" ? 2 : 3;
+    for (let i = 0; i < count; i += 1) {
+      await this.play("beep");
+      if (i < count - 1) {
+        await this.wait(220);
+      }
     }
   }
 

@@ -56,7 +56,8 @@ export default function ActionProgressBar({
   const bounceAnim = useRef(new Animated.Value(1)).current;
 
   const soundPlayedRef = useRef(false);
-  const warningPlayedRef = useRef(false);
+  const firstReminderPlayedRef = useRef(false);
+  const midReminderPlayedRef = useRef(false);
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
@@ -67,7 +68,8 @@ export default function ActionProgressBar({
     if (!effectiveLast) {
       setElapsed(0);
       soundPlayedRef.current = false;
-      warningPlayedRef.current = false;
+      firstReminderPlayedRef.current = false;
+      midReminderPlayedRef.current = false;
       stopBlinking();
       return;
     }
@@ -93,12 +95,14 @@ export default function ActionProgressBar({
     setLocalLastActionTime(null);
     setElapsed(0);
     soundPlayedRef.current = false;
-    warningPlayedRef.current = false;
+    firstReminderPlayedRef.current = false;
+    midReminderPlayedRef.current = false;
     stopBlinking();
   }, [resetRequest, resetKey]);
 
   const timeLeft = Math.max(0, durationSeconds - elapsed);
   const isExpired = elapsed >= durationSeconds;
+  const midpointWarning = Math.max(1, Math.floor(warningSeconds / 2));
 
   useEffect(() => {
     if (!isActive) {
@@ -108,7 +112,7 @@ export default function ActionProgressBar({
 
     if (isExpired) {
       if (!soundPlayedRef.current) {
-        sessionController.playSound("beep");
+        sessionController.playReminderPattern("end");
         triggerHaptic();
         soundPlayedRef.current = true;
       }
@@ -117,10 +121,20 @@ export default function ActionProgressBar({
       if (
         warningSeconds > 0 &&
         timeLeft === warningSeconds &&
-        !warningPlayedRef.current
+        !firstReminderPlayedRef.current
       ) {
-        sessionController.playSound("beep");
-        warningPlayedRef.current = true;
+        sessionController.playReminderPattern("first");
+        firstReminderPlayedRef.current = true;
+      }
+
+      if (
+        warningSeconds > 1 &&
+        timeLeft === midpointWarning &&
+        timeLeft < warningSeconds &&
+        !midReminderPlayedRef.current
+      ) {
+        sessionController.playReminderPattern("mid");
+        midReminderPlayedRef.current = true;
       }
 
       stopBlinking();
@@ -128,10 +142,11 @@ export default function ActionProgressBar({
         soundPlayedRef.current = false;
       }
       if (timeLeft > warningSeconds) {
-        warningPlayedRef.current = false;
+        firstReminderPlayedRef.current = false;
+        midReminderPlayedRef.current = false;
       }
     }
-  }, [isActive, isExpired, timeLeft, warningSeconds]);
+  }, [isActive, isExpired, midpointWarning, timeLeft, warningSeconds]);
 
   const triggerHaptic = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -188,7 +203,8 @@ export default function ActionProgressBar({
 
     stopBlinking();
     soundPlayedRef.current = false;
-    warningPlayedRef.current = false;
+    firstReminderPlayedRef.current = false;
+    midReminderPlayedRef.current = false;
 
     onPress();
     setLocalLastActionTime(Date.now());
@@ -236,10 +252,9 @@ export default function ActionProgressBar({
             {icon && React.cloneElement(icon, { color: "#fff" } as any)}
             <View style={styles.labelContainer}>
               <Text style={[styles.label, { color }]}>{label}</Text>
-              <Text style={[styles.subtitle, { color }]}>
-                {subtitle ? `${subtitle} - ${timeLeftText}` : timeLeftText}
-              </Text>
+              <Text style={[styles.subtitle, { color }]}>{subtitle || ""}</Text>
             </View>
+            <Text style={[styles.timerRight, { color }]}>{timeLeftText}</Text>
           </View>
         </View>
 
@@ -259,9 +274,10 @@ export default function ActionProgressBar({
             <View style={styles.labelContainer}>
               <Text style={[styles.label, { color: "#fff" }]}>{label}</Text>
               <Text style={[styles.subtitle, { color: "#fff" }]}>
-                {subtitle ? `${subtitle} - ${timeLeftText}` : timeLeftText}
+                {subtitle || ""}
               </Text>
             </View>
+            <Text style={styles.timerRight}>{timeLeftText}</Text>
           </View>
         </View>
       </AnimatedTouchableOpacity>
@@ -282,8 +298,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    height: 54,
-    borderRadius: 28,
+    height: 66,
+    borderRadius: 33,
     borderWidth: 2,
     position: "relative",
     justifyContent: "center",
@@ -314,22 +330,30 @@ const styles = StyleSheet.create({
   },
   labelContainer: {
     flex: 1,
-    alignItems: "center",
+    alignItems: "flex-start",
+    paddingLeft: 10,
   },
   label: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "bold",
-    textAlign: "center",
+    textAlign: "left",
   },
   subtitle: {
-    fontSize: 14,
-    textAlign: "center",
+    fontSize: 15,
+    textAlign: "left",
     fontWeight: "normal",
+  },
+  timerRight: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#fff",
+    minWidth: 78,
+    textAlign: "right",
   },
   badge: {
     borderWidth: 2,
-    width: 54,
-    height: 54,
+    width: 60,
+    height: 60,
     borderRadius: 1000,
     justifyContent: "center",
     alignItems: "center",

@@ -43,7 +43,7 @@ export default function Cpr() {
       setTheme(sessionStore.theme);
     });
     return () => unsubscribe();
-  });
+  }, []);
 
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
@@ -222,6 +222,10 @@ export default function Cpr() {
     sessionController.logEvents(selectedEvents);
   };
 
+  const handleOpenAideCognitive = () => {
+    router.push("/aide-cognitive" as any);
+  };
+
   const handleCancel = () => {
     const lastEventType = sessionStore.getSession()?.events.at(-1)?.type;
     let target: ResetTarget | null = null;
@@ -276,7 +280,7 @@ export default function Cpr() {
 
         {/* Shock Circular Timer */}
         {/* Pass shockDuration from settings */}
-        <View>
+        <View style={styles.shockRow}>
           <ShockTimer
             onShock={sessionController.logShock}
             onAnalysis={sessionController.logAnalysis}
@@ -293,21 +297,6 @@ export default function Cpr() {
         {/* Action Progress Bars */}
         <View style={styles.actionsContainer}>
           <ActionProgressBar
-            label="Cordarone"
-            count={cordaroneCount}
-            color="#448AFF"
-            icon={<FontAwesome5 name="syringe" size={24} />}
-            onPress={sessionController.logCordarone}
-            lastActionTime={lastCordaroneTimeState}
-            durationSeconds={cordaroneDuration} // Use setting
-            subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
-            resetRequest={cancelResetRequest}
-            resetKey="cordarone"
-            warningSeconds={warningSeconds}
-            isActive={isScreenActive}
-          />
-
-          <ActionProgressBar
             label="Adrenaline"
             count={adrenalineCount}
             color="#448AFF"
@@ -321,12 +310,28 @@ export default function Cpr() {
             warningSeconds={warningSeconds}
             isActive={isScreenActive}
           />
+
+          <ActionProgressBar
+            label="Cordarone"
+            count={cordaroneCount}
+            color="#448AFF"
+            icon={<FontAwesome5 name="syringe" size={24} />}
+            onPress={sessionController.logCordarone}
+            lastActionTime={lastCordaroneTimeState}
+            durationSeconds={cordaroneDuration} // Use setting
+            subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
+            resetRequest={cancelResetRequest}
+            resetKey="cordarone"
+            warningSeconds={warningSeconds}
+            isActive={isScreenActive}
+          />
         </View>
 
         {/* Action Buttons Grid */}
         <ActionButtons
           onEnd={handleEnd}
           onEvent={handleEvent}
+          onAideCognitive={handleOpenAideCognitive}
           onCancel={handleCancel}
           useShortTapEndButton={endButtonShortTap}
         />
@@ -360,7 +365,12 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     flex: 1,
     width: "100%",
-    gap: 8,
+    gap: 16,
+    justifyContent: "center",
+  },
+  shockRow: {
+    width: "100%",
+    alignItems: "center",
     justifyContent: "center",
   },
 });

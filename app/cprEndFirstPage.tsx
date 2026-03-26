@@ -4,7 +4,6 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { sessionStore } from "@/store/sessionStore";
-import { sessionController} from "@/controllers/SessionController";
 
 export default function CprEndFirstPage() {
   const theme = sessionStore.theme;
@@ -19,28 +18,51 @@ export default function CprEndFirstPage() {
     router.push({ pathname: "/cprEnd", params: { mode: "racs" } });
   };
 
-  const bgStyle = theme === "dark" ? { backgroundColor: "#353636" } : { backgroundColor: "#fff" };
+  const handleInterventionEnd = async () => {
+    await sessionStore.saveCurrentSession("Arrêt définitif");
+    router.push({ pathname: "/cprEnd", params: { mode: "death" } });
+  };
+
+  const bgStyle =
+    theme === "dark"
+      ? { backgroundColor: "#353636" }
+      : { backgroundColor: "#fff" };
 
   return (
     <SafeAreaView style={[styles.container, bgStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.contentContainer}>
-        <Text style={[styles.title, theme === "dark" ? {color: "#ccc"}:{}]}>Fin de RCP</Text>
-        <Text style={[styles.subtitle, theme === "dark" ? {color: "#ddd"}:{}]}>Résultat de la réanimation</Text>
+        <Text style={[styles.title, theme === "dark" ? { color: "#ccc" } : {}]}>
+          Fin de RCP
+        </Text>
+        <Text
+          style={[styles.subtitle, theme === "dark" ? { color: "#ddd" } : {}]}
+        >
+          Résultat de la réanimation
+        </Text>
 
         <View style={styles.buttonGroup}>
           <TouchableOpacity
-            style={[styles.button, styles.deathButton, theme === "dark" ? { borderColor : "#fff",borderWidth: 3 } : {}]}
+            style={[styles.button, styles.outlineButton, styles.deathButton]}
             onPress={handleDeath}
           >
-            <Text style={styles.buttonText}>Décès</Text>
+            <Text style={[styles.buttonText, styles.deathText]}>Décès</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.racsButton]}
+            style={[styles.button, styles.outlineButton, styles.racsButton]}
             onPress={handleRacs}
           >
-            <Text style={styles.buttonText}>RACS</Text>
+            <Text style={[styles.buttonText, styles.racsText]}>RACS</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.button, styles.outlineButton, styles.stopButton]}
+            onPress={handleInterventionEnd}
+          >
+            <Text style={[styles.buttonText, styles.stopText]}>
+              Fin d'intervention
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -88,16 +110,31 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
+  outlineButton: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+  },
   deathButton: {
-    backgroundColor: "#333", // Black/Dark Grey for Death
+    borderColor: "#333",
   },
   racsButton: {
-    backgroundColor: "#28a745", // Green for RACS (Success/Life)
+    borderColor: "#28a745",
+  },
+  stopButton: {
+    borderColor: "#d9534f",
   },
   buttonText: {
-    color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
     marginLeft: 10,
+  },
+  deathText: {
+    color: "#333",
+  },
+  racsText: {
+    color: "#28a745",
+  },
+  stopText: {
+    color: "#d9534f",
   },
 });

@@ -1,19 +1,19 @@
 import { sessionStore } from "@/store/sessionStore";
 import { getCurrentCycleElapsedSeconds } from "@/utils/sessionUtils";
 import React, { useEffect, useState } from "react";
-import {StyleSheet, Text, View} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function CprTimer() {
-
   const [theme, setTheme] = useState(sessionStore.theme);
 
   useEffect(() => {
     const unsubscribe = sessionStore.subscribe(() => {
-        setTheme(sessionStore.theme);
-    })
-  });
+      setTheme(sessionStore.theme);
+    });
+    return unsubscribe;
+  }, []);
 
-  const textStyleColor = {color: theme === "dark" ? "#ccc" : "#000"};
+  const textStyleColor = { color: theme === "dark" ? "#ccc" : "#000" };
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
@@ -40,14 +40,21 @@ export default function CprTimer() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-
   return (
-    <View style={[styles.container, theme === "dark" ? {backgroundColor: "#333", borderColor: "#ccc"} : {}]}>
+    <View
+      style={[
+        styles.container,
+        theme === "dark"
+          ? { backgroundColor: "#333", borderColor: "#ccc" }
+          : {},
+      ]}
+    >
       <Text style={[styles.label, textStyleColor]}>Durée RCP</Text>
-      <View style={[styles.timerContainer, theme === "dark" ? {backgroundColor: "#333", borderColor: "#ccc"} : {}]}>
-        <Text style={[styles.timerText, textStyleColor]}>{formatTime(seconds)}</Text>
+      <View style={styles.timerContainer}>
+        <Text style={[styles.timerText, textStyleColor]}>
+          {formatTime(seconds)}
+        </Text>
       </View>
-      <Text style={{ color: "#fff", marginTop: 8 }}>SAISIE ÉVENEMENTS</Text>
     </View>
   );
 }
@@ -56,9 +63,10 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     borderWidth: 4,
-    borderColor: '#333',
+    borderColor: "#333",
     borderRadius: 25,
-    padding: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     alignItems: "center",
     width: "100%",
   },

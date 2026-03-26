@@ -24,7 +24,7 @@ export class SessionController {
     if (log.type === "event") {
       sessionStore.logEvent("event", log.details);
     } else {
-      sessionStore.logEvent(log.type, { timestamp: log.timestamp });
+      sessionStore.logEvent(log.type);
     }
     this.notify();
   }
@@ -32,6 +32,14 @@ export class SessionController {
   async playSound(name: SoundName) {
     try {
       await this.soundController.play(name);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  async playReminderPattern(kind: "first" | "mid" | "end") {
+    try {
+      await this.soundController.playReminderPattern(kind);
     } catch (e) {
       // ignore
     }

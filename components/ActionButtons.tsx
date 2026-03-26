@@ -1,13 +1,14 @@
 import LongPressButton from "@/components/LongPressButton";
+import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { sessionStore } from "@/store/sessionStore";
 
 interface ActionButtonsProps {
   onEnd: () => void;
   onEvent: () => void;
+  onAideCognitive: () => void;
   onCancel: () => void;
   useShortTapEndButton?: boolean;
 }
@@ -15,9 +16,12 @@ interface ActionButtonsProps {
 export default function ActionButtons({
   onEnd,
   onEvent,
+  onAideCognitive,
   onCancel,
   useShortTapEndButton = false,
 }: ActionButtonsProps) {
+  const BUTTON_SIZE = 70;
+
   const handleEndPress = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     onEnd();
@@ -39,7 +43,7 @@ export default function ActionButtons({
           <LongPressButton
             onComplete={handleEndPress}
             color="#FF5252"
-            size={64}
+            size={BUTTON_SIZE}
             iconName="close"
             label="Fin RCP"
           />
@@ -49,36 +53,78 @@ export default function ActionButtons({
         )}
       </View>
 
-          <View style={styles.actionItem}>
-            <TouchableOpacity
-                style={[styles.circleButton, {backgroundColor: "#f5dd4b", width: 75, height: 75, borderRadius: 88}]}
-                onPress={onEvent}
-            >
-              <Ionicons name="add" size={48} color="#fff"/>
-            </TouchableOpacity>
-            <Text style={[styles.actionLabel, theme === "dark" ? {color : "#ccc"}:{color: "#000"}]}>Saisie événements</Text>
-          </View>
+      <View style={styles.actionItem}>
+        <TouchableOpacity
+          style={[
+            styles.circleButton,
+            {
+              backgroundColor: "#f5dd4b",
+              width: BUTTON_SIZE,
+              height: BUTTON_SIZE,
+              borderRadius: BUTTON_SIZE / 2,
+            },
+          ]}
+          onPress={onEvent}
+        >
+          <Ionicons name="add" size={40} color="#fff" />
+        </TouchableOpacity>
+        <Text
+          style={[
+            styles.actionLabel,
+            theme === "dark" ? { color: "#ccc" } : { color: "#000" },
+          ]}
+        >
+          Saisie événements
+        </Text>
+      </View>
 
-            {/*
-              LongPressButton handles the circular button and gesture.
-              We pass size=64 to match other buttons.
-          */}
-            <LongPressButton onComplete={onCancel} color="#444" size={64} />
-        </View>
+      <View style={styles.actionItem}>
+        <TouchableOpacity
+          style={[
+            styles.circleButton,
+            {
+              backgroundColor: "#5f9ea0",
+              width: BUTTON_SIZE,
+              height: BUTTON_SIZE,
+              borderRadius: BUTTON_SIZE / 2,
+            },
+          ]}
+          onPress={onAideCognitive}
+        >
+          <Ionicons name="book-outline" size={34} color="#fff" />
+        </TouchableOpacity>
+        <Text
+          style={[
+            styles.actionLabel,
+            theme === "dark" ? { color: "#ccc" } : { color: "#000" },
+          ]}
+        >
+          Aide cognitive
+        </Text>
+      </View>
 
+      <View style={styles.actionItem}>
+        <LongPressButton
+          onComplete={onCancel}
+          color="#444"
+          size={BUTTON_SIZE}
+        />
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     alignItems: "flex-start",
     width: "100%",
+    gap: 8,
   },
   actionItem: {
     alignItems: "center",
-    width: 80,
+    width: 84,
   },
   circleButton: {
     width: 64,
