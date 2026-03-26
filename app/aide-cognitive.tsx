@@ -22,27 +22,27 @@ type CognitiveDocument = {
 const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
   {
     id: "doc-1",
-    label: "Mock fiche 1",
+    label: "RCP Adulte ERC 2025",
     image: require("@/assets/documents/image.png"),
   },
   {
     id: "doc-2",
-    label: "Mock fiche 2",
+    label: "RCP Néonatale ERC 2025",
     image: require("@/assets/documents/image-1.png"),
   },
   {
     id: "doc-3",
-    label: "Mock fiche 3",
+    label: "RCP Pédiatrique ERC 2025",
     image: require("@/assets/documents/image-2.png"),
   },
   {
     id: "doc-4",
-    label: "Mock fiche 4",
+    label: "Causes réversible de l'AC pédiatrique 4H/4T",
     image: require("@/assets/documents/image-3.png"),
   },
   {
     id: "doc-5",
-    label: "Mock fiche 5",
+    label: "Organisation de la réanimation cardio-pulmonaire spécialisée préhospitaliere",
     image: require("@/assets/documents/image-4.png"),
   },
 ];
@@ -60,10 +60,6 @@ export default function AideCognitive() {
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen options={{ title: "Aide cognitive" }} />
-
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Aide cognitive</Text>
-      </View>
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.titleContainer}>

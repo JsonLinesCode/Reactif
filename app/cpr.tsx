@@ -363,7 +363,6 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     flexDirection: "column",
-    flex: 1,
     width: "100%",
     gap: 16,
     justifyContent: "center",

@@ -50,17 +50,17 @@ export default function CprEndFirstPage() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.outlineButton, styles.racsButton]}
+            style={[styles.button, styles.outlineButton]}
             onPress={handleRacs}
           >
-            <Text style={[styles.buttonText, styles.racsText]}>RACS</Text>
+            <Text style={[styles.buttonText]}>RACS</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.outlineButton, styles.stopButton]}
+            style={[styles.button, styles.outlineButton]}
             onPress={handleInterventionEnd}
           >
-            <Text style={[styles.buttonText, styles.stopText]}>
+            <Text style={[styles.buttonText]}>
               Fin d'intervention
             </Text>
           </TouchableOpacity>
@@ -105,10 +105,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowColor: "#000"
   },
   outlineButton: {
     backgroundColor: "transparent",

@@ -131,12 +131,11 @@ export default function CprEnd() {
             <TouchableOpacity
               style={[
                 styles.buttonConfirm,
-                styles.outlineButton,
-                styles.resumeButton,
+                styles.outlineButton
               ]}
               onPress={handleResume}
             >
-              <Text style={[styles.buttonText, styles.resumeText]}>
+              <Text style={[styles.buttonText]}>
                 Reprendre la RCP
               </Text>
             </TouchableOpacity>
@@ -149,18 +148,17 @@ export default function CprEnd() {
               ]}
               onPress={handleDeath}
             >
-              <Text style={[styles.buttonText, styles.deathText]}>Décès</Text>
+              <Text style={[styles.buttonText]}>Décès</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.buttonConfirm,
                 styles.outlineButton,
-                styles.stopButton,
               ]}
               onPress={handleConfirmEnd}
             >
-              <Text style={[styles.buttonText, styles.stopText]}>
+              <Text style={[styles.buttonText]}>
                 Fin d'intervention
               </Text>
             </TouchableOpacity>
@@ -541,7 +539,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   resumeText: {
-    color: "#28a745",
+    color: "black",
   },
   stopText: {
     color: "#d9534f",
