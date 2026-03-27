@@ -16,13 +16,13 @@ export default function DisplayChildData() {
   const [data, setData] = useState<PediatricData | undefined>(
     sessionStore.getPediatricData(),
   );
+  const computeMode = sessionStore.getComputeMode();
 
   useEffect(() => {
-    const unsubscribe = sessionStore.subscribe(() => {
+    return sessionStore.subscribe(() => {
       setData(sessionStore.getPediatricData());
       setTheme(sessionStore.theme);
     });
-    return unsubscribe;
   }, []);
 
   if (!data) {
@@ -50,12 +50,25 @@ export default function DisplayChildData() {
         <Text style={[styles.title, textStyle]}>Données Patient</Text>
 
         <View style={[styles.card, cardBgStyle]}>
-          <Text style={[styles.label, labelStyle]}>Age:</Text>
-          <Text style={[styles.value, textStyle]}>
-            {ageValue} {ageMode === "months" ? "Mois" : "Ans"}
-          </Text>
 
-          <Text style={[styles.label, labelStyle]}>Poids Estimé/Saisi:</Text>
+          {computeMode === "age" && (
+            <>
+              <Text style={[styles.label, labelStyle]}>Age:</Text>
+              <Text style={[styles.value, textStyle]}>
+                {ageValue} {ageMode === "months" ? "Mois" : "Ans"}
+              </Text>
+
+              <Text style={[styles.label, labelStyle]}>
+                Poids Estimé :
+              </Text>
+            </>
+          )}
+
+          {!(computeMode === "age") && (
+            <Text style={[styles.label, labelStyle]}>
+              Poids Saisi :
+            </Text>
+          )}
           <Text style={[styles.value, textStyle]}>{weight} kg</Text>
 
           <View style={styles.separator} />
@@ -85,6 +98,14 @@ export default function DisplayChildData() {
         >
           <Text style={styles.validationButtonText}>
             Valider et commencer RCP
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={() => router.push("/childData")}
+        >
+          <Text style={styles.validationButtonText}>
+            Annuler
           </Text>
         </TouchableOpacity>
       </View>
@@ -160,4 +181,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
+  cancelButton: {
+    backgroundColor: "#dc3545",
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginTop: 20,
+    marginBottom: 10,
+    width: "100%",
+    maxWidth: 150,
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  }
 });

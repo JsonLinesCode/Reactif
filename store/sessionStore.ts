@@ -4,6 +4,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const STORAGE_KEY_HISTORY = "@cpr_session_history";
 
 class SessionStore {
+  getComputeMode() {
+    const pediatricData = this.currentSession?.pediatricData;
+    if (!pediatricData) {
+      return null; // No pediatric data, so compute mode is not applicable
+    }
+    return pediatricData.inputMode || null;
+  }
   private currentSession: CprSession | null = null;
   private history: CprSession[] = [];
   private listeners: (() => void)[] = [];
