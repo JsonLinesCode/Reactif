@@ -31,7 +31,7 @@ const DURATION = 1000;
 export default function LongPressButton({
   onComplete,
   size = 80,
-  color = "#444",
+  color = "#448AFF",
   iconName = "arrow-undo",
   label = "Annuler",
   duration = DURATION,
@@ -135,12 +135,14 @@ export default function LongPressButton({
                 width: size,
                 height: size,
                 borderRadius: size / 2,
-                backgroundColor: color,
+                backgroundColor: "transparent",
+                borderWidth: 3,
+                borderColor: "#448AFF",
               },
               animatedButtonStyle,
             ]}
           >
-            <Ionicons name={iconName} size={32} color="#fff" />
+            <Ionicons name={iconName} size={32} color="#448AFF" />
           </Animated.View>
         </Pressable>
 

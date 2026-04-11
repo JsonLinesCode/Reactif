@@ -72,7 +72,7 @@ export default function AideRespiratoire() {
   return (
     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" />
-      <Stack.Screen options={{ title: "Aide respiratoire" }} />
+      <Stack.Screen options={{ title: "Réglages respirateur RCP Adulte" }} />
 
       <View style={styles.inner}>
         <Text style={styles.label}>Sexe</Text>

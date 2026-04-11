@@ -37,7 +37,7 @@ export default function ActionButtons({
             style={[styles.circleButton, { backgroundColor: "#FF5252" }]}
             onPress={handleEndPress}
           >
-            <Ionicons name="close" size={40} color="#fff" />
+            <Ionicons name="close" size={40} color="bla" />
           </TouchableOpacity>
         ) : (
           <LongPressButton
@@ -58,7 +58,6 @@ export default function ActionButtons({
           style={[
             styles.circleButton,
             {
-              backgroundColor: "#f5dd4b",
               width: BUTTON_SIZE,
               height: BUTTON_SIZE,
               borderRadius: BUTTON_SIZE / 2,
@@ -66,7 +65,7 @@ export default function ActionButtons({
           ]}
           onPress={onEvent}
         >
-          <Ionicons name="add" size={40} color="#fff" />
+          <Ionicons name="add" size={40} color="#448AFF" />
         </TouchableOpacity>
         <Text
           style={[
@@ -74,7 +73,7 @@ export default function ActionButtons({
             theme === "dark" ? { color: "#ccc" } : { color: "#000" },
           ]}
         >
-          Saisie événements
+          Saisie
         </Text>
       </View>
 
@@ -83,7 +82,6 @@ export default function ActionButtons({
           style={[
             styles.circleButton,
             {
-              backgroundColor: "#5f9ea0",
               width: BUTTON_SIZE,
               height: BUTTON_SIZE,
               borderRadius: BUTTON_SIZE / 2,
@@ -91,7 +89,7 @@ export default function ActionButtons({
           ]}
           onPress={onAideCognitive}
         >
-          <Ionicons name="book-outline" size={34} color="#fff" />
+          <Ionicons name="book-outline" size={34} color="#448AFF" />
         </TouchableOpacity>
         <Text
           style={[
@@ -132,6 +130,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",
+    borderColor: "#448AFF",
+    borderWidth: 2,
     marginBottom: 8,
   },
 

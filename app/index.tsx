@@ -32,7 +32,10 @@ export default function Index() {
     sessionStore.startNewSession();
     router.push("/childData");
   };
-
+  const startAideCognitive = () => {
+    sessionStore.startNewSession();
+    router.push("/aide-cognitive");
+  };
   return (
     <View id="coucou" style={[styles.container, bgStyle]}>
       <Image
@@ -54,13 +57,19 @@ export default function Index() {
         <View style={{ width: "100%", alignItems: "center" }}>
           <View style={{ height: 20 }} />
           <TouchableOpacity style={styles.menuButton} onPress={startAdultCpr}>
-            <Text style={styles.menuButtonText}>RCP Adulte</Text>
+            <Text style={styles.menuButtonText}>RCP ADULTE</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.menuButton}
             onPress={startPediatricCpr}
           >
-            <Text style={styles.menuButtonText}>RCP pédiatrique</Text>
+            <Text style={styles.menuButtonText}>RCP PEDIATRIQUE</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={startAideCognitive}
+          >
+            <Text style={styles.menuButtonText}>AIDE COGNITIVE</Text>
           </TouchableOpacity>
         </View>
         <View style={{ width: "100%", alignItems: "center" }}>
@@ -80,9 +89,6 @@ export default function Index() {
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
               >
-                <Text style={[styles.menuSubButtonText, outlineTextStyle]}>
-                  Paramètres
-                </Text>
                 <Feather
                   name="settings"
                   size={24}
@@ -99,9 +105,6 @@ export default function Index() {
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
               >
-                <Text style={[styles.menuButtonText, outlineTextStyle]}>
-                  A propos
-                </Text>
                 <Feather
                   name="info"
                   size={24}

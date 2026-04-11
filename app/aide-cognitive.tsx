@@ -61,14 +61,11 @@ export default function AideCognitive() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ title: "Aide cognitive" }} />
+      <Stack.Screen options={{ title: "Retour" }} />
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.titleContainer}>
-          <Text style={styles.pageTitle}>Fiches disponibles</Text>
-          <Text style={styles.subtitle}>
-            Touchez une fiche pour l&apos;ouvrir en mode zoom
-          </Text>
+          <Text style={styles.pageTitle}>Aides cognitives</Text>
         </View>
 
         <View style={styles.optionsList}>
@@ -76,7 +73,9 @@ export default function AideCognitive() {
             style={styles.optionItem}
             onPress={() => router.push("/aide-respiratoire")}
           >
-            <Text style={styles.optionText}>Calculateur respiratoire</Text>
+            <Text style={styles.optionText}>
+              Réglages respirateur RCP Adulte
+            </Text>
             <Ionicons name="chevron-forward" size={22} color="#0D47A1" />
           </TouchableOpacity>
 
