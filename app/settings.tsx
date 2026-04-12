@@ -171,7 +171,9 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, labelColor]}>Alerte sonore avant l'échéance des timers</Text>
+            <Text style={[styles.label, labelColor]}>
+              Alerte sonore avant l'échéance des timers
+            </Text>
             <View style={[styles.inputWrapper, inputBgStyle]}>
               <TextInput
                 style={[styles.input, textStyle]}

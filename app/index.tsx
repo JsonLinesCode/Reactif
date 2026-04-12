@@ -75,7 +75,11 @@ export default function Index() {
         <View style={{ width: "100%", alignItems: "center" }}>
           <View style={styles.bottomActionRow}>
             <TouchableOpacity
-              style={[styles.buttonHistory, styles.bottomHistoryButton, outlineButtonStyle]}
+              style={[
+                styles.buttonHistory,
+                styles.bottomHistoryButton,
+                outlineButtonStyle,
+              ]}
               onPress={() => router.push("/history")}
             >
               <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
@@ -83,13 +87,21 @@ export default function Index() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.menuSubButton, styles.bottomSettingsButton, outlineButtonStyle]}
+              style={[
+                styles.menuSubButton,
+                styles.bottomSettingsButton,
+                outlineButtonStyle,
+              ]}
               onPress={() => router.push("/settings")}
             >
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
               >
-                <Feather name="settings" size={22} color={isDark ? "#fff" : "#007BFF"} />
+                <Feather
+                  name="settings"
+                  size={22}
+                  color={isDark ? "#fff" : "#007BFF"}
+                />
               </View>
             </TouchableOpacity>
           </View>

@@ -1,3 +1,4 @@
+import { useFocusEffect } from "@react-navigation/native";
 import { router, Stack } from "expo-router";
 import React from "react";
 import {
@@ -9,7 +10,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useFocusEffect } from "@react-navigation/native";
 
 import { sessionStore } from "@/store/sessionStore";
 
@@ -81,9 +81,7 @@ export default function CprEndFirstPage() {
             style={[styles.button, styles.outlineButton]}
             onPress={handleInterventionEnd}
           >
-            <Text style={[styles.buttonText]}>
-              Fin d'intervention
-            </Text>
+            <Text style={[styles.buttonText]}>Fin d'intervention</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -126,7 +124,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 12,
     elevation: 3,
-    shadowColor: "#000"
+    shadowColor: "#000",
   },
   outlineButton: {
     backgroundColor: "transparent",

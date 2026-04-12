@@ -243,7 +243,9 @@ export default function ChildData() {
               style={styles.aideButton}
               onPress={() => router.push("/aide-cognitive")}
             >
-              <Text style={styles.aideButtonText}>Ouvrir les aides cognitives</Text>
+              <Text style={styles.aideButtonText}>
+                Ouvrir les aides cognitives
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

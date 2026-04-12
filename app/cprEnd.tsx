@@ -1,8 +1,8 @@
 import { FontAwesome5 } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
 import {
   Alert,
   BackHandler,
@@ -145,15 +145,10 @@ export default function CprEnd() {
 
           <View style={styles.buttonGroupConfirm}>
             <TouchableOpacity
-              style={[
-                styles.buttonConfirm,
-                styles.outlineButton
-              ]}
+              style={[styles.buttonConfirm, styles.outlineButton]}
               onPress={handleResume}
             >
-              <Text style={[styles.buttonText]}>
-                Reprendre la RCP
-              </Text>
+              <Text style={[styles.buttonText]}>Reprendre la RCP</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -168,15 +163,10 @@ export default function CprEnd() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.buttonConfirm,
-                styles.outlineButton,
-              ]}
+              style={[styles.buttonConfirm, styles.outlineButton]}
               onPress={handleConfirmEnd}
             >
-              <Text style={[styles.buttonText]}>
-                Fin d'intervention
-              </Text>
+              <Text style={[styles.buttonText]}>Fin d'intervention</Text>
             </TouchableOpacity>
           </View>
         </View>
