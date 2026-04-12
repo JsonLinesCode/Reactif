@@ -27,11 +27,6 @@ if (
 
 type AgeMode = "months" | "years";
 
-let savedDatas: Record<AgeMode, string> = {
-  months: "",
-  years: "",
-};
-
 export default function ChildData() {
   const [theme, setTheme] = useState(sessionStore.theme);
 
@@ -51,6 +46,8 @@ export default function ChildData() {
     borderTopColor: isDark ? "#333" : "#ccc",
   };
 
+  const [inputMode, setInputMode] = useState<"age" | "weight" | null>(null);
+
   {
     /* Animation for the expansion of the content */
   }
@@ -60,13 +57,14 @@ export default function ChildData() {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     if (!expanded) {
       setWeightExpanded(false);
+      setInputMode("age");
+    } else {
+      setInputMode(null);
     }
     setExpanded(!expanded);
   };
 
-  {
-    /* Age input states */
-  }
+  // Age input states
   const [mode, setMode] = useState<AgeMode | undefined>("months");
   const [valeurTemp, setValeurTemp] = useState("");
 
@@ -88,6 +86,9 @@ export default function ChildData() {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     if (!weightExpanded) {
       setExpanded(false);
+      setInputMode("weight");
+    } else {
+      setInputMode(null);
     }
     setWeightExpanded(!weightExpanded);
   };
@@ -122,8 +123,16 @@ export default function ChildData() {
   const energyDose = finalWeight ? (4 * finalWeight).toFixed(0) : null;
 
   const handleValidation = () => {
-    if (!mode && !weightInput) {
-      Alert.alert("Erreur", "Veuillez entrer une donnée (âge ou poids).");
+    if (inputMode === "age" && !valeurTemp) {
+      Alert.alert("Erreur", "Veuillez entrer un âge.");
+      return;
+    }
+    if (inputMode === "weight" && !weightInput) {
+      Alert.alert("Erreur", "Veuillez entrer un poids.");
+      return;
+    }
+    if (!inputMode) {
+      Alert.alert("Erreur", "Veuillez sélectionner et entrer une donnée (âge ou poids).");
       return;
     }
 
@@ -132,6 +141,7 @@ export default function ChildData() {
 
     // Save to store
     sessionStore.setPediatricData({
+      inputMode: inputMode,
       ageMode: currentMode,
       ageValue: ageVal,
       weight: finalWeight ?? 0,

@@ -1,6 +1,7 @@
 export type AgeMode = "months" | "years";
 
 export interface PediatricData {
+  inputMode?: "age" | "weight" | null;
   ageMode: AgeMode;
   ageValue: number;
   weight?: number; // In kg
@@ -20,4 +21,9 @@ export interface CprSession {
   endTime?: number;
   pediatricData?: PediatricData; // Optional, as adult CPR might not use it or use different fields
   events: CprEvent[];
+}
+
+
+export interface ComputeMode {
+  inputMode: 'age' | 'weight';
 }
