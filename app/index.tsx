@@ -73,43 +73,23 @@ export default function Index() {
           </TouchableOpacity>
         </View>
         <View style={{ width: "100%", alignItems: "center" }}>
-          <TouchableOpacity
-            style={[styles.buttonHistory, outlineButtonStyle]}
-            onPress={() => router.push("/history")}
-          >
-            <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
-              Historique
-            </Text>
-          </TouchableOpacity>
-          <View style={styles.buttonRow}>
+          <View style={styles.bottomActionRow}>
             <TouchableOpacity
-              style={[styles.menuSubButton, outlineButtonStyle]}
+              style={[styles.buttonHistory, styles.bottomHistoryButton, outlineButtonStyle]}
+              onPress={() => router.push("/history")}
+            >
+              <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
+                Historique
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.menuSubButton, styles.bottomSettingsButton, outlineButtonStyle]}
               onPress={() => router.push("/settings")}
             >
               <View
                 style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
               >
-                <Feather
-                  name="settings"
-                  size={24}
-                  color={isDark ? "#fff" : "#007BFF"}
-                />
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.aboutButton, outlineButtonStyle]}
-              onPress={() =>
-                router.push({ pathname: "/about", params: { us: "value" } })
-              }
-            >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
-              >
-                <Feather
-                  name="info"
-                  size={24}
-                  color={isDark ? "#fff" : "#007BFF"}
-                />
+                <Feather name="settings" size={22} color={isDark ? "#fff" : "#007BFF"} />
               </View>
             </TouchableOpacity>
           </View>
@@ -148,7 +128,7 @@ const styles = StyleSheet.create({
     borderColor: "#007BFF",
     borderWidth: 2,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 0,
     width: "100%",
     maxWidth: 400,
     alignItems: "center",
@@ -163,6 +143,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 10,
+  },
+  bottomActionRow: {
+    width: "100%",
+    maxWidth: 400,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 20,
+  },
+  bottomHistoryButton: {
+    flex: 1,
+    height: 62,
+    justifyContent: "center",
+  },
+  bottomSettingsButton: {
+    width: 74,
+    maxWidth: 74,
+    height: 62,
+    justifyContent: "center",
+    marginBottom: 0,
   },
   menuSubButton: {
     backgroundColor: "#fff",
@@ -184,22 +184,6 @@ const styles = StyleSheet.create({
     color: "#007BFF",
     fontSize: 18,
     fontWeight: "bold",
-  },
-  aboutButton: {
-    backgroundColor: "#fff",
-    borderColor: "#007BFF",
-    borderWidth: 2,
-    paddingVertical: 18,
-    borderRadius: 12,
-    marginBottom: 20,
-    width: "100%",
-    maxWidth: 160,
-    alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
   },
   menuButtonText: {
     color: "#007BFF",

@@ -1,12 +1,33 @@
 import { router, Stack } from "expo-router";
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  BackHandler,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { sessionStore } from "@/store/sessionStore";
 
 export default function CprEndFirstPage() {
   const theme = sessionStore.theme;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Platform.OS !== "android") return;
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => true,
+      );
+      return () => {
+        subscription.remove();
+      };
+    }, []),
+  );
 
   const handleDeath = async () => {
     await sessionStore.saveCurrentSession("Décès");

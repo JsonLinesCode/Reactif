@@ -2,8 +2,11 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   Alert,
+  BackHandler,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -29,6 +32,19 @@ export default function CprEnd() {
 
   const [step, setStep] = useState<"racs" | "summary">(initialMode as any);
   const [session, setSession] = useState<CprSession | null>(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Platform.OS !== "android") return;
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => true,
+      );
+      return () => {
+        subscription.remove();
+      };
+    }, []),
+  );
 
   useEffect(() => {
     const current = sessionStore.getSession();

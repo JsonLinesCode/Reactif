@@ -1,6 +1,13 @@
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
-import { StatusBar, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  BackHandler,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import ActionButtons from "@/components/ActionButtons";
@@ -106,6 +113,19 @@ export default function Cpr() {
         StatusBar.setHidden(false, "none");
         metronomeController.stop();
         void sessionController.stopAllSounds();
+      };
+    }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS !== "android") return;
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => true,
+      );
+      return () => {
+        subscription.remove();
       };
     }, []),
   );

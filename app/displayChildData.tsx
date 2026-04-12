@@ -43,17 +43,25 @@ export default function DisplayChildData() {
     cordaroneDose,
     energyDose,
   } = data;
+  const shouldShowAge = ageValue > 0;
+
+  const handleStartPediatricCpr = () => {
+    sessionStore.resetCurrentSessionStartTime();
+    router.push("/cpr");
+  };
 
   return (
     <SafeAreaView style={[styles.container, bgStyle]}>
       <View style={styles.scrollContent}>
-        <Text style={[styles.title, textStyle]}>Données Patient</Text>
-
         <View style={[styles.card, cardBgStyle]}>
-          <Text style={[styles.label, labelStyle]}>Age:</Text>
-          <Text style={[styles.value, textStyle]}>
-            {ageValue} {ageMode === "months" ? "Mois" : "Ans"}
-          </Text>
+          {shouldShowAge && (
+            <>
+              <Text style={[styles.label, labelStyle]}>Age:</Text>
+              <Text style={[styles.value, textStyle]}>
+                {ageValue} {ageMode === "months" ? "Mois" : "Ans"}
+              </Text>
+            </>
+          )}
 
           <Text style={[styles.label, labelStyle]}>Poids Estimé/Saisi:</Text>
           <Text style={[styles.value, textStyle]}>{weight} kg</Text>
@@ -81,7 +89,7 @@ export default function DisplayChildData() {
         </View>
         <TouchableOpacity
           style={styles.validationButton}
-          onPress={() => router.push("/cpr")}
+          onPress={handleStartPediatricCpr}
         >
           <Text style={styles.validationButtonText}>
             Valider et commencer RCP

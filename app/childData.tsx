@@ -46,7 +46,10 @@ export default function ChildData() {
   const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };
   const textStyle = { color: isDark ? "#fff" : "#000" };
   const expandedBg = { backgroundColor: isDark ? "#353636" : "#f9f9f9" };
-  const footerBg = { backgroundColor: isDark ? "#353636" : "#f9f9f9", borderTopColor: isDark ? "#333" : "#ccc" };
+  const footerBg = {
+    backgroundColor: isDark ? "#353636" : "#f9f9f9",
+    borderTopColor: isDark ? "#333" : "#ccc",
+  };
 
   {
     /* Animation for the expansion of the content */
@@ -109,7 +112,9 @@ export default function ChildData() {
   const [weightInput, setWeightInput] = useState("");
 
   const finalWeight = weightInput
-    ? (parseFloat(weightInput) <= 50 ? parseFloat(weightInput) : 50)
+    ? parseFloat(weightInput) <= 50
+      ? parseFloat(weightInput)
+      : 50
     : calculateWeightFromAge(parsedAge, mode);
 
   const adrenalineDose = finalWeight ? (0.01 * finalWeight).toFixed(2) : null;
@@ -153,8 +158,7 @@ export default function ChildData() {
           keyboardShouldPersistTaps="handled"
         >
           <Text style={[styles.titleText, textStyle]}>
-            Sélectionnez l&#39;âge ou le poids de l&#39;enfant pour calculer les doses
-            et énergies de RCP pédiatrique.
+            Renseigner l'âge ou le poids
           </Text>
           <TouchableOpacity style={styles.choiceButton} onPress={toggleExpand}>
             <Text style={styles.choiceButtonText}>Âge</Text>
@@ -224,10 +228,24 @@ export default function ChildData() {
 
           {/* ADDED: Adult RCP note */}
           <Text style={styles.infoText}>
-            RCP adulte si le gabarit est celui d'un adulte (habituellement à la puberté, vers
-            12-14 ans, ou si plus que 50kg approximativement). Toujours se
-            référer aux recommandations et protocoles locaux.
+            RCP adulte si le gabarit est celui d'un adulte (habituellement à la
+            puberté, vers 12-14 ans, ou si plus que 50kg approximativement).
+            Toujours se référer aux recommandations et protocoles locaux.
           </Text>
+
+          <View style={styles.aideSection}>
+            <Text style={styles.aideSectionTitle}>Aides cognitives</Text>
+            <Text style={styles.aideSectionText}>
+              Ouvrir rapidement les fiches de référence pendant la prise en
+              charge.
+            </Text>
+            <TouchableOpacity
+              style={styles.aideButton}
+              onPress={() => router.push("/aide-cognitive")}
+            >
+              <Text style={styles.aideButtonText}>Ouvrir les aides cognitives</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
         {(expanded || weightExpanded) && (
           <View style={[styles.footer, footerBg]}>
@@ -395,6 +413,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     marginTop: 20,
+  },
+  aideSection: {
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: "#0f172a",
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 18,
+    marginBottom: 20,
+    gap: 10,
+  },
+  aideSectionTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  aideSectionText: {
+    color: "#d1d5db",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  aideButton: {
+    backgroundColor: "#007BFF",
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    alignItems: "center",
+  },
+  aideButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "bold",
   },
   footer: {
     paddingHorizontal: 20,

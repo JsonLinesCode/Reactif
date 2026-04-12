@@ -22,6 +22,17 @@ class SessionStore {
     this.notifyListeners();
   }
 
+  resetCurrentSessionStartTime() {
+    if (!this.currentSession) {
+      this.startNewSession();
+      return;
+    }
+
+    this.currentSession.startTime = Date.now();
+    this.currentSession.endTime = undefined;
+    this.notifyListeners();
+  }
+
   getSession(): CprSession | null {
     return this.currentSession;
   }

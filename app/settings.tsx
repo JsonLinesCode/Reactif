@@ -171,7 +171,7 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, labelColor]}>Alerte avant fin</Text>
+            <Text style={[styles.label, labelColor]}>Alerte sonore avant l'échéance des timers</Text>
             <View style={[styles.inputWrapper, inputBgStyle]}>
               <TextInput
                 style={[styles.input, textStyle]}
@@ -233,6 +233,33 @@ export default function SettingsScreen() {
 
           <TouchableOpacity style={styles.resetButton} onPress={resetSettings}>
             <Text style={styles.resetButtonText}>Réinitialiser par défaut</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.aboutButton,
+              {
+                borderColor: isDark ? "#64748b" : "#94a3b8",
+                backgroundColor: isDark ? "#1f2937" : "#f8fafc",
+              },
+            ]}
+            onPress={() =>
+              router.push({ pathname: "/about", params: { us: "value" } })
+            }
+          >
+            <Ionicons
+              name="information-circle-outline"
+              size={18}
+              color={isDark ? "#e2e8f0" : "#334155"}
+            />
+            <Text
+              style={[
+                styles.aboutButtonText,
+                { color: isDark ? "#e2e8f0" : "#334155" },
+              ]}
+            >
+              À propos
+            </Text>
           </TouchableOpacity>
         </ScrollView>
 
@@ -333,6 +360,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  aboutButton: {
+    marginTop: 12,
+    marginBottom: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  aboutButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
   saveButton: {
     padding: 16,
     backgroundColor: "#5cc668",
@@ -363,5 +406,29 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
     gap: 12,
+  },
+  toggleTextBlock: {
+    flex: 1,
+    minWidth: 180,
+  },
+  toggleTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  toggleSubtitle: {
+    marginTop: 4,
+    fontSize: 13,
+  },
+  pill: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    alignSelf: "center",
+  },
+  pillText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.3,
   },
 });
