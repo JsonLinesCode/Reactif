@@ -56,20 +56,29 @@ export default function Index() {
       >
         <View style={{ width: "100%", alignItems: "center" }}>
           <View style={{ height: 20 }} />
-          <TouchableOpacity style={styles.menuButton} onPress={startAdultCpr}>
-            <Text style={styles.menuButtonText}>RCP ADULTE</Text>
+          <TouchableOpacity
+            style={[styles.menuButton, outlineButtonStyle]}
+            onPress={startAdultCpr}
+          >
+            <Text style={[styles.menuButtonText, outlineTextStyle]}>
+              RCP ADULTE
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.menuButton}
+            style={[styles.menuButton, outlineButtonStyle]}
             onPress={startPediatricCpr}
           >
-            <Text style={styles.menuButtonText}>RCP PEDIATRIQUE</Text>
+            <Text style={[styles.menuButtonText, outlineTextStyle]}>
+              RCP PEDIATRIQUE
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.menuButton}
+            style={[styles.menuButton, outlineButtonStyle]}
             onPress={startAideCognitive}
           >
-            <Text style={styles.menuButtonText}>AIDE COGNITIVE</Text>
+            <Text style={[styles.menuButtonText, outlineTextStyle]}>
+              AIDE COGNITIVE
+            </Text>
           </TouchableOpacity>
         </View>
         <View style={{ width: "100%", alignItems: "center" }}>

@@ -18,8 +18,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import {
+  formatElapsedFromStart,
   formatEventDetails,
   formatEventType,
+  formatHumanReadableTime,
   getEventsWithCycles,
 } from "@/utils/sessionUtils";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -300,9 +302,16 @@ export default function CprEnd() {
             </Text>
           ) : (
             actions.map(({ event, cycle }, i) => (
-              <Text key={i} style={styles.itemText}>
-                • [RCP {cycle}] {formatEventType(event.type)}
-              </Text>
+              <View key={i} style={styles.itemRow}>
+                <Text style={styles.itemText}>
+                  • [RCP {cycle}] {formatEventType(event.type)}
+                </Text>
+                <Text style={styles.itemTimestamp}>
+                  Temps écoulé:{" "}
+                  {formatElapsedFromStart(session!.startTime, event.timestamp)}{" "}
+                  | Heure: {formatHumanReadableTime(event.timestamp)}
+                </Text>
+              </View>
             ))
           )}
         </View>
@@ -334,9 +343,16 @@ export default function CprEnd() {
             </Text>
           ) : (
             customEvents.map(({ event, cycle }, i: number) => (
-              <Text key={i} style={styles.itemText}>
-                • [RCP {cycle}] {formatEventDetails(event.details)}
-              </Text>
+              <View key={i} style={styles.itemRow}>
+                <Text style={styles.itemText}>
+                  • [RCP {cycle}] {formatEventDetails(event.details)}
+                </Text>
+                <Text style={styles.itemTimestamp}>
+                  Temps écoulé:{" "}
+                  {formatElapsedFromStart(session!.startTime, event.timestamp)}{" "}
+                  | Heure: {formatHumanReadableTime(event.timestamp)}
+                </Text>
+              </View>
             ))
           )}
         </View>
@@ -522,6 +538,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#333",
     marginBottom: 4,
+  },
+  itemRow: {
+    marginBottom: 8,
+  },
+  itemTimestamp: {
+    fontSize: 13,
+    color: "#64748b",
+    marginLeft: 12,
   },
   cycleTitle: {
     fontSize: 18,

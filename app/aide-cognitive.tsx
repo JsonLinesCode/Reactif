@@ -70,6 +70,33 @@ export default function AideCognitive() {
     [selectedDocumentId],
   );
 
+  const renderDocumentItem = (documentId: string) => {
+    const item = COGNITIVE_DOCUMENTS.find((doc) => doc.id === documentId);
+    if (!item) return null;
+
+    return (
+      <TouchableOpacity
+        key={item.id}
+        style={[
+          styles.optionItem,
+          { borderBottomColor: isDark ? "#374151" : "#E5E7EB" },
+        ]}
+        onPress={() => setSelectedDocumentId(item.id)}
+      >
+        <Text
+          style={[styles.optionText, { color: isDark ? "#e5e7eb" : "#111827" }]}
+        >
+          {item.label}
+        </Text>
+        <Ionicons
+          name="chevron-forward"
+          size={22}
+          color={isDark ? "#93c5fd" : "#0D47A1"}
+        />
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView
       style={[
@@ -100,23 +127,14 @@ export default function AideCognitive() {
       />
 
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.titleContainer}>
-          <Text
-            style={[
-              styles.pageTitle,
-              { color: isDark ? "#e2e8f0" : "#0D47A1" },
-            ]}
-          >
-            Aides cognitives
-          </Text>
-        </View>
-
         <View
           style={[
             styles.optionsList,
             { backgroundColor: isDark ? "#1f2937" : "#fff" },
           ]}
         >
+          {renderDocumentItem("doc-5")}
+          {renderDocumentItem("doc-1")}
           <TouchableOpacity
             style={[
               styles.optionItem,
@@ -138,31 +156,8 @@ export default function AideCognitive() {
               color={isDark ? "#93c5fd" : "#0D47A1"}
             />
           </TouchableOpacity>
-
-          {COGNITIVE_DOCUMENTS.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[
-                styles.optionItem,
-                { borderBottomColor: isDark ? "#374151" : "#E5E7EB" },
-              ]}
-              onPress={() => setSelectedDocumentId(item.id)}
-            >
-              <Text
-                style={[
-                  styles.optionText,
-                  { color: isDark ? "#e5e7eb" : "#111827" },
-                ]}
-              >
-                {item.label}
-              </Text>
-              <Ionicons
-                name="chevron-forward"
-                size={22}
-                color={isDark ? "#93c5fd" : "#0D47A1"}
-              />
-            </TouchableOpacity>
-          ))}
+          {renderDocumentItem("doc-3")}
+          {renderDocumentItem("doc-4")}
         </View>
       </ScrollView>
 
@@ -249,6 +244,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 10,
     paddingHorizontal: 8,
+    marginBottom: 16,
   },
   optionItem: {
     minHeight: 56,
