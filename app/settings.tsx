@@ -361,6 +361,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+    textTransform: "uppercase",
+    lineHeight: 20,
+    textAlign: "center",
+    includeFontPadding: false,
   },
   aboutButton: {
     marginTop: 12,
@@ -377,6 +381,10 @@ const styles = StyleSheet.create({
   aboutButtonText: {
     fontSize: 15,
     fontWeight: "600",
+    textTransform: "uppercase",
+    lineHeight: 19,
+    textAlign: "center",
+    includeFontPadding: false,
   },
   saveButton: {
     padding: 16,
@@ -388,6 +396,10 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+    textTransform: "uppercase",
+    lineHeight: 20,
+    textAlign: "center",
+    includeFontPadding: false,
   },
   stickyFooter: {
     position: "absolute",

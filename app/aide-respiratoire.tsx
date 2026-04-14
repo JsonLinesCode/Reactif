@@ -1,7 +1,8 @@
 import CustomSwitch from "@/components/CustomSwitch";
+import { sessionStore } from "@/store/sessionStore";
 import * as Clipboard from "expo-clipboard";
 import { Stack } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   StatusBar,
@@ -18,9 +19,19 @@ import {
 
 export default function AideRespiratoire() {
   const insets = useSafeAreaInsets();
+  const [theme, setTheme] = useState(sessionStore.theme);
   const [sex, setSex] = useState<number>(1); // 1 = Male, 2 = Female
   const [heightCm, setHeightCm] = useState<string>("170");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const isDark = theme === "dark";
 
   const parsedHeight = useMemo(() => {
     const n = Number(heightCm.replace(",", "."));
@@ -70,12 +81,22 @@ export default function AideRespiratoire() {
   const displayPit = Number.isFinite(pit) ? pit.toFixed(1) : "—";
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          backgroundColor: isDark ? "#111827" : "#F5F5F5",
+        },
+      ]}
+    >
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
       <Stack.Screen options={{ title: "Réglages respirateur RCP Adulte" }} />
 
       <View style={styles.inner}>
-        <Text style={styles.label}>Sexe</Text>
+        <Text style={[styles.label, { color: isDark ? "#e5e7eb" : "#111827" }]}>
+          Sexe
+        </Text>
         <CustomSwitch
           selectionMode={sex}
           roundCorner={true}
@@ -85,13 +106,28 @@ export default function AideRespiratoire() {
           selectionColor={"#0D47A1"}
         />
 
-        <Text style={[styles.label, { marginTop: 18 }]}>Taille (cm)</Text>
+        <Text
+          style={[
+            styles.label,
+            { marginTop: 18, color: isDark ? "#e5e7eb" : "#111827" },
+          ]}
+        >
+          Taille (cm)
+        </Text>
         <TextInput
           value={heightCm}
           onChangeText={setHeightCm}
           keyboardType="numeric"
           placeholder="ex. 170"
-          style={styles.input}
+          placeholderTextColor={isDark ? "#94a3b8" : "#6b7280"}
+          style={[
+            styles.input,
+            {
+              backgroundColor: isDark ? "#1f2937" : "#fff",
+              borderColor: isDark ? "#374151" : "#E5E7EB",
+              color: isDark ? "#f9fafb" : "#111827",
+            },
+          ]}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -103,28 +139,96 @@ export default function AideRespiratoire() {
             <Text style={styles.calcButtonText}>Calculer</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.resetButton} onPress={onReset}>
-            <Text style={styles.resetButtonText}>Réinitialiser</Text>
+            <Text
+              style={[
+                styles.resetButtonText,
+                { color: isDark ? "#e5e7eb" : "#374151" },
+              ]}
+            >
+              Réinitialiser
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.resultCard}>
-          <Text style={styles.resultTitle}>Résultats</Text>
+        <View
+          style={[
+            styles.resultCard,
+            {
+              backgroundColor: isDark ? "#1f2937" : "#fff",
+              borderColor: isDark ? "#374151" : "#E5E7EB",
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.resultTitle,
+              { color: isDark ? "#f9fafb" : "#111827" },
+            ]}
+          >
+            Résultats
+          </Text>
           <View style={styles.resultRow}>
-            <Text style={styles.resultLabel}>PIT (kg)</Text>
-            <Text style={styles.resultValue}>{displayPit}</Text>
+            <Text
+              style={[
+                styles.resultLabel,
+                { color: isDark ? "#d1d5db" : "#374151" },
+              ]}
+            >
+              PIT (kg)
+            </Text>
+            <Text
+              style={[
+                styles.resultValue,
+                { color: isDark ? "#f9fafb" : "#111827" },
+              ]}
+            >
+              {displayPit}
+            </Text>
           </View>
           <View style={styles.resultRow}>
-            <Text style={styles.resultLabel}>Vt (mL)</Text>
-            <Text style={styles.resultValue}>
+            <Text
+              style={[
+                styles.resultLabel,
+                { color: isDark ? "#d1d5db" : "#374151" },
+              ]}
+            >
+              Vt (mL)
+            </Text>
+            <Text
+              style={[
+                styles.resultValue,
+                { color: isDark ? "#f9fafb" : "#111827" },
+              ]}
+            >
               {Number.isFinite(vtRange.min)
                 ? `${vtRange.min} – ${vtRange.max}`
                 : "—"}
             </Text>
           </View>
-          <Text style={styles.note}>Plage: 6–8 mL/kg de PIT</Text>
+          <Text
+            style={[styles.note, { color: isDark ? "#9ca3af" : "#6b7280" }]}
+          >
+            Plage: 6–8 mL/kg de PIT
+          </Text>
           <View style={styles.resultActions}>
-            <TouchableOpacity style={styles.copyButton} onPress={onCopy}>
-              <Text style={styles.copyButtonText}>Copier la plage Vt</Text>
+            <TouchableOpacity
+              style={[
+                styles.copyButton,
+                {
+                  backgroundColor: isDark ? "#111827" : "#fff",
+                  borderColor: isDark ? "#93c5fd" : "#0D47A1",
+                },
+              ]}
+              onPress={onCopy}
+            >
+              <Text
+                style={[
+                  styles.copyButtonText,
+                  { color: isDark ? "#bfdbfe" : "#0D47A1" },
+                ]}
+              >
+                Copier la plage Vt
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -154,9 +258,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  calcButtonText: { color: "#fff", fontWeight: "bold" },
+  calcButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
   resetButton: {
-    backgroundColor: "#fff",
+    backgroundColor: "transparent",
     borderWidth: 1,
     borderColor: "#6b7280",
     paddingVertical: 12,
@@ -164,7 +272,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 14,
   },
-  resetButtonText: { color: "#374151", fontWeight: "600" },
+  resetButtonText: {
+    color: "#374151",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
   resultCard: {
     marginTop: 20,
     backgroundColor: "#fff",
@@ -191,5 +303,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
   },
-  copyButtonText: { color: "#0D47A1", fontWeight: "600" },
+  copyButtonText: {
+    color: "#0D47A1",
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
 });

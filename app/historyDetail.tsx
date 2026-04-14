@@ -2,6 +2,7 @@ import { CprEvent, CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import {
   formatDuration,
+  formatElapsedFromStart,
   formatEventDetails,
   formatEventType,
   generateSessionHtml,
@@ -25,6 +26,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function HistoryDetail() {
   const { sessionId } = useLocalSearchParams<{ sessionId?: string }>();
   const [session, setSession] = useState<CprSession | null>(null);
+  const [theme, setTheme] = useState(sessionStore.theme);
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const loadSession = () => {
@@ -38,6 +41,13 @@ export default function HistoryDetail() {
     const unsubscribe = sessionStore.subscribe(loadSession);
     return unsubscribe;
   }, [sessionId]);
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return unsubscribe;
+  }, []);
 
   const eventsWithCycles = useMemo(() => {
     if (!session) return [];
@@ -69,10 +79,22 @@ export default function HistoryDetail() {
 
   if (!session) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: isDark ? "#111827" : "#f3f4f6" },
+        ]}
+      >
         <Stack.Screen options={{ title: "Detail session" }} />
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Session introuvable.</Text>
+          <Text
+            style={[
+              styles.emptyText,
+              { color: isDark ? "#9ca3af" : "#64748b" },
+            ]}
+          >
+            Session introuvable.
+          </Text>
           <TouchableOpacity
             style={styles.primaryButton}
             onPress={() => router.back()}
@@ -87,41 +109,140 @@ export default function HistoryDetail() {
   const startDate = new Date(session.startTime);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: isDark ? "#111827" : "#f3f4f6" },
+      ]}
+    >
       <Stack.Screen options={{ title: "Detail session" }} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.headerCard}>
-          <Text style={styles.headerTitle}>Session CPR complete</Text>
-          <Text style={styles.headerLine}>
+        <View
+          style={[
+            styles.headerCard,
+            {
+              backgroundColor: isDark ? "#1f2937" : "#fff",
+              borderColor: isDark ? "#374151" : "#e5e7eb",
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.headerTitle,
+              { color: isDark ? "#f9fafb" : "#111827" },
+            ]}
+          >
+            Session CPR complete
+          </Text>
+          <Text
+            style={[
+              styles.headerLine,
+              { color: isDark ? "#d1d5db" : "#374151" },
+            ]}
+          >
             Date: {startDate.toLocaleDateString()}
           </Text>
-          <Text style={styles.headerLine}>
+          <Text
+            style={[
+              styles.headerLine,
+              { color: isDark ? "#d1d5db" : "#374151" },
+            ]}
+          >
             Patient: {session.pediatricData ? "Enfant" : "Standard"}
           </Text>
-          <Text style={styles.headerLine}>
+          <Text
+            style={[
+              styles.headerLine,
+              { color: isDark ? "#d1d5db" : "#374151" },
+            ]}
+          >
             Duree: {formatDuration(session.startTime, session.endTime)}
           </Text>
-          <Text style={styles.headerLine}>Chocs: {shockCount}</Text>
-          <Text style={styles.headerLine}>
+          <Text
+            style={[
+              styles.headerLine,
+              { color: isDark ? "#d1d5db" : "#374151" },
+            ]}
+          >
+            Chocs: {shockCount}
+          </Text>
+          <Text
+            style={[
+              styles.headerLine,
+              { color: isDark ? "#d1d5db" : "#374151" },
+            ]}
+          >
             Evenements: {session.events.length}
           </Text>
         </View>
 
-        <View style={styles.timelineCard}>
-          <Text style={styles.sectionTitle}>Chronologie complete</Text>
+        <View
+          style={[
+            styles.timelineCard,
+            {
+              backgroundColor: isDark ? "#1f2937" : "#fff",
+              borderColor: isDark ? "#374151" : "#e5e7eb",
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: isDark ? "#f9fafb" : "#111827" },
+            ]}
+          >
+            Chronologie complete
+          </Text>
           {eventsWithCycles.length === 0 ? (
-            <Text style={styles.emptyTimeline}>
+            <Text
+              style={[
+                styles.emptyTimeline,
+                { color: isDark ? "#9ca3af" : "#6b7280" },
+              ]}
+            >
               Aucun evenement enregistre.
             </Text>
           ) : (
             eventsWithCycles.map(({ event, cycle }, index) => (
-              <View key={`${event.timestamp}-${index}`} style={styles.eventRow}>
+              <View
+                key={`${event.timestamp}-${index}`}
+                style={[
+                  styles.eventRow,
+                  { borderBottomColor: isDark ? "#374151" : "#f1f5f9" },
+                ]}
+              >
                 <View style={styles.eventContent}>
-                  <Text style={styles.eventCycle}>RCP {cycle}</Text>
-                  <Text style={styles.eventType}>
+                  <Text
+                    style={[
+                      styles.eventCycle,
+                      { color: isDark ? "#9ca3af" : "#64748b" },
+                    ]}
+                  >
+                    RCP {cycle}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.eventTime,
+                      { color: isDark ? "#93c5fd" : "#2563eb" },
+                    ]}
+                  >
+                    Temps écoulé:{" "}
+                    {formatElapsedFromStart(session.startTime, event.timestamp)}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.eventType,
+                      { color: isDark ? "#f3f4f6" : "#0f172a" },
+                    ]}
+                  >
                     {formatEventType(event.type)}
                   </Text>
-                  <Text style={styles.eventDetails}>
+                  <Text
+                    style={[
+                      styles.eventDetails,
+                      { color: isDark ? "#cbd5e1" : "#475569" },
+                    ]}
+                  >
                     {formatEventDetails(event.details)}
                   </Text>
                 </View>
@@ -133,11 +254,25 @@ export default function HistoryDetail() {
 
       <View style={styles.actionBar}>
         <TouchableOpacity
-          style={styles.secondaryButton}
+          style={[
+            styles.secondaryButton,
+            { backgroundColor: isDark ? "#374151" : "#e2e8f0" },
+          ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={18} color="#334155" />
-          <Text style={styles.secondaryButtonText}>Retour</Text>
+          <Ionicons
+            name="arrow-back"
+            size={18}
+            color={isDark ? "#e5e7eb" : "#334155"}
+          />
+          <Text
+            style={[
+              styles.secondaryButtonText,
+              { color: isDark ? "#e5e7eb" : "#334155" },
+            ]}
+          >
+            Retour
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.primaryButton} onPress={handleExport}>
           <Ionicons name="share-outline" size={18} color="#fff" />
@@ -203,6 +338,10 @@ const styles = StyleSheet.create({
   eventContent: {
     gap: 2,
   },
+  eventTime: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
   eventType: {
     fontSize: 15,
     color: "#0f172a",
@@ -235,6 +374,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 15,
     fontWeight: "700",
+    textTransform: "uppercase",
   },
   secondaryButton: {
     flex: 1,
@@ -250,6 +390,7 @@ const styles = StyleSheet.create({
     color: "#334155",
     fontSize: 15,
     fontWeight: "700",
+    textTransform: "uppercase",
   },
   emptyContainer: {
     flex: 1,

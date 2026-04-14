@@ -4,6 +4,32 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const STORAGE_KEY_HISTORY = "@cpr_session_history";
 
 class SessionStore {
+  private createSessionId() {
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  private ensureUniqueHistoryIds(history: CprSession[]) {
+    const seen = new Set<string>();
+    let changed = false;
+
+    const normalized = history.map((session, index) => {
+      let nextId = session.id;
+      if (!nextId || seen.has(nextId)) {
+        nextId = `${session.startTime || Date.now()}-${index}-${Math.random()
+          .toString(36)
+          .slice(2, 6)}`;
+        changed = true;
+      }
+      seen.add(nextId);
+      if (nextId === session.id) {
+        return session;
+      }
+      return { ...session, id: nextId };
+    });
+
+    return { normalized, changed };
+  }
+
   getComputeMode() {
     const pediatricData = this.currentSession?.pediatricData;
     if (!pediatricData) {
@@ -22,7 +48,7 @@ class SessionStore {
 
   startNewSession() {
     this.currentSession = {
-      id: Date.now().toString(),
+      id: this.createSessionId(),
       startTime: Date.now(),
       events: [],
     };
@@ -158,7 +184,12 @@ class SessionStore {
     try {
       const json = await AsyncStorage.getItem(STORAGE_KEY_HISTORY);
       if (json) {
-        this.history = JSON.parse(json);
+        const parsed = JSON.parse(json) as CprSession[];
+        const { normalized, changed } = this.ensureUniqueHistoryIds(parsed);
+        this.history = normalized;
+        if (changed) {
+          await this.persistHistory();
+        }
         this.notifyListeners();
       }
     } catch (e) {

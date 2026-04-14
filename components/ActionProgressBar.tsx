@@ -1,4 +1,5 @@
 import { sessionController } from "@/controllers/SessionController";
+import { sessionStore } from "@/store/sessionStore";
 import { formatSecondsToClock } from "@/utils/sessionUtils";
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
@@ -46,6 +47,7 @@ export default function ActionProgressBar({
   resetRequest,
   resetKey,
 }: ActionProgressBarProps) {
+  const [theme, setTheme] = useState(sessionStore.theme);
   const [elapsed, setElapsed] = useState(0);
   const [width, setWidth] = useState(0);
   const [localLastActionTime, setLocalLastActionTime] = useState<number | null>(
@@ -59,6 +61,14 @@ export default function ActionProgressBar({
   const firstReminderPlayedRef = useRef(false);
   const midReminderPlayedRef = useRef(false);
   const blinkingRef = useRef<Animated.CompositeAnimation | null>(null);
+  const isDark = theme === "dark";
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (!isActive) return;
@@ -241,7 +251,7 @@ export default function ActionProgressBar({
           {
             opacity: blinkAnim,
             transform: [{ scale: bounceAnim }],
-
+            backgroundColor: isDark ? "#1f2937" : "#fff",
             borderColor: color,
           },
         ]}

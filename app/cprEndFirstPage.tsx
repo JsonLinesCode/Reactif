@@ -14,7 +14,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { sessionStore } from "@/store/sessionStore";
 
 export default function CprEndFirstPage() {
-  const theme = sessionStore.theme;
+  const [theme, setTheme] = React.useState(sessionStore.theme);
+
+  React.useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -48,6 +55,7 @@ export default function CprEndFirstPage() {
     theme === "dark"
       ? { backgroundColor: "#353636" }
       : { backgroundColor: "#fff" };
+  const neutralButtonColor = theme === "dark" ? "#fff" : "#333";
 
   return (
     <SafeAreaView style={[styles.container, bgStyle]}>
@@ -64,24 +72,42 @@ export default function CprEndFirstPage() {
 
         <View style={styles.buttonGroup}>
           <TouchableOpacity
-            style={[styles.button, styles.outlineButton, styles.deathButton]}
+            style={[
+              styles.button,
+              styles.outlineButton,
+              { borderColor: neutralButtonColor },
+            ]}
             onPress={handleDeath}
           >
-            <Text style={[styles.buttonText, styles.deathText]}>Décès</Text>
+            <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
+              Décès
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.outlineButton]}
+            style={[
+              styles.button,
+              styles.outlineButton,
+              { borderColor: neutralButtonColor },
+            ]}
             onPress={handleRacs}
           >
-            <Text style={[styles.buttonText]}>RACS</Text>
+            <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
+              RACS
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.outlineButton]}
+            style={[
+              styles.button,
+              styles.outlineButton,
+              { borderColor: neutralButtonColor },
+            ]}
             onPress={handleInterventionEnd}
           >
-            <Text style={[styles.buttonText]}>Fin d'intervention</Text>
+            <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
+              Fin d'intervention
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -143,6 +169,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginLeft: 10,
+    textTransform: "uppercase",
+    lineHeight: 24,
+    textAlign: "center",
+    flexShrink: 1,
+    includeFontPadding: false,
   },
   deathText: {
     color: "#333",

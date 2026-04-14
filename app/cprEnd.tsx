@@ -25,8 +25,9 @@ import {
 import { router, Stack, useLocalSearchParams } from "expo-router";
 
 export default function CprEnd() {
-  const theme = sessionStore.theme;
+  const [theme, setTheme] = useState(sessionStore.theme);
   const bgStyle = theme === "dark" ? { backgroundColor: "#353636" } : {};
+  const neutralButtonColor = theme === "dark" ? "#fff" : "#333";
   const params = useLocalSearchParams();
   const initialMode = params.mode === "death" ? "summary" : "racs";
 
@@ -45,6 +46,13 @@ export default function CprEnd() {
       };
     }, []),
   );
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const current = sessionStore.getSession();
@@ -76,6 +84,10 @@ export default function CprEnd() {
     await sessionStore.saveCurrentSession("Arrêt définitif");
     setSession(sessionStore.getSession());
     setStep("summary");
+  };
+
+  const handleOpenAideCognitive = () => {
+    router.push("/aide-cognitive");
   };
 
   const handleExportPdf = async () => {
@@ -145,28 +157,62 @@ export default function CprEnd() {
 
           <View style={styles.buttonGroupConfirm}>
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.outlineButton]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                { borderColor: neutralButtonColor },
+              ]}
               onPress={handleResume}
             >
-              <Text style={[styles.buttonText]}>Reprendre la RCP</Text>
+              <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
+                Reprendre la RCP
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.buttonConfirm,
                 styles.outlineButton,
-                styles.deathButton,
+                { borderColor: neutralButtonColor },
               ]}
               onPress={handleDeath}
             >
-              <Text style={[styles.buttonText]}>Décès</Text>
+              <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
+                Décès
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.outlineButton]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                { borderColor: neutralButtonColor },
+              ]}
               onPress={handleConfirmEnd}
             >
-              <Text style={[styles.buttonText]}>Fin d'intervention</Text>
+              <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
+                Fin d'intervention
+              </Text>
+            </TouchableOpacity>
+
+            <View
+              style={[
+                styles.racsSeparator,
+                { backgroundColor: theme === "dark" ? "#6b7280" : "#d1d5db" },
+              ]}
+            />
+
+            <TouchableOpacity
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                { borderColor: neutralButtonColor },
+              ]}
+              onPress={handleOpenAideCognitive}
+            >
+              <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
+                Aides cognitives
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -188,11 +234,11 @@ export default function CprEnd() {
           <Text
             style={[
               styles.headerTitle,
-              theme === "dark" ? { color: "#ccc" } : {},
+              theme === "dark" ? { color: "#FFFF" } : {},
             ]}
           >
             {" "}
-            {summaryTitle === "Décès" ? "Patient décédé" : "Résumé de la RCP"}
+            {summaryTitle === "Décès" ? "DÉCÈS" : "RESUME DE RCP"}
           </Text>
         </View>
 
@@ -200,7 +246,7 @@ export default function CprEnd() {
         <View
           style={[
             styles.card,
-            theme === "dark" ? { backgroundColor: "#999" } : {},
+            theme === "dark" ? { backgroundColor: "#FFFF" } : {},
           ]}
         >
           <View style={[styles.cardRow]}>
@@ -231,7 +277,7 @@ export default function CprEnd() {
         <View
           style={[
             styles.card,
-            theme === "dark" ? { backgroundColor: "#999" } : {},
+            theme === "dark" ? { backgroundColor: "#FFFF" } : {},
           ]}
         >
           <View style={styles.cardHeaderRow}>
@@ -265,7 +311,7 @@ export default function CprEnd() {
         <View
           style={[
             styles.card,
-            theme === "dark" ? { backgroundColor: "#999" } : {},
+            theme === "dark" ? { backgroundColor: "#FFFF" } : {},
           ]}
         >
           <View style={styles.cardHeaderRow}>
@@ -298,19 +344,38 @@ export default function CprEnd() {
         {/* Buttons */}
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity
-            style={[styles.actionButton, styles.outlineSummaryButton]}
+            style={[
+              styles.actionButton,
+              styles.outlineSummaryButton,
+              { borderColor: neutralButtonColor },
+            ]}
             onPress={handleExportPdf}
           >
-            <FontAwesome5 name="file-pdf" size={18} color="#546E7A" />
-            <Text style={styles.actionButtonText}> Exporter en PDF</Text>
+            <FontAwesome5
+              name="file-pdf"
+              size={18}
+              color={neutralButtonColor}
+            />
+            <Text
+              style={[styles.actionButtonText, { color: neutralButtonColor }]}
+            >
+              {" "}
+              Exporter en PDF
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.actionButton, styles.outlineSummaryButton]}
+            style={[
+              styles.actionButton,
+              styles.outlineSummaryButton,
+              { borderColor: neutralButtonColor },
+            ]}
             onPress={handleGoHome}
           >
-            <FontAwesome5 name="home" size={18} color="#546E7A" />
-            <Text style={styles.actionButtonText}>
+            <FontAwesome5 name="home" size={18} color={neutralButtonColor} />
+            <Text
+              style={[styles.actionButtonText, { color: neutralButtonColor }]}
+            >
               {" "}
               Retour à l&apos;accueil
             </Text>
@@ -488,6 +553,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginLeft: 10,
+    textTransform: "uppercase",
+    lineHeight: 20,
+    textAlign: "center",
+    flexShrink: 1,
+    includeFontPadding: false,
   },
   outlineSummaryButton: {
     backgroundColor: "transparent",
@@ -518,6 +588,11 @@ const styles = StyleSheet.create({
     width: "100%",
     gap: 15,
   },
+  racsSeparator: {
+    height: 1,
+    width: "100%",
+    marginVertical: 4,
+  },
   buttonConfirm: {
     flexDirection: "row",
     alignItems: "center",
@@ -543,6 +618,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginLeft: 10,
+    textTransform: "uppercase",
+    lineHeight: 22,
+    textAlign: "center",
+    flexShrink: 1,
+    includeFontPadding: false,
   },
   resumeText: {
     color: "black",

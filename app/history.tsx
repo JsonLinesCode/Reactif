@@ -1,9 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as Print from "expo-print";
-import {router, Stack} from "expo-router";
+import { router, Stack } from "expo-router";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useState } from "react";
-import { sessionController } from "@/controllers/SessionController";
 import {
   Alert,
   FlatList,
@@ -16,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
-import { generateSessionHtml } from "@/utils/sessionUtils";
+import { formatDuration, generateSessionHtml } from "@/utils/sessionUtils";
 
 export default function History() {
   const [sessions, setSessions] = useState<CprSession[]>([]);
@@ -25,7 +24,8 @@ export default function History() {
     new Set(),
   );
 
-    const [theme, setTheme] = useState(sessionStore.theme);
+  const [theme, setTheme] = useState(sessionStore.theme);
+  const isDark = theme === "dark";
   useEffect(() => {
     // Load history
     const history = sessionStore.getHistory();
@@ -91,7 +91,6 @@ export default function History() {
   };
 
   const renderItem = ({ item, index }: { item: CprSession; index: number }) => {
-    const date = new Date(item.startTime);
     const isSelected = selectedSessionIds.has(item.id);
     const sessionNumber = sessions.length - index;
 
@@ -113,45 +112,85 @@ export default function History() {
         <View
           style={[
             styles.card,
+            { backgroundColor: isDark ? "#1f2937" : "#fff" },
             isSelected && {
-              backgroundColor: "#cce5ff",
-              borderColor: "#007BFF",
+              backgroundColor: isDark ? "#1e3a8a" : "#cce5ff",
+              borderColor: isDark ? "#93c5fd" : "#007BFF",
               borderWidth: 1,
             },
           ]}
         >
-          <View style={styles.cardHeader}>
+          <View
+            style={[
+              styles.cardHeader,
+              { borderBottomColor: isDark ? "#374151" : "#eee" },
+            ]}
+          >
             <View>
-              <Text style={styles.cardTitle}>Session #{sessionNumber}</Text>
-              <Text style={styles.infoText}>{date.toLocaleDateString()}</Text>
+              <Text
+                style={[
+                  styles.cardTitle,
+                  { color: isDark ? "#f9fafb" : "#333" },
+                ]}
+              >
+                Session #{sessionNumber}
+              </Text>
+              <Text
+                style={[
+                  styles.infoText,
+                  { color: isDark ? "#d1d5db" : "#444" },
+                ]}
+              >
+                Temps écoulé: {formatDuration(item.startTime, item.endTime)}
+              </Text>
             </View>
             {!isSelectionMode && (
               <TouchableOpacity
                 style={styles.exportButton}
                 onPress={() => handleExport(item)}
               >
-                <Ionicons name="share-outline" size={24} color="#007BFF" />
+                <Ionicons
+                  name="share-outline"
+                  size={24}
+                  color={isDark ? "#93c5fd" : "#007BFF"}
+                />
               </TouchableOpacity>
             )}
             {isSelectionMode && (
               <Ionicons
                 name={isSelected ? "checkbox" : "square-outline"}
                 size={24}
-                color={isSelected ? "#007BFF" : "#ccc"}
+                color={
+                  isSelected ? (isDark ? "#bfdbfe" : "#007BFF") : "#9ca3af"
+                }
               />
             )}
           </View>
 
           <View style={styles.cardContent}>
             {item.pediatricData ? (
-              <Text style={styles.infoText}>
+              <Text
+                style={[
+                  styles.infoText,
+                  { color: isDark ? "#d1d5db" : "#444" },
+                ]}
+              >
                 Patient: Enfant ({item.pediatricData.ageValue}{" "}
                 {item.pediatricData.ageMode})
               </Text>
             ) : (
-              <Text style={styles.infoText}>Patient: Standard</Text>
+              <Text
+                style={[
+                  styles.infoText,
+                  { color: isDark ? "#d1d5db" : "#444" },
+                ]}
+              >
+                Patient: Standard
+              </Text>
             )}
-            <Text style={styles.infoText}>
+            <Text
+              style={[styles.infoText, { color: isDark ? "#d1d5db" : "#444" }]}
+            >
               Événements: {item.events.length}
             </Text>
           </View>
@@ -159,37 +198,58 @@ export default function History() {
       </TouchableOpacity>
     );
   };
-  const bgStyle = { backgroundColor: theme === "dark" ? "#353636" : "#f5f5f5" };
+  const bgStyle = { backgroundColor: isDark ? "#111827" : "#f5f5f5" };
   return (
     <SafeAreaView style={[styles.container, bgStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <View style={{justifyContent: "flex-start"}}>
+      <View style={{ justifyContent: "flex-start" }}>
         <TouchableOpacity
-            style={[styles.backButton, theme === "dark" ? { backgroundColor: "#555", borderColor : "#fff",borderWidth: 3, borderRadius: 666 } : {}]}
-            onPress={() => router.back()}
+          style={[
+            styles.backButton,
+            isDark
+              ? {
+                  backgroundColor: "#374151",
+                  borderColor: "#9ca3af",
+                  borderWidth: 1,
+                  borderRadius: 999,
+                }
+              : {},
+          ]}
+          onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color={theme === "dark" ? "#fff" : "#000"} />
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color={isDark ? "#fff" : "#000"}
+          />
         </TouchableOpacity>
         <View style={[styles.topBar, bgStyle]}>
-
           <TouchableOpacity
-              style={[styles.selectButton, {borderColor: theme === "dark" ? "#fff" : "#007BFF" }]}
-              onPress={toggleSelectionMode}
+            style={[
+              styles.selectButton,
+              { borderColor: isDark ? "#93c5fd" : "#007BFF" },
+            ]}
+            onPress={toggleSelectionMode}
           >
-            <Text style={[styles.selectButtonText, {color: theme === "dark" ? "#fff" : "#007BFF"}]}>
+            <Text
+              style={[
+                styles.selectButtonText,
+                { color: isDark ? "#bfdbfe" : "#007BFF" },
+              ]}
+            >
               {isSelectionMode ? "Annuler" : "Sélectionner"}
             </Text>
           </TouchableOpacity>
 
           {isSelectionMode && selectedSessionIds.size > 0 && (
-              <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={deleteSelectedSessions}
-              >
-                <Text style={styles.deleteButtonText}>
-                  Supprimer ({selectedSessionIds.size})
-                </Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={deleteSelectedSessions}
+            >
+              <Text style={styles.deleteButtonText}>
+                Supprimer ({selectedSessionIds.size})
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
       </View>
@@ -197,12 +257,18 @@ export default function History() {
       <Stack.Screen options={{ title: "Historique des sessions" }} />
       {sessions.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Aucune session enregistrée.</Text>
+          <Text
+            style={[styles.emptyText, { color: isDark ? "#9ca3af" : "#888" }]}
+          >
+            Aucune session enregistrée.
+          </Text>
         </View>
       ) : (
         <FlatList
           data={sessions}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) =>
+            `${item.id}-${item.startTime}-${index}`
+          }
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
         />
@@ -255,6 +321,7 @@ const styles = StyleSheet.create({
     color: "#007BFF",
     fontSize: 14,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   deleteButton: {
     backgroundColor: "#dc3545",
@@ -266,6 +333,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   card: {
     backgroundColor: "#fff",

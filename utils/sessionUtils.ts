@@ -34,6 +34,29 @@ export function formatDuration(startTime: number, endTime?: number): string {
   return formatSecondsToClock(diffSeconds);
 }
 
+export function formatHumanReadableTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+export function formatHumanReadableDateTime(timestamp: number): string {
+  return `${new Date(timestamp).toLocaleDateString("fr-FR")} ${formatHumanReadableTime(timestamp)}`;
+}
+
+export function formatElapsedFromStart(
+  startTimestamp: number,
+  eventTimestamp: number,
+): string {
+  const elapsedSeconds = Math.max(
+    0,
+    Math.floor((eventTimestamp - startTimestamp) / 1000),
+  );
+  return formatSecondsToClock(elapsedSeconds);
+}
+
 export function formatEventType(type: CprEvent["type"]): string {
   switch (type) {
     case "shock":

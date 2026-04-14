@@ -132,7 +132,10 @@ export default function ChildData() {
       return;
     }
     if (!inputMode) {
-      Alert.alert("Erreur", "Veuillez sélectionner et entrer une donnée (âge ou poids).");
+      Alert.alert(
+        "Erreur",
+        "Veuillez sélectionner et entrer une donnée (âge ou poids).",
+      );
       return;
     }
 
@@ -295,6 +298,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   choiceButton: {
     backgroundColor: "#007BFF",
@@ -329,6 +333,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   agePickerContainer: {
     alignItems: "center",
@@ -362,6 +367,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   input: {
     backgroundColor: "#fff",
@@ -403,8 +409,18 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   activeTab: { backgroundColor: "#007AFF" },
-  activeTabText: { color: "#fff", fontSize: 14, fontWeight: "bold" },
-  tabText: { color: "#007AFF", fontWeight: "bold", fontSize: 14 },
+  activeTabText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+  tabText: {
+    color: "#007AFF",
+    fontWeight: "bold",
+    fontSize: 14,
+    textTransform: "uppercase",
+  },
   validationButton: {
     backgroundColor: "#28a745",
     paddingVertical: 16,
@@ -458,6 +474,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 15,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   footer: {
     paddingHorizontal: 20,

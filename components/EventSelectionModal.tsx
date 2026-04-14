@@ -1,3 +1,4 @@
+import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
@@ -36,7 +37,16 @@ export default function EventSelectionModal({
   onClose,
   onSave,
 }: EventSelectionModalProps) {
+  const [theme, setTheme] = useState(sessionStore.theme);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const isDark = theme === "dark";
+
+  React.useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const toggleEvent = (event: string) => {
     const newSelected = new Set(selected);
@@ -65,9 +75,19 @@ export default function EventSelectionModal({
       animationType="slide"
       presentationStyle="pageSheet"
     >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: isDark ? "#111827" : "#F5F5F5" },
+        ]}
+      >
         {/* Header */}
-        <View style={styles.header}>
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: isDark ? "#0f172a" : "#000" },
+          ]}
+        >
           <TouchableOpacity onPress={handleClose} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
@@ -76,16 +96,31 @@ export default function EventSelectionModal({
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.titleContainer}>
-            <Text style={styles.pageTitle}>📝 Saisie Événements</Text>
+            <Text
+              style={[
+                styles.pageTitle,
+                { color: isDark ? "#93c5fd" : "#0D47A1" },
+              ]}
+            >
+              📝 Saisie Événements
+            </Text>
           </View>
 
-          <View style={styles.optionsList}>
+          <View
+            style={[
+              styles.optionsList,
+              { backgroundColor: isDark ? "#1f2937" : "#fff" },
+            ]}
+          >
             {EVENT_OPTIONS.map((item) => {
               const isSelected = selected.has(item);
               return (
                 <TouchableOpacity
                   key={item}
-                  style={styles.optionItem}
+                  style={[
+                    styles.optionItem,
+                    { borderBottomColor: isDark ? "#374151" : "#eee" },
+                  ]}
                   onPress={() => toggleEvent(item)}
                 >
                   <View
@@ -98,7 +133,14 @@ export default function EventSelectionModal({
                       <Ionicons name="checkmark" size={16} color="#fff" />
                     )}
                   </View>
-                  <Text style={styles.optionText}>{item}</Text>
+                  <Text
+                    style={[
+                      styles.optionText,
+                      { color: isDark ? "#e5e7eb" : "#333" },
+                    ]}
+                  >
+                    {item}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
@@ -106,7 +148,15 @@ export default function EventSelectionModal({
         </ScrollView>
 
         {/* Footer Button */}
-        <View style={styles.footer}>
+        <View
+          style={[
+            styles.footer,
+            {
+              backgroundColor: isDark ? "#111827" : "#F5F5F5",
+              borderTopColor: isDark ? "#374151" : "#ddd",
+            },
+          ]}
+        >
           <TouchableOpacity style={styles.validateButton} onPress={handleSave}>
             <Ionicons
               name="checkbox-outline"
@@ -203,5 +253,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
 });

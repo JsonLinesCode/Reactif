@@ -49,7 +49,14 @@ export default function ActionButtons({
           />
         )}
         {useShortTapEndButton && (
-          <Text style={styles.actionLabel}>Fin RCP</Text>
+          <Text
+            style={styles.actionLabel}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.72}
+          >
+            Fin RCP
+          </Text>
         )}
       </View>
 
@@ -72,6 +79,9 @@ export default function ActionButtons({
             styles.actionLabel,
             theme === "dark" ? { color: "#ccc" } : { color: "#000" },
           ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.72}
         >
           Saisie
         </Text>
@@ -96,8 +106,11 @@ export default function ActionButtons({
             styles.actionLabel,
             theme === "dark" ? { color: "#ccc" } : { color: "#000" },
           ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.72}
         >
-          Aide cognitive
+          Aide
         </Text>
       </View>
       <View style={styles.actionItem}>
@@ -117,11 +130,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     width: "100%",
-    gap: 8,
+    gap: 0,
   },
   actionItem: {
     alignItems: "center",
-    width: 84,
+    flex: 1,
+    minWidth: 0,
+    paddingHorizontal: 3,
   },
   circleButton: {
     width: 64,
@@ -136,9 +151,13 @@ const styles = StyleSheet.create({
   },
 
   actionLabel: {
-    fontSize: 17,
+    width: "100%",
+    fontSize: 18,
     fontWeight: "600",
     textAlign: "center",
     color: "#000",
+    textTransform: "uppercase",
+    lineHeight: 22,
+    includeFontPadding: false,
   },
 });

@@ -1,7 +1,7 @@
 import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 
 interface MetronomeControlProps {
@@ -17,6 +17,17 @@ export default function MetronomeControl({
   isMuted,
   setIsMuted,
 }: MetronomeControlProps) {
+  const [theme, setTheme] = useState(sessionStore.theme);
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const isDark = theme === "dark";
+
   const decreaseBpm = () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setBpm(Math.max(100, bpm - 5));
@@ -26,40 +37,59 @@ export default function MetronomeControl({
     setBpm(Math.min(120, bpm + 5));
   };
 
-  const theme = sessionStore.theme;
-
   return (
     <View
       style={[
         styles.container,
-        theme === "dark"
-          ? { backgroundColor: "#333", borderColor: "#ccc" }
-          : {},
+        isDark ? { backgroundColor: "#1f2937", borderColor: "#94a3b8" } : {},
       ]}
     >
       {/* BPM Control */}
       <View style={styles.bpmContainer}>
-        <TouchableOpacity style={styles.bpmButton} onPress={decreaseBpm}>
-          <Ionicons name="remove" size={20} color="#000" />
+        <TouchableOpacity
+          style={[
+            styles.bpmButton,
+            isDark ? { backgroundColor: "#374151" } : {},
+          ]}
+          onPress={decreaseBpm}
+        >
+          <Ionicons
+            name="remove"
+            size={20}
+            color={isDark ? "#f3f4f6" : "#000"}
+          />
         </TouchableOpacity>
         <View style={styles.bpmDisplay}>
           <Text
             style={[
               styles.bpmValue,
-              theme === "dark" ? { color: "#ccc" } : { color: "#333" },
+              isDark ? { color: "#e5e7eb" } : { color: "#333" },
             ]}
           >
             {bpm}
           </Text>
-          <Text style={styles.bpmLabel}>BPM</Text>
+          <Text style={[styles.bpmLabel, isDark ? { color: "#94a3b8" } : {}]}>
+            BPM
+          </Text>
         </View>
 
-        <TouchableOpacity style={styles.bpmButton} onPress={increaseBpm}>
-          <Ionicons name="add" size={20} color="#000" />
+        <TouchableOpacity
+          style={[
+            styles.bpmButton,
+            isDark ? { backgroundColor: "#374151" } : {},
+          ]}
+          onPress={increaseBpm}
+        >
+          <Ionicons name="add" size={20} color={isDark ? "#f3f4f6" : "#000"} />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.muteContainer}>
+      <View
+        style={[
+          styles.muteContainer,
+          isDark ? { backgroundColor: "#374151" } : {},
+        ]}
+      >
         <Switch
           trackColor={{ false: "#767577", true: "#81b0ff" }}
           thumbColor={!isMuted ? "#f4f3f4" : "#f5dd4b"}
@@ -70,7 +100,7 @@ export default function MetronomeControl({
         <Ionicons
           name={isMuted ? "volume-mute" : "volume-high"}
           size={24}
-          color="#000"
+          color={isDark ? "#f3f4f6" : "#000"}
           style={{ marginLeft: 8 }}
         />
       </View>

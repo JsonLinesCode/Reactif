@@ -70,16 +70,12 @@ export default function DisplayChildData() {
                 {ageValue} {ageMode === "months" ? "Mois" : "Ans"}
               </Text>
 
-              <Text style={[styles.label, labelStyle]}>
-                Poids Estimé :
-              </Text>
+              <Text style={[styles.label, labelStyle]}>Poids Estimé :</Text>
             </>
           )}
 
           {!(computeMode === "age") && (
-            <Text style={[styles.label, labelStyle]}>
-              Poids Saisi :
-            </Text>
+            <Text style={[styles.label, labelStyle]}>Poids Saisi :</Text>
           )}
           <Text style={[styles.value, textStyle]}>{weight} kg</Text>
 
@@ -116,9 +112,7 @@ export default function DisplayChildData() {
           style={styles.cancelButton}
           onPress={() => router.push("/childData")}
         >
-          <Text style={styles.validationButtonText}>
-            Annuler
-          </Text>
+          <Text style={styles.validationButtonText}>Annuler</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -175,11 +169,12 @@ const styles = StyleSheet.create({
   validationButton: {
     backgroundColor: "#28a745",
     paddingVertical: 16,
+    paddingHorizontal: 14,
     borderRadius: 12,
     marginTop: 20,
     marginBottom: 10,
     width: "100%",
-    maxWidth: 150,
+    maxWidth: 230,
     alignItems: "center",
     elevation: 3,
     shadowColor: "#000",
@@ -189,23 +184,27 @@ const styles = StyleSheet.create({
   },
   validationButtonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
+    textTransform: "uppercase",
+    lineHeight: 20,
+    includeFontPadding: false,
   },
   cancelButton: {
     backgroundColor: "#dc3545",
     paddingVertical: 16,
+    paddingHorizontal: 14,
     borderRadius: 12,
     marginTop: 20,
     marginBottom: 10,
     width: "100%",
-    maxWidth: 150,
+    maxWidth: 230,
     alignItems: "center",
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
-  }
+  },
 });

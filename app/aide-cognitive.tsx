@@ -1,7 +1,8 @@
 import ImageViewer from "@/components/ImageViewer";
+import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ImageSourcePropType,
   Modal,
@@ -50,9 +51,19 @@ const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
 
 export default function AideCognitive() {
   const router = useRouter();
+  const [theme, setTheme] = useState(sessionStore.theme);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const isDark = theme === "dark";
 
   const selectedDocument = useMemo(
     () => COGNITIVE_DOCUMENTS.find((doc) => doc.id === selectedDocumentId),
@@ -60,33 +71,96 @@ export default function AideCognitive() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ title: "Retour" }} />
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: isDark ? "#111827" : "#F5F5F5" },
+      ]}
+    >
+      <Stack.Screen
+        options={{
+          title: "Aides cognitives",
+          headerStyle: {
+            backgroundColor: isDark ? "#111827" : "#F5F5F5",
+          },
+          headerTintColor: isDark ? "#e5e7eb" : "#0f172a",
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.headerBackButton}
+            >
+              <Ionicons
+                name="arrow-back"
+                size={22}
+                color={isDark ? "#e5e7eb" : "#0f172a"}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.titleContainer}>
-          <Text style={styles.pageTitle}>Aides cognitives</Text>
+          <Text
+            style={[
+              styles.pageTitle,
+              { color: isDark ? "#e2e8f0" : "#0D47A1" },
+            ]}
+          >
+            Aides cognitives
+          </Text>
         </View>
 
-        <View style={styles.optionsList}>
+        <View
+          style={[
+            styles.optionsList,
+            { backgroundColor: isDark ? "#1f2937" : "#fff" },
+          ]}
+        >
           <TouchableOpacity
-            style={styles.optionItem}
+            style={[
+              styles.optionItem,
+              { borderBottomColor: isDark ? "#374151" : "#E5E7EB" },
+            ]}
             onPress={() => router.push("/aide-respiratoire")}
           >
-            <Text style={styles.optionText}>
+            <Text
+              style={[
+                styles.optionText,
+                { color: isDark ? "#e5e7eb" : "#111827" },
+              ]}
+            >
               Réglages respirateur RCP Adulte
             </Text>
-            <Ionicons name="chevron-forward" size={22} color="#0D47A1" />
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color={isDark ? "#93c5fd" : "#0D47A1"}
+            />
           </TouchableOpacity>
 
           {COGNITIVE_DOCUMENTS.map((item) => (
             <TouchableOpacity
               key={item.id}
-              style={styles.optionItem}
+              style={[
+                styles.optionItem,
+                { borderBottomColor: isDark ? "#374151" : "#E5E7EB" },
+              ]}
               onPress={() => setSelectedDocumentId(item.id)}
             >
-              <Text style={styles.optionText}>{item.label}</Text>
-              <Ionicons name="chevron-forward" size={22} color="#0D47A1" />
+              <Text
+                style={[
+                  styles.optionText,
+                  { color: isDark ? "#e5e7eb" : "#111827" },
+                ]}
+              >
+                {item.label}
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={22}
+                color={isDark ? "#93c5fd" : "#0D47A1"}
+              />
             </TouchableOpacity>
           ))}
         </View>
@@ -98,8 +172,18 @@ export default function AideCognitive() {
         presentationStyle="fullScreen"
         onRequestClose={() => setSelectedDocumentId(null)}
       >
-        <SafeAreaView style={styles.viewerContainer}>
-          <View style={styles.viewerHeader}>
+        <SafeAreaView
+          style={[
+            styles.viewerContainer,
+            { backgroundColor: isDark ? "#0b1220" : "#F5F5F5" },
+          ]}
+        >
+          <View
+            style={[
+              styles.viewerHeader,
+              { backgroundColor: isDark ? "#111827" : "#000" },
+            ]}
+          >
             <TouchableOpacity
               onPress={() => setSelectedDocumentId(null)}
               style={styles.backButton}
@@ -140,6 +224,10 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     paddingBottom: 28,
+  },
+  headerBackButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   titleContainer: {
     alignItems: "center",

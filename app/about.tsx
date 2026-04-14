@@ -1,6 +1,7 @@
+import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -9,9 +10,26 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 export default function About() {
+  const [theme, setTheme] = useState(sessionStore.theme);
+
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const isDark = theme === "dark";
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        { backgroundColor: isDark ? "#111827" : "#F0F4F8" },
+      ]}
+    >
       <Stack.Screen
         options={{ title: "À Propos", headerBackTitle: "Retour" }}
       />
@@ -23,21 +41,38 @@ export default function About() {
           onPress={() => router.back()}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color={"#000"} />
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color={isDark ? "#fff" : "#000"}
+          />
         </TouchableOpacity>
-        <Text style={styles.title}>À propos de cette application</Text>
+        <Text style={[styles.title, { color: isDark ? "#e2e8f0" : "#0A3D62" }]}>
+          À propos de cette application
+        </Text>
 
-        <View style={styles.section}>
-          <Text style={styles.paragraph}>
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: isDark ? "#1f2937" : "#FFFFFF" },
+          ]}
+        >
+          <Text
+            style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
+          >
             Cette application est une assistance à la réanimation
             cardio-pulmonaire (RCP) de type &#34;time keeper&#34;.
           </Text>
-          <Text style={styles.paragraph}>
+          <Text
+            style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
+          >
             La gestion automatisée des délais lors d&#39;une RCP limite les
             erreurs tout en améliorant la sécurité et la qualité des soins
             conformément aux dernières recommandations.
           </Text>
-          <Text style={styles.paragraph}>
+          <Text
+            style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
+          >
             Cette application répond au double objectif d&#39;améliorer les
             séquences de RCP et donc d&#39;améliorer le pronostic des arrêts
             cardiaques (AC), mais aussi d&#39;enregistrer et d&#39;exporter des
@@ -45,9 +80,23 @@ export default function About() {
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.subHeader}>Protection des données :</Text>
-          <Text style={styles.paragraph}>
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: isDark ? "#1f2937" : "#FFFFFF" },
+          ]}
+        >
+          <Text
+            style={[
+              styles.subHeader,
+              { color: isDark ? "#93c5fd" : "#1F3A93" },
+            ]}
+          >
+            Protection des données :
+          </Text>
+          <Text
+            style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
+          >
             Conformément à la réglementation sur les données de santé,
             l&#39;application se limite à la saisie des horaires des étapes de
             la RCP à des fins d&#39;évaluation des pratiques, excluant toute
@@ -57,21 +106,51 @@ export default function About() {
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.subHeader}>Initiateurs et Développement :</Text>
-          <Text style={styles.paragraph}>
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: isDark ? "#1f2937" : "#FFFFFF" },
+          ]}
+        >
+          <Text
+            style={[
+              styles.subHeader,
+              { color: isDark ? "#93c5fd" : "#1F3A93" },
+            ]}
+          >
+            Initiateurs et Développement :
+          </Text>
+          <Text
+            style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
+          >
             Application imaginée et portée par Steven LAGADEC (SAMU 91).
           </Text>
-          <Text style={styles.paragraph}>
+          <Text
+            style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
+          >
             Développement et production : Josselin ROBERT, Jacques ANGLEYS,
             Othmane QAIBES, Lina ZAROUAL, Nesma HOUMANI et Mossab HARIZ de
             Télécom SudParis.
           </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.subHeader}>Financement :</Text>
-          <Text style={styles.paragraph}>
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: isDark ? "#1f2937" : "#FFFFFF" },
+          ]}
+        >
+          <Text
+            style={[
+              styles.subHeader,
+              { color: isDark ? "#93c5fd" : "#1F3A93" },
+            ]}
+          >
+            Financement :
+          </Text>
+          <Text
+            style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
+          >
             Le développement de cette application a profité d’un financement
             dans le cadre du 7ème Appel à idées innovantes Genopole en
             partenariat avec le Centre Hospitalier Sud Francilien (CHSF).

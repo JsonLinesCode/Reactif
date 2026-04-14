@@ -337,8 +337,19 @@ export default function ShockTimer({
               : { backgroundColor: "#F5F5F5" },
           ]}
         >
-          <Ionicons name="flash" size={40} color="black" />
-          <Text style={styles.labelText}>CHOC</Text>
+          <Ionicons
+            name="flash"
+            size={40}
+            color={theme === "dark" ? "#FFFF" : "#000"}
+          />
+          <Text
+            style={[
+              styles.labelText,
+              { color: theme === "dark" ? "#FFFF" : "#000" },
+            ]}
+          >
+            CHOC
+          </Text>
           <Pressable
             style={styles.badge}
             onPress={handleShockBadgePress}
@@ -418,14 +429,14 @@ export default function ShockTimer({
             size={40}
             style={[
               theme === "dark"
-                ? { color: "#ccc", marginBottom: 4 }
+                ? { color: "#FFFF", marginBottom: 4 }
                 : { color: "#000", marginBottom: 4 },
             ]}
           />
           <Text
             style={[
               styles.timerText,
-              theme === "dark" ? { color: "#ccc" } : { color: "#000" },
+              theme === "dark" ? { color: "#FFFF" } : { color: "#000" },
             ]}
           >
             {formatTime(timeLeft)}
@@ -433,7 +444,7 @@ export default function ShockTimer({
           <Text
             style={[
               styles.labelText,
-              theme === "dark" ? { color: "#ccc" } : { color: "#000" },
+              theme === "dark" ? { color: "#FFFF" } : { color: "#000" },
             ]}
           >
             ANALYSE

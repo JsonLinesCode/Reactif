@@ -184,6 +184,7 @@ export default function LongPressButton({
           styles.label,
           theme === "dark" ? { color: "#ccc" } : { color: "black" },
         ]}
+        numberOfLines={1}
       >
         {label}
       </Text>
@@ -213,9 +214,13 @@ const styles = StyleSheet.create({
     }),
   },
   label: {
-    fontSize: 17,
+    width: "100%",
+    fontSize: 18,
     fontWeight: "600",
     textAlign: "center",
     color: "#000",
+    textTransform: "uppercase",
+    lineHeight: 22,
+    includeFontPadding: false,
   },
 });

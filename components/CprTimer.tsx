@@ -13,7 +13,7 @@ export default function CprTimer() {
     return unsubscribe;
   }, []);
 
-  const textStyleColor = { color: theme === "dark" ? "#ccc" : "#000" };
+  const textStyleColor = { color: theme === "dark" ? "#FFFF" : "#000" };
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
@@ -45,11 +45,11 @@ export default function CprTimer() {
       style={[
         styles.container,
         theme === "dark"
-          ? { backgroundColor: "#333", borderColor: "#ccc" }
+          ? { backgroundColor: "#333", borderColor: "#FFFF" }
           : {},
       ]}
     >
-      <Text style={[styles.label, textStyleColor]}>Durée RCP</Text>
+      <Text style={[styles.label, textStyleColor]}>DURÉE RCP</Text>
       <View style={styles.timerContainer}>
         <Text style={[styles.timerText, textStyleColor]}>
           {formatTime(seconds)}

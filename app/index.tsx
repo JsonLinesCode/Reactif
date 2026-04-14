@@ -201,11 +201,13 @@ const styles = StyleSheet.create({
     color: "#007BFF",
     fontSize: 22,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   buttonHistoryText: {
     color: "#007BFF",
     fontSize: 18,
     fontWeight: "bold",
+    textTransform: "uppercase",
   },
   mainButtons: {
     width: "100%",

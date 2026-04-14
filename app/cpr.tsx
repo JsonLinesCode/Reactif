@@ -5,7 +5,6 @@ import {
   Platform,
   StatusBar,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -294,9 +293,7 @@ export default function Cpr() {
     >
       <View style={styles.container}>
         {/* Top Timer */}
-        <TouchableOpacity onPress={handleEvent}>
-          <CprTimer />
-        </TouchableOpacity>
+        <CprTimer />
 
         {/* Shock Circular Timer */}
         {/* Pass shockDuration from settings */}
