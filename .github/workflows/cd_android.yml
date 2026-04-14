@@ -79,7 +79,7 @@ jobs:
             --aab android/app/build/outputs/bundle/release/app-release.aab \
             --track internal \
             --json_key /tmp/google-play-service-account.json \
-            --package_name com.reactif \
+            --package_name fr.reactif \
             --skip_upload_images true \
             --skip_upload_screenshots true \
             --skip_upload_metadata true
