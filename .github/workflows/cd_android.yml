@@ -9,7 +9,7 @@ on:
 jobs:
   # CD
   deploy_android:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     # Beta release only
     if: github.ref == 'refs/heads/beta-releases'
     steps:
