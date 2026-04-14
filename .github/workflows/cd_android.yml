@@ -9,7 +9,7 @@ on:
 jobs:
   # CD
   deploy_android:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     # Beta release only
     if: github.ref == 'refs/heads/beta-releases'
     steps:
@@ -74,18 +74,18 @@ jobs:
       - name: Install fastlane
         run: gem install fastlane --user-install -N
 
-      - name: Upload to Google Play Internal track
-        run: |
-          cat > /tmp/google-play-service-account.json <<EOF
-          ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          EOF
-          fastlane supply \
-            --aab android/app/build/outputs/bundle/release/app-release.aab \
-            --track internal \
-            --json_key /tmp/google-play-service-account.json \
-            --package_name fr.reactif \
-            --skip_upload_images true \
-            --skip_upload_screenshots true \
-            --skip_upload_metadata true
-        env:
-          SUPPLY_TIMEOUT: 300
+      # - name: Upload to Google Play Internal track
+      #   run: |
+      #     cat > /tmp/google-play-service-account.json <<EOF
+      #     ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+      #     EOF
+      #     fastlane supply \
+      #       --aab android/app/build/outputs/bundle/release/app-release.aab \
+      #       --track internal \
+      #       --json_key /tmp/google-play-service-account.json \
+      #       --package_name fr.reactif \
+      #       --skip_upload_images true \
+      #       --skip_upload_screenshots true \
+      #       --skip_upload_metadata true
+      #   env:
+      #     SUPPLY_TIMEOUT: 300
