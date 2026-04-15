@@ -99,7 +99,7 @@ export default function DisplayChildData() {
           onPress={handleStartPediatricCpr}
         >
           <Text style={styles.validationButtonText}>
-            Valider et commencer RCP
+            Commencer RCP
           </Text>
         </TouchableOpacity>
         <TouchableOpacity

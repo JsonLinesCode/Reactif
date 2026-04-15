@@ -125,6 +125,7 @@ export default function LongPressButton({
           justifyContent: "center",
           alignItems: "center",
           position: "relative",
+          marginBottom: 8,
         }}
       >
         <Pressable
