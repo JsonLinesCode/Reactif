@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
   label: {
     color: "black",
     fontSize: 20,
+    fontWeight: "bold",
     marginBottom: 4,
   },
   timerContainer: {

@@ -21,6 +21,7 @@ import {
   formatElapsedFromStart,
   formatEventDetails,
   formatEventType,
+  formatHumanReadableDateTime,
   formatHumanReadableTime,
   getEventsWithCycles,
 } from "@/utils/sessionUtils";
@@ -411,6 +412,8 @@ function generateHtml(session: CprSession) {
             <td>RCP ${cycle}</td>
             <td>${formatEventType(event.type)}</td>
             <td>${formatEventDetails(event.details)}</td>
+            <td>${formatElapsedFromStart(session.startTime, event.timestamp)}</td>
+            <td>${formatHumanReadableDateTime(event.timestamp)}</td>
         </tr>
       `,
     )
@@ -446,9 +449,11 @@ function generateHtml(session: CprSession) {
         <table>
             <thead>
                 <tr>
-                  <th>Cycle</th>
+                    <th>Cycle</th>
                     <th>Type</th>
                     <th>Détails</th>
+                    <th>Temps écoulé</th>
+                    <th>Heure</th>
                 </tr>
             </thead>
             <tbody>

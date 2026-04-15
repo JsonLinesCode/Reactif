@@ -43,7 +43,8 @@ export default function DisplayChildData() {
     cordaroneDose,
     energyDose,
   } = data;
-  const shouldShowAge = ageValue > 0;
+  // Only show age if computeMode is 'age'
+  const shouldShowAge = ageValue > 0 && computeMode === "age";
 
   const handleStartPediatricCpr = () => {
     sessionStore.resetCurrentSessionStartTime();
@@ -64,17 +65,10 @@ export default function DisplayChildData() {
           )}
 
           {computeMode === "age" && (
-            <>
-              <Text style={[styles.label, labelStyle]}>Age:</Text>
-              <Text style={[styles.value, textStyle]}>
-                {ageValue} {ageMode === "months" ? "Mois" : "Ans"}
-              </Text>
-
-              <Text style={[styles.label, labelStyle]}>Poids Estimé :</Text>
-            </>
+            <Text style={[styles.label, labelStyle]}>Poids Estimé :</Text>
           )}
 
-          {!(computeMode === "age") && (
+          {computeMode === "weight" && (
             <Text style={[styles.label, labelStyle]}>Poids Saisi :</Text>
           )}
           <Text style={[styles.value, textStyle]}>{weight} kg</Text>

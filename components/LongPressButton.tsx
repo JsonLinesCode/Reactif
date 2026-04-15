@@ -20,9 +20,10 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 interface LongPressButtonProps {
   onComplete: () => void;
   size?: number;
-  color?: string;
+  iconSize?: number;
   iconName?: keyof typeof Ionicons.glyphMap;
   label?: string;
+  showLabel?: boolean;
   duration?: number;
 }
 
@@ -31,12 +32,15 @@ const DURATION = 1000;
 export default function LongPressButton({
   onComplete,
   size = 80,
-  color = "#448AFF",
+  iconSize = 32,
   iconName = "arrow-undo",
   label = "Annuler",
+  showLabel = true,
   duration = DURATION,
 }: LongPressButtonProps) {
   const theme = sessionStore.theme;
+  const buttonColor =
+    label.trim().toUpperCase() === "FIN RCP" ? "#FF5252" : "#448AFF";
 
   const progress = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -136,13 +140,13 @@ export default function LongPressButton({
                 height: size,
                 borderRadius: size / 2,
                 backgroundColor: "transparent",
-                borderWidth: 3,
-                borderColor: "#448AFF",
+                borderWidth: 2,
+                borderColor: buttonColor,
               },
               animatedButtonStyle,
             ]}
           >
-            <Ionicons name={iconName} size={32} color="#448AFF" />
+            <Ionicons name={iconName} size={iconSize} color={buttonColor} />
           </Animated.View>
         </Pressable>
 
@@ -168,7 +172,7 @@ export default function LongPressButton({
               cx={svgSize / 2}
               cy={svgSize / 2}
               r={ringRadius}
-              stroke={color}
+              stroke={buttonColor}
               strokeWidth={strokeWidth}
               fill="transparent"
               strokeDasharray={circumference}
@@ -179,15 +183,17 @@ export default function LongPressButton({
           </Svg>
         </View>
       </View>
-      <Text
-        style={[
-          styles.label,
-          theme === "dark" ? { color: "#ccc" } : { color: "black" },
-        ]}
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
+      {showLabel ? (
+        <Text
+          style={[
+            styles.label,
+            theme === "dark" ? { color: "#ccc" } : { color: "black" },
+          ]}
+          numberOfLines={1}
+        >
+          {label}
+        </Text>
+      ) : null}
     </View>
   );
 }

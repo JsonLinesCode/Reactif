@@ -33,6 +33,9 @@ interface ActionProgressBarProps {
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
 
+const BAR_HEIGHT = 66;
+const BADGE_SIZE = BAR_HEIGHT;
+
 export default function ActionProgressBar({
   label,
   count,
@@ -332,14 +335,14 @@ export default function ActionProgressBar({
 const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "center",
     width: "100%",
   },
   container: {
     flex: 1,
-    height: 66,
-    borderRadius: 33,
+    height: BAR_HEIGHT,
+    borderRadius: BAR_HEIGHT / 2,
     borderWidth: 2,
     position: "relative",
     justifyContent: "center",
@@ -399,8 +402,12 @@ const styles = StyleSheet.create({
   },
   badge: {
     borderWidth: 2,
-    width: 60,
-    height: 60,
+    width: BADGE_SIZE,
+    height: BADGE_SIZE,
+    minWidth: BADGE_SIZE,
+    maxWidth: BADGE_SIZE,
+    minHeight: BADGE_SIZE,
+    maxHeight: BADGE_SIZE,
     borderRadius: 1000,
     justifyContent: "center",
     alignItems: "center",

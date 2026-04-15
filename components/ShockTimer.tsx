@@ -419,9 +419,6 @@ export default function ShockTimer({
               height: innerSize,
               borderRadius: innerRadius,
             },
-            theme === "dark"
-              ? { backgroundColor: "#353636" }
-              : { backgroundColor: "#F5F5F5" },
           ]}
         >
           <MaterialCommunityIcons
@@ -433,14 +430,7 @@ export default function ShockTimer({
                 : { color: "#000", marginBottom: 4 },
             ]}
           />
-          <Text
-            style={[
-              styles.timerText,
-              theme === "dark" ? { color: "#FFFF" } : { color: "#000" },
-            ]}
-          >
-            {formatTime(timeLeft)}
-          </Text>
+
           <Text
             style={[
               styles.labelText,
@@ -448,6 +438,14 @@ export default function ShockTimer({
             ]}
           >
             ANALYSE
+          </Text>
+          <Text
+            style={[
+              styles.timerText,
+              theme === "dark" ? { color: "#FFFF" } : { color: "#000" },
+            ]}
+          >
+            {formatTime(timeLeft)}
           </Text>
         </View>
       </AnimatedTouchableOpacity>
@@ -465,7 +463,6 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   buttonCircle: {
-    backgroundColor: "#F5F5F5", // Same bg as inner timer
     justifyContent: "center",
     alignItems: "center",
     elevation: 5,
@@ -485,12 +482,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
     elevation: 2,
     zIndex: 1,
   },
   timerText: {
-    fontSize: 36,
+    fontSize: 30,
     fontWeight: "bold",
     color: "#000",
   },

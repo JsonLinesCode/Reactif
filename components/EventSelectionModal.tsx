@@ -164,7 +164,7 @@ export default function EventSelectionModal({
               color="#fff"
               style={{ marginRight: 8 }}
             />
-            <Text style={styles.validateButtonText}>Valider et Retour</Text>
+            <Text style={[styles.validateButtonText, { textAlign: "center" }]}>Valider et Retour</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
