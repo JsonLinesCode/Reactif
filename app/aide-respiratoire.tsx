@@ -138,7 +138,7 @@ En post RACS, restaurer les paramètres habituels et ajuster les réglages pour 
 
   return (
     <SafeAreaView
-      edges={["left", "right", "bottom"]}
+      edges={["top", "left", "right", "bottom"]}
       style={[
         styles.container,
         {
@@ -444,6 +444,8 @@ En post RACS, restaurer les paramètres habituels et ajuster les réglages pour 
 const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 28,
+    marginTop: 15,
+    paddingTop: 8,
   },
   helpHeader: {
     marginHorizontal: 16,

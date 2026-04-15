@@ -30,7 +30,7 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 export default function CprEnd() {
   const [theme, setTheme] = useState(sessionStore.theme);
   const bgStyle = theme === "dark" ? { backgroundColor: "#353636" } : {};
-  const neutralButtonColor = theme === "dark" ? "#fff" : "#333";
+  const neutralButtonColor = "#007BFF";
   const params = useLocalSearchParams();
   const initialMode = params.mode === "death" ? "summary" : "racs";
 
@@ -160,42 +160,24 @@ export default function CprEnd() {
 
           <View style={styles.buttonGroupConfirm}>
             <TouchableOpacity
-              style={[
-                styles.buttonConfirm,
-                styles.outlineButton,
-                { borderColor: neutralButtonColor },
-              ]}
+              style={[styles.buttonConfirm, styles.outlineButton]}
               onPress={handleResume}
             >
-              <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
-                Reprendre la RCP
-              </Text>
+              <Text style={[styles.buttonText]}>Reprendre la RCP</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.buttonConfirm,
-                styles.outlineButton,
-                { borderColor: neutralButtonColor },
-              ]}
+              style={[styles.buttonConfirm, styles.outlineButton]}
               onPress={handleDeath}
             >
-              <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
-                Décès
-              </Text>
+              <Text style={[styles.buttonText]}>Décès</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.buttonConfirm,
-                styles.outlineButton,
-                { borderColor: neutralButtonColor },
-              ]}
+              style={[styles.buttonConfirm, styles.outlineButton]}
               onPress={handleConfirmEnd}
             >
-              <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
-                Fin d'intervention
-              </Text>
+              <Text style={[styles.buttonText]}>Fin d'intervention</Text>
             </TouchableOpacity>
 
             <View
@@ -206,16 +188,10 @@ export default function CprEnd() {
             />
 
             <TouchableOpacity
-              style={[
-                styles.buttonConfirm,
-                styles.outlineButton,
-                { borderColor: neutralButtonColor },
-              ]}
+              style={[styles.buttonConfirm, styles.outlineButton]}
               onPress={handleOpenAideCognitive}
             >
-              <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
-                Aides cognitives
-              </Text>
+              <Text style={[styles.buttonText]}>Aides cognitives</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -361,11 +337,7 @@ export default function CprEnd() {
         {/* Buttons */}
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity
-            style={[
-              styles.actionButton,
-              styles.outlineSummaryButton,
-              { borderColor: neutralButtonColor },
-            ]}
+            style={[styles.actionButton, styles.outlineSummaryButton]}
             onPress={handleExportPdf}
           >
             <FontAwesome5
@@ -373,26 +345,15 @@ export default function CprEnd() {
               size={18}
               color={neutralButtonColor}
             />
-            <Text
-              style={[styles.actionButtonText, { color: neutralButtonColor }]}
-            >
-              {" "}
-              Exporter en PDF
-            </Text>
+            <Text style={[styles.actionButtonText]}> Exporter en PDF</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.actionButton,
-              styles.outlineSummaryButton,
-              { borderColor: neutralButtonColor },
-            ]}
+            style={[styles.actionButton, styles.outlineSummaryButton]}
             onPress={handleGoHome}
           >
             <FontAwesome5 name="home" size={18} color={neutralButtonColor} />
-            <Text
-              style={[styles.actionButtonText, { color: neutralButtonColor }]}
-            >
+            <Text style={[styles.actionButtonText]}>
               {" "}
               Retour à l&apos;accueil
             </Text>
@@ -574,11 +535,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 14,
     borderRadius: 8,
-    elevation: 2,
+    borderColor: "#007BFF",
     borderWidth: 2,
   },
   actionButtonText: {
-    color: "#546E7A",
+    color: "#007BFF",
+
     fontSize: 16,
     fontWeight: "bold",
     marginLeft: 10,
@@ -590,7 +552,7 @@ const styles = StyleSheet.create({
   },
   outlineSummaryButton: {
     backgroundColor: "transparent",
-    borderColor: "#546E7A",
+    borderColor: "#007BFF",
   },
 
   // Confirm styles
@@ -628,21 +590,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 15,
     borderRadius: 10,
-    elevation: 2,
+    borderColor: "#007BFF",
   },
   outlineButton: {
     backgroundColor: "transparent",
+    borderColor: "#007BFF",
+
     borderWidth: 2,
   },
-  resumeButton: {
-    borderColor: "#28a745",
-  },
-  stopButton: {
-    borderColor: "#d9534f",
-  },
-  deathButton: {
-    borderColor: "#333",
-  },
+
   buttonText: {
     fontSize: 18,
     fontWeight: "bold",
@@ -652,6 +608,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     flexShrink: 1,
     includeFontPadding: false,
+    color: "#007BFF",
   },
   resumeText: {
     color: "black",
