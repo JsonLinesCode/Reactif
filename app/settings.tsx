@@ -33,8 +33,10 @@ export default function SettingsScreen() {
     adrenalineDuration,
     warningSeconds,
     endButtonShortTap,
+    previewMaxVolume,
     updateSettings,
     setEndButtonShortTap,
+    setPreviewMaxVolume,
     resetSettings,
     loading,
   } = useCprSettings();
@@ -270,6 +272,36 @@ export default function SettingsScreen() {
             >
               <Text style={styles.pillText}>
                 {endButtonShortTap ? "ACTIF" : "INACTIF"}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <Text style={[styles.sectionTitle, sectionTitleColor]}>Preview</Text>
+          <TouchableOpacity
+            style={[
+              styles.toggleRow,
+              { borderColor: isDark ? "#444" : "#d1d5db" },
+            ]}
+            onPress={() => setPreviewMaxVolume(!previewMaxVolume)}
+          >
+            <View style={styles.toggleTextBlock}>
+              <Text style={[styles.toggleTitle, textStyle]}>
+                Maximiser le volume sur Android
+              </Text>
+              <Text style={[styles.toggleSubtitle, labelColor]}>
+                Le volume sera monté au maximum à l'ouverture de l'application.
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.pill,
+                {
+                  backgroundColor: previewMaxVolume ? "#22c55e" : "#9ca3af",
+                },
+              ]}
+            >
+              <Text style={styles.pillText}>
+                {previewMaxVolume ? "ACTIF" : "INACTIF"}
               </Text>
             </View>
           </TouchableOpacity>

@@ -55,16 +55,48 @@ jobs:
       - name: Decode Android keystore from secret
         run: |
           mkdir -p android/app
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          printf '%s' "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
 
       - name: Create Android key.properties
         run: |
+          KEY_ALIAS="${{ secrets.ANDROID_KEY_ALIAS }}"
+          KEY_PASSWORD="${{ secrets.ANDROID_KEY_PASSWORD }}"
+          if [ -z "$KEY_ALIAS" ]; then KEY_ALIAS="upload"; fi
+          if [ -z "$KEY_PASSWORD" ]; then KEY_PASSWORD="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"; fi
+
           cat > android/key.properties <<EOF
-          storeFile=app/upload-keystore.jks
+          storeFile=upload-keystore.jks
           storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyAlias=upload
-          keyPassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
           EOF
+
+      - name: Verify upload keystore fingerprint
+        run: |
+          KEY_ALIAS="${{ secrets.ANDROID_KEY_ALIAS }}"
+          KEY_PASSWORD="${{ secrets.ANDROID_KEY_PASSWORD }}"
+          if [ -z "$KEY_ALIAS" ]; then KEY_ALIAS="upload"; fi
+          if [ -z "$KEY_PASSWORD" ]; then KEY_PASSWORD="${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"; fi
+
+          SHA1_LINE=$(keytool -list -v \
+            -keystore android/app/upload-keystore.jks \
+            -alias "$KEY_ALIAS" \
+            -storepass "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" \
+            -keypass "$KEY_PASSWORD" | grep "SHA1:")
+
+          echo "$SHA1_LINE"
+
+          EXPECTED_SHA1="${{ secrets.ANDROID_UPLOAD_CERT_SHA1 }}"
+          if [ -n "$EXPECTED_SHA1" ]; then
+            NORMALIZED_ACTUAL=$(echo "$SHA1_LINE" | sed -E 's/.*SHA1:[[:space:]]*//' | tr '[:lower:]' '[:upper:]')
+            NORMALIZED_EXPECTED=$(echo "$EXPECTED_SHA1" | tr '[:lower:]' '[:upper:]')
+            if [ "$NORMALIZED_ACTUAL" != "$NORMALIZED_EXPECTED" ]; then
+              echo "Keystore SHA1 mismatch."
+              echo "Actual:   $NORMALIZED_ACTUAL"
+              echo "Expected: $NORMALIZED_EXPECTED"
+              exit 1
+            fi
+          fi
 
       - name: Build Android App Bundle and APK
         run: |

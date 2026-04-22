@@ -11,6 +11,7 @@ const SOUND_FILES: Record<SoundName, any> = {
 export class SoundController {
   private sounds: Partial<Record<SoundName, Audio.Sound | null>> = {};
   private initialized = false;
+  private volume = 1;
 
   async init() {
     if (this.initialized) return;
@@ -28,7 +29,7 @@ export class SoundController {
     for (const name of Object.keys(SOUND_FILES) as SoundName[]) {
       try {
         const result = await Audio.Sound.createAsync(SOUND_FILES[name]);
-        await result.sound.setVolumeAsync(1);
+        await result.sound.setVolumeAsync(this.volume);
         this.sounds[name] = result.sound;
       } catch (e) {
         this.sounds[name] = null;
@@ -43,10 +44,26 @@ export class SoundController {
     const sound = this.sounds[name];
     try {
       if (!sound) return;
-      await sound.setVolumeAsync(1);
+      await sound.setVolumeAsync(this.volume);
       await sound.replayAsync();
     } catch (e) {
       // ignore playback errors
+    }
+  }
+
+  async setVolume(volume: number) {
+    this.volume = Math.max(0, Math.min(1, volume));
+    if (!this.initialized) {
+      await this.init();
+      return;
+    }
+
+    for (const k of Object.keys(this.sounds) as SoundName[]) {
+      try {
+        await this.sounds[k]?.setVolumeAsync(this.volume);
+      } catch (e) {
+        // ignore volume update errors
+      }
     }
   }
 
