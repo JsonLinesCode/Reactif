@@ -45,19 +45,14 @@ export function useCprSettings(): CprSettings {
 
   const loadSettings = async () => {
     try {
-      const [
-        shock,
-        cordarone,
-        adrenaline,
-        warning,
-        endButtonMode,
-      ] = await Promise.all([
-        AsyncStorage.getItem(STORAGE_KEY_SHOCK),
-        AsyncStorage.getItem(STORAGE_KEY_CORDARONE),
-        AsyncStorage.getItem(STORAGE_KEY_ADRENALINE),
-        AsyncStorage.getItem(STORAGE_KEY_WARNING),
-        AsyncStorage.getItem(STORAGE_KEY_END_BUTTON_SHORT_TAP),
-      ]);
+      const [shock, cordarone, adrenaline, warning, endButtonMode] =
+        await Promise.all([
+          AsyncStorage.getItem(STORAGE_KEY_SHOCK),
+          AsyncStorage.getItem(STORAGE_KEY_CORDARONE),
+          AsyncStorage.getItem(STORAGE_KEY_ADRENALINE),
+          AsyncStorage.getItem(STORAGE_KEY_WARNING),
+          AsyncStorage.getItem(STORAGE_KEY_END_BUTTON_SHORT_TAP),
+        ]);
 
       if (shock) setShockDuration(parseInt(shock, 10));
       if (cordarone) setCordaroneDuration(parseInt(cordarone, 10));
@@ -93,10 +88,7 @@ export function useCprSettings(): CprSettings {
         await AsyncStorage.setItem(STORAGE_KEY_SHOCK, value.toString());
       } else if (key === "cordarone") {
         setCordaroneDuration(value);
-        await AsyncStorage.setItem(
-          STORAGE_KEY_CORDARONE,
-          value.toString(),
-        );
+        await AsyncStorage.setItem(STORAGE_KEY_CORDARONE, value.toString());
       } else if (key === "adrenaline") {
         setAdrenalineDuration(value);
         await AsyncStorage.setItem(STORAGE_KEY_ADRENALINE, value.toString());

@@ -166,7 +166,15 @@ export default function ActionProgressBar({
         midReminderPlayedRef.current = false;
       }
     }
-  }, [isActive, isExpired, midpointWarning, timeLeft, warningSeconds, count, resetKey]);
+  }, [
+    isActive,
+    isExpired,
+    midpointWarning,
+    timeLeft,
+    warningSeconds,
+    count,
+    resetKey,
+  ]);
 
   const triggerHaptic = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -282,9 +290,9 @@ export default function ActionProgressBar({
                   { color },
                   !subtitle ? styles.labelCenter : undefined,
                 ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.5}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.5}
               >
                 {label}
               </Text>
@@ -321,9 +329,9 @@ export default function ActionProgressBar({
                   { color: "#fff" },
                   !subtitle ? styles.labelCenter : undefined,
                 ]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.5}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.5}
               >
                 {label}
               </Text>

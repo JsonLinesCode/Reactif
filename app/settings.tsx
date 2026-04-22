@@ -177,8 +177,6 @@ export default function SettingsScreen() {
             </View>
           </View>
 
-
-
           <View style={styles.inputGroup}>
             <Text style={[styles.label, labelColor]}>
               Adrénaline (Intervalle)
@@ -188,16 +186,22 @@ export default function SettingsScreen() {
                 <TouchableOpacity
                   style={styles.pickerButton}
                   onPress={() =>
-                    handleAdrenalinePickerChange(parseInt(adrenalineInput, 10) - 1)
+                    handleAdrenalinePickerChange(
+                      parseInt(adrenalineInput, 10) - 1,
+                    )
                   }
                 >
                   <Text style={[styles.pickerButtonText, textStyle]}>-</Text>
                 </TouchableOpacity>
-                <Text style={[styles.pickerValue, textStyle]}>{adrenalineInput}</Text>
+                <Text style={[styles.pickerValue, textStyle]}>
+                  {adrenalineInput}
+                </Text>
                 <TouchableOpacity
                   style={styles.pickerButton}
                   onPress={() =>
-                    handleAdrenalinePickerChange(parseInt(adrenalineInput, 10) + 1)
+                    handleAdrenalinePickerChange(
+                      parseInt(adrenalineInput, 10) + 1,
+                    )
                   }
                 >
                   <Text style={[styles.pickerButtonText, textStyle]}>+</Text>
