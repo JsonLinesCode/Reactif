@@ -60,7 +60,6 @@ export function useCprSettings(): CprSettings {
         ]);
 
       if (shock) setShockDuration(parseInt(shock, 10));
-      if (cordarone) setCordaroneDuration(parseInt(cordarone, 10));
       if (adrenaline) setAdrenalineDuration(parseInt(adrenaline, 10));
       if (warning) setWarningSeconds(parseInt(warning, 10));
       if (endButtonMode) setEndButtonShortTapState(endButtonMode === "true");
@@ -104,8 +103,6 @@ export function useCprSettings(): CprSettings {
       if (key === "shock") {
         setShockDuration(value);
         await AsyncStorage.setItem(STORAGE_KEY_SHOCK, value.toString());
-      } else if (key === "cordarone") {
-        setCordaroneDuration(value);
         await AsyncStorage.setItem(STORAGE_KEY_CORDARONE, value.toString());
       } else if (key === "adrenaline") {
         setAdrenalineDuration(value);
