@@ -9,7 +9,7 @@ on:
 jobs:
   # CD
   deploy_android:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     # Beta release only
     if: github.ref == 'refs/heads/beta-releases'
     steps:
@@ -27,8 +27,6 @@ jobs:
 
       - name: Install JS dependencies
         run: npm ci
-      - name: Générer le projet Android (Expo Prebuild)
-        run: npx expo prebuild --platform android
       - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
@@ -98,10 +96,10 @@ jobs:
             fi
           fi
 
-      - name: Build Android App Bundle and APK
+      - name: Build Android App Bundle
         run: |
           cd android
-          ./gradlew clean bundleRelease assembleRelease --no-daemon
+          ./gradlew bundleRelease --no-daemon --parallel --build-cache --configuration-cache
 
       - name: Install fastlane
         run: gem install fastlane --user-install -N
