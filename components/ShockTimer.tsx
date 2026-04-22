@@ -503,8 +503,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     justifyContent: "center",
     alignItems: "center",
-    elevation: 2,
-    zIndex: 1,
   },
   timerText: {
     fontSize: 30,

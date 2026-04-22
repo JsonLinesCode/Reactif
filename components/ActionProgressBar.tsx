@@ -123,6 +123,13 @@ export default function ActionProgressBar({
       return;
     }
 
+    // Prevent Cordarone from blinking after 2 uses
+    const isCordarone = resetKey === "cordarone";
+    if (isCordarone && count >= 2) {
+      stopBlinking();
+      return;
+    }
+
     if (isExpired) {
       if (!soundPlayedRef.current) {
         sessionController.playReminderPattern("end");
@@ -159,7 +166,7 @@ export default function ActionProgressBar({
         midReminderPlayedRef.current = false;
       }
     }
-  }, [isActive, isExpired, midpointWarning, timeLeft, warningSeconds]);
+  }, [isActive, isExpired, midpointWarning, timeLeft, warningSeconds, count, resetKey]);
 
   const triggerHaptic = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
@@ -275,6 +282,9 @@ export default function ActionProgressBar({
                   { color },
                   !subtitle ? styles.labelCenter : undefined,
                 ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
               >
                 {label}
               </Text>
@@ -311,6 +321,9 @@ export default function ActionProgressBar({
                   { color: "#fff" },
                   !subtitle ? styles.labelCenter : undefined,
                 ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
               >
                 {label}
               </Text>

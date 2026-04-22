@@ -29,6 +29,7 @@ export default function SettingsScreen() {
 
   const {
     shockDuration,
+    cordaroneDuration,
     adrenalineDuration,
     warningSeconds,
     endButtonShortTap,
@@ -39,16 +40,29 @@ export default function SettingsScreen() {
   } = useCprSettings();
 
   const [shockInput, setShockInput] = useState("");
+  const [cordaroneInput, setCordaroneInput] = useState("");
   const [adrenalineInput, setAdrenalineInput] = useState("");
   const [warningInput, setWarningInput] = useState("");
 
   useEffect(() => {
     if (!loading) {
       setShockInput((shockDuration / 60).toString());
-      setAdrenalineInput((adrenalineDuration / 60).toString());
+      setCordaroneInput((cordaroneDuration / 60).toString());
+      const adrenalineMinutes = Math.min(
+        5,
+        Math.max(3, Math.round(adrenalineDuration / 60)),
+      );
+      setAdrenalineInput(adrenalineMinutes.toString());
       setWarningInput(warningSeconds.toString());
     }
   }, [loading]);
+
+  const handleAdrenalinePickerChange = (nextMinutes: number) => {
+    const clamped = Math.min(5, Math.max(3, Math.round(nextMinutes)));
+    const next = clamped.toString();
+    setAdrenalineInput(next);
+    updateSettings("adrenaline", clamped * 60);
+  };
 
   if (loading) {
     return (
@@ -65,9 +79,14 @@ export default function SettingsScreen() {
     );
   }
 
-  const handleDurationChange = (key: "shock" | "adrenaline", text: string) => {
+  const handleDurationChange = (
+    key: "shock" | "cordarone" | "adrenaline",
+    text: string,
+  ) => {
     if (key === "shock") {
       setShockInput(text);
+    } else if (key === "cordarone") {
+      setCordaroneInput(text);
     } else {
       setAdrenalineInput(text);
     }
@@ -87,6 +106,11 @@ export default function SettingsScreen() {
     const shockVal = parseFloat(shockInput);
     if (!isNaN(shockVal)) {
       updateSettings("shock", Math.round(shockVal * 60));
+    }
+
+    const cordaroneVal = parseFloat(cordaroneInput);
+    if (!isNaN(cordaroneVal)) {
+      updateSettings("cordarone", Math.round(cordaroneVal * 60));
     }
 
     const adrenalineVal = parseFloat(adrenalineInput);
@@ -153,19 +177,32 @@ export default function SettingsScreen() {
             </View>
           </View>
 
+
+
           <View style={styles.inputGroup}>
             <Text style={[styles.label, labelColor]}>
               Adrénaline (Intervalle)
             </Text>
             <View style={[styles.inputWrapper, inputBgStyle]}>
-              <TextInput
-                style={[styles.input, textStyle]}
-                keyboardType="numeric"
-                value={adrenalineInput}
-                onChangeText={(text) =>
-                  handleDurationChange("adrenaline", text)
-                }
-              />
+              <View style={styles.pickerRow}>
+                <TouchableOpacity
+                  style={styles.pickerButton}
+                  onPress={() =>
+                    handleAdrenalinePickerChange(parseInt(adrenalineInput, 10) - 1)
+                  }
+                >
+                  <Text style={[styles.pickerButtonText, textStyle]}>-</Text>
+                </TouchableOpacity>
+                <Text style={[styles.pickerValue, textStyle]}>{adrenalineInput}</Text>
+                <TouchableOpacity
+                  style={styles.pickerButton}
+                  onPress={() =>
+                    handleAdrenalinePickerChange(parseInt(adrenalineInput, 10) + 1)
+                  }
+                >
+                  <Text style={[styles.pickerButtonText, textStyle]}>+</Text>
+                </TouchableOpacity>
+              </View>
               <Text style={styles.unit}>min</Text>
             </View>
           </View>
@@ -349,6 +386,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#888",
     marginLeft: 8,
+  },
+  pickerRow: {
+    flex: 1,
+    height: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  pickerButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#9ca3af",
+  },
+  pickerButtonText: {
+    fontSize: 22,
+    lineHeight: 24,
+    fontWeight: "700",
+  },
+  pickerValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    minWidth: 32,
+    textAlign: "center",
   },
   resetButton: {
     marginTop: 28,

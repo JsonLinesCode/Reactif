@@ -20,7 +20,7 @@ export interface CprSettings {
   endButtonShortTap: boolean;
   loading: boolean;
   updateSettings: (
-    key: "shock" | "adrenaline" | "warning",
+    key: "shock" | "cordarone" | "adrenaline" | "warning",
     value: number,
   ) => Promise<void>;
   setEndButtonShortTap: (enabled: boolean) => Promise<void>;
@@ -45,16 +45,22 @@ export function useCprSettings(): CprSettings {
 
   const loadSettings = async () => {
     try {
-      const [shock, adrenaline, warning, endButtonMode] = await Promise.all([
+      const [
+        shock,
+        cordarone,
+        adrenaline,
+        warning,
+        endButtonMode,
+      ] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEY_SHOCK),
+        AsyncStorage.getItem(STORAGE_KEY_CORDARONE),
         AsyncStorage.getItem(STORAGE_KEY_ADRENALINE),
         AsyncStorage.getItem(STORAGE_KEY_WARNING),
         AsyncStorage.getItem(STORAGE_KEY_END_BUTTON_SHORT_TAP),
       ]);
 
       if (shock) setShockDuration(parseInt(shock, 10));
-      // Cordarone is fixed to 4 minutes by default.
-      setCordaroneDuration(DEFAULT_CORDARONE_DURATION);
+      if (cordarone) setCordaroneDuration(parseInt(cordarone, 10));
       if (adrenaline) setAdrenalineDuration(parseInt(adrenaline, 10));
       if (warning) setWarningSeconds(parseInt(warning, 10));
       if (endButtonMode) setEndButtonShortTapState(endButtonMode === "true");
@@ -78,13 +84,19 @@ export function useCprSettings(): CprSettings {
   };
 
   const updateSettings = async (
-    key: "shock" | "adrenaline" | "warning",
+    key: "shock" | "cordarone" | "adrenaline" | "warning",
     value: number,
   ) => {
     try {
       if (key === "shock") {
         setShockDuration(value);
         await AsyncStorage.setItem(STORAGE_KEY_SHOCK, value.toString());
+      } else if (key === "cordarone") {
+        setCordaroneDuration(value);
+        await AsyncStorage.setItem(
+          STORAGE_KEY_CORDARONE,
+          value.toString(),
+        );
       } else if (key === "adrenaline") {
         setAdrenalineDuration(value);
         await AsyncStorage.setItem(STORAGE_KEY_ADRENALINE, value.toString());
