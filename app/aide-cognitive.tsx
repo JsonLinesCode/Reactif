@@ -45,7 +45,7 @@ const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
   {
     id: "doc-5",
     label:
-      "Organisation de la réanimation cardio-pulmonaire spécialisée préhospitaliere",
+      "Organisation RCP spécialisée",
     image: require("@/assets/documents/image-4.png"),
   },
 ];

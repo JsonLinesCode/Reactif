@@ -45,14 +45,12 @@ export function useCprSettings(): CprSettings {
 
   const loadSettings = async () => {
     try {
-      const [shock, cordarone, adrenaline, warning, endButtonMode] =
-        await Promise.all([
-          AsyncStorage.getItem(STORAGE_KEY_SHOCK),
-          AsyncStorage.getItem(STORAGE_KEY_CORDARONE),
-          AsyncStorage.getItem(STORAGE_KEY_ADRENALINE),
-          AsyncStorage.getItem(STORAGE_KEY_WARNING),
-          AsyncStorage.getItem(STORAGE_KEY_END_BUTTON_SHORT_TAP),
-        ]);
+      const [shock, adrenaline, warning, endButtonMode] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_KEY_SHOCK),
+        AsyncStorage.getItem(STORAGE_KEY_ADRENALINE),
+        AsyncStorage.getItem(STORAGE_KEY_WARNING),
+        AsyncStorage.getItem(STORAGE_KEY_END_BUTTON_SHORT_TAP),
+      ]);
 
       if (shock) setShockDuration(parseInt(shock, 10));
       if (cordarone) setCordaroneDuration(parseInt(cordarone, 10));
@@ -79,7 +77,7 @@ export function useCprSettings(): CprSettings {
   };
 
   const updateSettings = async (
-    key: "shock" | "cordarone" | "adrenaline" | "warning",
+    key: "shock" | "adrenaline" | "warning",
     value: number,
   ) => {
     try {
