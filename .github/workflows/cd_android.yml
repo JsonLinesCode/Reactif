@@ -27,6 +27,8 @@ jobs:
 
       - name: Install JS dependencies
         run: npm ci
+      - name: Générer le projet Android (Expo Prebuild)
+        run: npx expo prebuild --platform android
       - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
