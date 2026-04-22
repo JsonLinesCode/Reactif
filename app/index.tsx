@@ -72,16 +72,20 @@ export default function Index() {
               RCP PEDIATRIQUE
             </Text>
           </TouchableOpacity>
+        </View>
+        <View style={{ width: "100%", alignItems: "center" }}>
           <TouchableOpacity
-            style={[styles.menuButton, outlineButtonStyle]}
+            style={[
+              styles.buttonHistory,
+              styles.bottomAideButton,
+              outlineButtonStyle,
+            ]}
             onPress={startAideCognitive}
           >
-            <Text style={[styles.menuButtonText, outlineTextStyle]}>
+            <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
               AIDE COGNITIVE
             </Text>
           </TouchableOpacity>
-        </View>
-        <View style={{ width: "100%", alignItems: "center" }}>
           <View style={styles.bottomActionRow}>
             <TouchableOpacity
               style={[
@@ -97,7 +101,7 @@ export default function Index() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[
-                styles.menuSubButton,
+                styles.buttonHistory,
                 styles.bottomSettingsButton,
                 outlineButtonStyle,
               ]}
@@ -178,12 +182,20 @@ const styles = StyleSheet.create({
     height: 62,
     justifyContent: "center",
   },
+  bottomAideButton: {
+    width: "100%",
+    maxWidth: 400,
+    marginBottom: 12,
+    height: 62,
+    justifyContent: "center",
+  },
   bottomSettingsButton: {
     width: 74,
     maxWidth: 74,
     height: 62,
     justifyContent: "center",
     marginBottom: 0,
+    paddingVertical: 0,
   },
   menuSubButton: {
     backgroundColor: "#fff",
@@ -217,6 +229,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textTransform: "uppercase",
+    lineHeight: 22,
+    includeFontPadding: false,
   },
   mainButtons: {
     width: "100%",

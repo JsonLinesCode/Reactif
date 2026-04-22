@@ -22,30 +22,35 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
 
       - name: Install JS dependencies
         run: npm ci
-
+      - name: Générer le projet Android (Expo Prebuild)
+        run: npx expo prebuild --platform android
       - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
           check-latest: true
+          cache: "gradle"
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.2"
 
-      - name: Cache Gradle
+      - name: Cache Ruby gems (fastlane)
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          path: ~/.gem
+          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_android.yml') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-ruby-gems-
+
+      - name: Add Ruby user gem bin to PATH
+        run: echo "$(ruby -e 'print Gem.user_dir')/bin" >> "$GITHUB_PATH"
 
       - name: Decode Android keystore from secret
         run: |
@@ -67,7 +72,7 @@ jobs:
           ./gradlew clean bundleRelease assembleRelease --no-daemon
 
       - name: Install fastlane
-        run: gem install fastlane -N
+        run: gem install fastlane --user-install -N
 
       - name: Upload to Google Play Internal track
         run: |
@@ -78,7 +83,7 @@ jobs:
             --aab android/app/build/outputs/bundle/release/app-release.aab \
             --track internal \
             --json_key /tmp/google-play-service-account.json \
-            --package_name com.reactif \
+            --package_name fr.reactif \
             --skip_upload_images true \
             --skip_upload_screenshots true \
             --skip_upload_metadata true

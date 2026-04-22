@@ -17,7 +17,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 type CognitiveDocument = {
   id: string;
   label: string;
-  image: ImageSourcePropType;
+  image?: ImageSourcePropType;
+  pdf?: { uri: string } | number;
 };
 
 const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
@@ -192,7 +193,14 @@ export default function AideCognitive() {
 
           <View style={styles.viewerBody}>
             {selectedDocument ? (
-              <ImageViewer imgSource={selectedDocument.image} />
+              selectedDocument.image ? (
+                <ImageViewer imgSource={selectedDocument.image} />
+              ) : selectedDocument.pdf ? (
+                <Text style={{ color: isDark ? "#fff" : "#000" }}>
+                  PDF documents are not supported in this build. Please open the
+                  PDF externally.
+                </Text>
+              ) : null
             ) : null}
           </View>
         </SafeAreaView>

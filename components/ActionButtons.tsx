@@ -42,9 +42,9 @@ export default function ActionButtons({
         ) : (
           <LongPressButton
             onComplete={handleEndPress}
-            color="#FF5252"
             size={BUTTON_SIZE}
-            iconName="close"
+            iconSize={65}
+            iconName="close-outline"
             label="Fin RCP"
           />
         )}
@@ -87,6 +87,8 @@ export default function ActionButtons({
         </Text>
       </View>
 
+      
+
       <View style={styles.actionItem}>
         <TouchableOpacity
           style={[
@@ -114,11 +116,7 @@ export default function ActionButtons({
         </Text>
       </View>
       <View style={styles.actionItem}>
-        <LongPressButton
-          onComplete={onCancel}
-          color="#444"
-          size={BUTTON_SIZE}
-        />
+        <LongPressButton onComplete={onCancel} size={BUTTON_SIZE} />
       </View>
     </View>
   );

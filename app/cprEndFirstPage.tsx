@@ -55,7 +55,7 @@ export default function CprEndFirstPage() {
     theme === "dark"
       ? { backgroundColor: "#353636" }
       : { backgroundColor: "#fff" };
-  const neutralButtonColor = theme === "dark" ? "#fff" : "#333";
+  const neutralButtonColor = "#007BFF";
 
   return (
     <SafeAreaView style={[styles.container, bgStyle]}>
@@ -148,8 +148,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
+    borderColor: "#007BFF",
+    color: "#007BFF",
     borderRadius: 12,
-    elevation: 3,
     shadowColor: "#000",
   },
   outlineButton: {

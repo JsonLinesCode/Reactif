@@ -100,7 +100,15 @@ export default function ChildData() {
 
     const strategies: Record<AgeMode, () => number | null> = {
       months: () => (age >= 12 ? 10 : (MONTHLY_WEIGHTS[age] ?? null)),
-      years: () => (age >= 1 && age <= 12 ? (age + 4) * 2 : null),
+      years: () => {
+        if (age >= 1 && age < 5) {
+          return (age + 4) * 2;
+        } else if (age >= 5 && age <= 12) {
+          return age * 4;
+        } else {
+          return null;
+        }
+      },
     };
 
     return strategies[mode] ? strategies[mode]() : null;
@@ -112,11 +120,22 @@ export default function ChildData() {
   }
   const [weightInput, setWeightInput] = useState("");
 
-  const finalWeight = weightInput
-    ? parseFloat(weightInput) <= 50
-      ? parseFloat(weightInput)
-      : 50
-    : calculateWeightFromAge(parsedAge, mode);
+  // Only use the value from the currently expanded section
+  let finalWeight: number | null = null;
+  if (expanded && !weightExpanded) {
+    // Age section expanded, weight section collapsed
+    finalWeight = calculateWeightFromAge(parsedAge, mode);
+  } else if (weightExpanded && !expanded) {
+    // Weight section expanded, age section collapsed
+    finalWeight = weightInput
+      ? parseFloat(weightInput) <= 50
+        ? parseFloat(weightInput)
+        : 50
+      : null;
+  } else {
+    // If both are collapsed or both are expanded, default to null
+    finalWeight = null;
+  }
 
   const adrenalineDose = finalWeight ? (0.01 * finalWeight).toFixed(2) : null;
   const cordaroneDose = finalWeight ? (5 * finalWeight).toFixed(1) : null;
@@ -173,13 +192,13 @@ export default function ChildData() {
           <Text style={[styles.titleText, textStyle]}>
             Renseigner l'âge ou le poids
           </Text>
+          {/* Always show Age button, but only expand if not hidden by weight input */}
           <TouchableOpacity style={styles.choiceButton} onPress={toggleExpand}>
-            <Text style={styles.choiceButtonText}>Âge</Text>
+            <Text style={styles.choiceButtonText}>Age</Text>
           </TouchableOpacity>
           {/* Content that disappear/appear */}
-          {expanded && (
+          {expanded && !weightExpanded && (
             <View style={[styles.expandedContent, expandedBg]}>
-              <Text style={styles.expandedButtonText}> Choix mois/années</Text>
               <View style={{ marginVertical: 20 }}>
                 <CustomSwitch
                   selectionMode={mode === "years" ? 2 : 1}
@@ -194,8 +213,8 @@ export default function ChildData() {
               <View style={styles.agePickerContainer}>
                 <Text style={styles.expandedButtonText}>
                   {mode === "months"
-                    ? "Entrez l'âge (mois):"
-                    : "Entrez l'âge (années):"}
+                    ? "Entrer age (mois):"
+                    : "Entrer age (années):"}
                 </Text>
                 <TextInput
                   style={styles.input}
@@ -220,47 +239,90 @@ export default function ChildData() {
           </TouchableOpacity>
 
           {weightExpanded && (
-            <View style={styles.weightPickerContainer}>
-              <Text style={styles.expandedButtonText}>
-                Entrez le poids (kg):
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ex: 12,5"
-                placeholderTextColor="#ccc"
-                keyboardType="decimal-pad" // Allow decimals for weight
-                value={weightInput}
-                onChangeText={(text) => {
-                  setWeightInput(text.replace(",", "."));
-                  // If user types here, we probably unset age mode or keep it but rely on weightInput
-                }}
-                maxLength={5} // e.g. 45.5 or 110.2
-              />
+            <View style={[styles.expandedContent, expandedBg]}>
+              <View style={styles.weightPickerContainer}>
+                <Text style={styles.expandedButtonText}>
+                  Entrer poids (kg):
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ex: 12,5"
+                  placeholderTextColor="#ccc"
+                  keyboardType="decimal-pad" // Allow decimals for weight
+                  value={weightInput}
+                  onChangeText={(text) => {
+                    setWeightInput(text.replace(",", "."));
+                    // If user types here, we probably unset age mode or keep it but rely on weightInput
+                  }}
+                  maxLength={5} // e.g. 45.5 or 110.2
+                />
+              </View>
             </View>
           )}
 
-          {/* ADDED: Adult RCP note */}
           <Text style={styles.infoText}>
-            RCP adulte si le gabarit est celui d'un adulte (habituellement à la
-            puberté, vers 12-14 ans, ou si plus que 50kg approximativement).
-            Toujours se référer aux recommandations et protocoles locaux.
+            RCP adulte pour gabarit adulte (habituellement à la puberté, vers
+            12-14 ans, ou si plus que 50kg).
+          </Text>
+          <View style={{ marginTop: 1, marginBottom: 2, marginLeft: 16 }}>
+            <Text style={[styles.infoText]}>
+              {"\u2022"} Nourissons de moins de 12 mois: (âge en mois + 9)/2
+            </Text>
+            <Text style={[styles.infoText]}>
+              {"\u2022"} Inférieur à 5 ans : (âge+4)x2
+            </Text>
+            <Text style={[styles.infoText]}>
+              {"\u2022"} Supérieur à 5 ans : âge x 4
+            </Text>
+          </View>
+          <Text style={styles.infoText}>
+            Penser à regarder l'âge sur l'étiquette des vêtements.
           </Text>
 
-          <View style={styles.aideSection}>
-            <Text style={styles.aideSectionTitle}>Aides cognitives</Text>
-            <Text style={styles.aideSectionText}>
-              Ouvrir rapidement les fiches de référence pendant la prise en
-              charge.
-            </Text>
-            <TouchableOpacity
-              style={styles.aideButton}
-              onPress={() => router.push("/aide-cognitive")}
+          <Text
+            style={[styles.infoText, { fontSize: 11, fontStyle: "italic" }]}
+          >
+            Tinning K, Acworth J. Make your Best Guess : an updated method for
+            paediatric weight estimation in emergencies. Emerg Med Australas.
+            2007 Dec;19(6):528-34{" "}
+          </Text>
+
+          <TouchableOpacity
+            style={[
+              {
+                paddingVertical: 18,
+                backgroundColor: "#fff",
+                borderColor: "#007BFF",
+                borderWidth: 2,
+                borderRadius: 12,
+                marginBottom: 12,
+                width: "100%",
+                maxWidth: 400,
+                alignItems: "center",
+                elevation: 3,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 3,
+                height: 62,
+                justifyContent: "center",
+              },
+            ]}
+            onPress={() => router.push("/aide-cognitive")}
+          >
+            <Text
+              style={{
+                color: "#007BFF",
+                fontSize: 18,
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                lineHeight: 22,
+                includeFontPadding: false,
+              }}
             >
-              <Text style={styles.aideButtonText}>
-                Ouvrir les aides cognitives
-              </Text>
-            </TouchableOpacity>
-          </View>
+              Ouvrir les aides cognitives
+            </Text>
+          </TouchableOpacity>
         </ScrollView>
         {(expanded || weightExpanded) && (
           <View style={[styles.footer, footerBg]}>
@@ -268,7 +330,7 @@ export default function ChildData() {
               style={styles.validationButton}
               onPress={handleValidation}
             >
-              <Text style={styles.subButtonText}> Valider et calculer</Text>
+              <Text style={styles.subButtonText}>Calculer</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -368,6 +430,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     textTransform: "uppercase",
+    textAlign: "center",
   },
   input: {
     backgroundColor: "#fff",
@@ -379,6 +442,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     fontSize: 16,
+    textAlign: "center",
   },
   inputButton: {
     backgroundColor: "#007BFF",
@@ -440,7 +504,6 @@ const styles = StyleSheet.create({
     color: "#ccc",
     fontSize: 14,
     textAlign: "center",
-    marginTop: 20,
   },
   aideSection: {
     width: "100%",
@@ -482,5 +545,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#25292e",
     borderTopWidth: 1,
     borderTopColor: "#333",
+    alignItems: "center",
   },
 });

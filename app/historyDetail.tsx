@@ -5,6 +5,7 @@ import {
   formatElapsedFromStart,
   formatEventDetails,
   formatEventType,
+  formatHumanReadableDateTime,
   generateSessionHtml,
   getEventsWithCycles,
 } from "@/utils/sessionUtils";
@@ -85,7 +86,7 @@ export default function HistoryDetail() {
           { backgroundColor: isDark ? "#111827" : "#f3f4f6" },
         ]}
       >
-        <Stack.Screen options={{ title: "Detail session" }} />
+        <Stack.Screen options={{ title: "Détail session" }} />
         <View style={styles.emptyContainer}>
           <Text
             style={[
@@ -115,7 +116,7 @@ export default function HistoryDetail() {
         { backgroundColor: isDark ? "#111827" : "#f3f4f6" },
       ]}
     >
-      <Stack.Screen options={{ title: "Detail session" }} />
+      <Stack.Screen options={{ title: "Détail session" }} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View
           style={[
@@ -132,7 +133,7 @@ export default function HistoryDetail() {
               { color: isDark ? "#f9fafb" : "#111827" },
             ]}
           >
-            Session CPR complete
+            Session RCP complète
           </Text>
           <Text
             style={[
@@ -226,7 +227,15 @@ export default function HistoryDetail() {
                       { color: isDark ? "#93c5fd" : "#2563eb" },
                     ]}
                   >
-                    Temps écoulé:{" "}
+                    Heure: {formatHumanReadableDateTime(event.timestamp)}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.eventTime,
+                      { color: isDark ? "#93c5fd" : "#2563eb" },
+                    ]}
+                  >
+                    Temps écoulé :{" "}
                     {formatElapsedFromStart(session.startTime, event.timestamp)}
                   </Text>
                   <Text
@@ -339,7 +348,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   eventTime: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "600",
   },
   eventType: {

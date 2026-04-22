@@ -314,7 +314,7 @@ export default function Cpr() {
         {/* Action Progress Bars */}
         <View style={styles.actionsContainer}>
           <ActionProgressBar
-            label="Adrenaline"
+            label="Adrénaline"
             count={adrenalineCount}
             color="#448AFF"
             icon={<FontAwesome5 name="syringe" size={24} />}

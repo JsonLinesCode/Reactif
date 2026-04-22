@@ -38,12 +38,11 @@ export function formatHumanReadableTime(timestamp: number): string {
   return new Date(timestamp).toLocaleTimeString("fr-FR", {
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
   });
 }
 
 export function formatHumanReadableDateTime(timestamp: number): string {
-  return `${new Date(timestamp).toLocaleDateString("fr-FR")} ${formatHumanReadableTime(timestamp)}`;
+  return `${formatHumanReadableTime(timestamp)}`;
 }
 
 export function formatElapsedFromStart(
@@ -138,6 +137,7 @@ export function generateSessionHtml(session: CprSession): string {
             <td>RCP ${cycle}</td>
             <td>${formatEventType(event.type)}</td>
             <td>${formatEventDetails(event.details)}</td>
+            <td>${formatHumanReadableDateTime(event.timestamp)} (${formatElapsedFromStart(session.startTime, event.timestamp)})</td>
         </tr>
     `,
     )
@@ -173,9 +173,10 @@ export function generateSessionHtml(session: CprSession): string {
         <table>
             <thead>
                 <tr>
-                <th>Cycle</th>
+                  <th>Cycle</th>
                     <th>Type</th>
                     <th>Details</th>
+                  <th>Heure (Temps écoulé)</th>
                 </tr>
             </thead>
             <tbody>
