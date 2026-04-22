@@ -447,7 +447,7 @@ export default function ShockTimer({
             size={40}
             style={[
               theme === "dark"
-                ? { color: "#FFFF", marginBottom: 4 }
+                ? { color: "#FFFFF", marginBottom: 4 }
                 : { color: "#000", marginBottom: 4 },
             ]}
           />

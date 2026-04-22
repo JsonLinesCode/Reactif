@@ -75,8 +75,7 @@ export default function About() {
           >
             Cette application répond au double objectif d&#39;améliorer les
             séquences de RCP et donc d&#39;améliorer le pronostic des arrêts
-            cardiaques (AC), mais aussi d&#39;enregistrer et d&#39;exporter des
-            horaires précis dans les registres à des fins de recherche.
+            cardiaques (AC), mais aussi d'enregistrer des horaires précis afin d’améliorer la saisie des données dans les registres à des fins d’analyse.
           </Text>
         </View>
 
@@ -118,19 +117,19 @@ export default function About() {
               { color: isDark ? "#93c5fd" : "#1F3A93" },
             ]}
           >
-            Initiateurs et Développement :
+            Conception :
           </Text>
           <Text
             style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
           >
-            Application imaginée et portée par Steven LAGADEC (SAMU 91).
+            Création : Steven LAGADEC (SAMU 91).
           </Text>
           <Text
             style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
           >
-            Développement et production : Josselin ROBERT, Jacques ANGLEYS,
-            Othmane QAIBES, Lina ZAROUAL, Nesma HOUMANI et Mossab HARIZ de
-            Télécom SudParis.
+            Développement  : Josselin ROBERT, Jacques ANGLEYS,
+            Othmane QAIBES, Lina ZAROUAL,
+            Télécom SudParis dans le cadre du programme Cassiopée.
           </Text>
         </View>
 
