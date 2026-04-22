@@ -1,10 +1,14 @@
 import { CprEvent } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 import { SoundController, SoundName } from "./SoundController";
+
+const STORAGE_KEY_PREVIEW_MAX_VOLUME = "@cpr_settings_preview_max_volume";
 
 export class SessionController {
   constructor(
-    private readonly soundController: SoundController = new SoundController(),
+    private readonly soundController: SoundController = soundController,
   ) {
     // Forward session store updates to controller subscribers
     sessionStore.subscribe(() => this.notify());
@@ -32,6 +36,29 @@ export class SessionController {
   async playSound(name: SoundName) {
     try {
       await this.soundController.play(name);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  async initAudioAtMaxVolume() {
+    try {
+      await this.soundController.setVolume(1);
+
+      if (Platform.OS !== "android") return;
+      const previewMaxVolume =
+        (await AsyncStorage.getItem(STORAGE_KEY_PREVIEW_MAX_VOLUME)) === "true";
+      if (!previewMaxVolume) return;
+
+      const volumeManagerModule = require("react-native-volume-manager");
+      const VolumeManager = volumeManagerModule?.VolumeManager;
+      if (!VolumeManager?.setVolume) return;
+
+      await VolumeManager.setVolume(1, {
+        type: "music",
+        showUI: false,
+        playSound: false,
+      });
     } catch (e) {
       // ignore
     }

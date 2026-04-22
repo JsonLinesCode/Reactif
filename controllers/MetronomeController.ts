@@ -1,5 +1,5 @@
 import { sessionStore } from "@/store/sessionStore";
-import { SoundController } from "./SoundController";
+import { soundController, SoundController } from "./SoundController";
 
 export class MetronomeController {
   private bpm = 100;
@@ -96,6 +96,4 @@ export class MetronomeController {
   }
 }
 
-export const metronomeController = new MetronomeController(
-  new SoundController(),
-);
+export const metronomeController = new MetronomeController(soundController);

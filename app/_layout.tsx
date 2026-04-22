@@ -1,3 +1,4 @@
+import { sessionController } from "@/controllers/SessionController";
 import { sessionStore } from "@/store/sessionStore";
 import { useKeepAwake } from "expo-keep-awake";
 import { Stack } from "expo-router";
@@ -32,6 +33,8 @@ export default function RootLayout() {
   const [theme, setTheme] = useState(sessionStore.theme);
 
   useEffect(() => {
+    void sessionController.initAudioAtMaxVolume();
+
     const unsubscribe = sessionStore.subscribe(() => {
       setTheme(sessionStore.theme);
     });
