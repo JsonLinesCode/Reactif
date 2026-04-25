@@ -4,9 +4,11 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [theme, setTheme] = useState(sessionStore.theme);
 
   useEffect(() => {
@@ -37,7 +39,14 @@ export default function Index() {
     router.push("/aide-cognitive");
   };
   return (
-    <View id="coucou" style={[styles.container, bgStyle]}>
+    <View
+      id="coucou"
+      style={[
+        styles.container,
+        bgStyle,
+        { paddingBottom: Math.max(20, insets.bottom + 12) },
+      ]}
+    >
       <Image
         source={
           isDark

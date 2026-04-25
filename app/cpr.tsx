@@ -1,4 +1,5 @@
 import { useFocusEffect } from "@react-navigation/native";
+import { useIsFocused } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   BackHandler,
@@ -54,7 +55,7 @@ export default function Cpr() {
   // ----- Metronome State & Logic -----
   const [bpm, setBpm] = useState(100);
   const [isMuted, setIsMuted] = useState(true);
-  const [isScreenActive, setIsScreenActive] = useState(true);
+  const isScreenActive = useIsFocused();
 
   // Doses State
   const [doses, setDoses] = useState({
@@ -105,10 +106,8 @@ export default function Cpr() {
 
   useFocusEffect(
     useCallback(() => {
-      setIsScreenActive(true);
       StatusBar.setHidden(false, "none");
       return () => {
-        setIsScreenActive(false);
         StatusBar.setHidden(false, "none");
         metronomeController.stop();
         void sessionController.stopAllSounds();
