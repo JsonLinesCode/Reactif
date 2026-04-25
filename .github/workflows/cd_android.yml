@@ -103,11 +103,10 @@ jobs:
 
       - name: Generate release description txt
         run: |
-          VERSION_CODE=$(node -e "const fs=require('fs'); const p='android/app/build/outputs/bundle/release/output-metadata.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); const e=(j.elements&&j.elements[0])||{}; process.stdout.write(String(e.versionCode||j.versionCode||''));")
-
-          if [ -z "$VERSION_CODE" ]; then
-            echo "Could not determine versionCode from output-metadata.json"
-            exit 1
+          VERSION_CODE=""
+          METADATA_FILE=$(find android/app/build -type f -name output-metadata.json | head -n 1 || true)
+          if [ -n "$METADATA_FILE" ]; then
+            VERSION_CODE=$(node -e "const fs=require('fs'); const p=process.argv[1]; const j=JSON.parse(fs.readFileSync(p,'utf8')); const e=(j.elements&&j.elements[0])||{}; process.stdout.write(String(e.versionCode||j.versionCode||''));" "$METADATA_FILE")
           fi
 
           mkdir -p .ci/play-metadata/android/fr-FR/changelogs
@@ -134,8 +133,13 @@ jobs:
             echo "$CHANGELOG"
           } > .ci/release-notes.txt
 
-          cp .ci/release-notes.txt ".ci/play-metadata/android/fr-FR/changelogs/${VERSION_CODE}.txt"
-          cp .ci/release-notes.txt ".ci/play-metadata/android/en-US/changelogs/${VERSION_CODE}.txt"
+          cp .ci/release-notes.txt ".ci/play-metadata/android/fr-FR/changelogs/default.txt"
+          cp .ci/release-notes.txt ".ci/play-metadata/android/en-US/changelogs/default.txt"
+
+          if [ -n "$VERSION_CODE" ]; then
+            cp .ci/release-notes.txt ".ci/play-metadata/android/fr-FR/changelogs/${VERSION_CODE}.txt"
+            cp .ci/release-notes.txt ".ci/play-metadata/android/en-US/changelogs/${VERSION_CODE}.txt"
+          fi
 
       - name: Upload release description artifact
         uses: actions/upload-artifact@v4
