@@ -100,6 +100,50 @@ jobs:
         run: |
           cd android
           ./gradlew bundleRelease --no-daemon --parallel --build-cache
+
+      - name: Generate release description txt
+        run: |
+          VERSION_CODE=$(node -e "const fs=require('fs'); const p='android/app/build/outputs/bundle/release/output-metadata.json'; const j=JSON.parse(fs.readFileSync(p,'utf8')); const e=(j.elements&&j.elements[0])||{}; process.stdout.write(String(e.versionCode||j.versionCode||''));")
+
+          if [ -z "$VERSION_CODE" ]; then
+            echo "Could not determine versionCode from output-metadata.json"
+            exit 1
+          fi
+
+          mkdir -p .ci/play-metadata/android/fr-FR/changelogs
+          mkdir -p .ci/play-metadata/android/en-US/changelogs
+
+          BASE_SHA="${{ github.event.before }}"
+          if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            CHANGELOG=$(git log --no-merges --pretty=format:'- %s (%h)' "$BASE_SHA"..HEAD)
+          else
+            CHANGELOG=$(git log --no-merges -n 20 --pretty=format:'- %s (%h)' HEAD)
+          fi
+
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- Internal CI build"
+          fi
+
+          {
+            echo "Reactif CI build"
+            echo "Branch: ${{ github.ref_name }}"
+            echo "Commit: ${GITHUB_SHA::7}"
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            echo "Changes:"
+            echo "$CHANGELOG"
+          } > .ci/release-notes.txt
+
+          cp .ci/release-notes.txt ".ci/play-metadata/android/fr-FR/changelogs/${VERSION_CODE}.txt"
+          cp .ci/release-notes.txt ".ci/play-metadata/android/en-US/changelogs/${VERSION_CODE}.txt"
+
+      - name: Upload release description artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-description
+          path: .ci/release-notes.txt
+          if-no-files-found: error
+
       - name: Install fastlane
         run: gem install fastlane --user-install -N
 
@@ -108,13 +152,10 @@ jobs:
           cat > /tmp/google-play-service-account.json <<EOF
           ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           EOF
-          fastlane supply \
-            --aab android/app/build/outputs/bundle/release/app-release.aab \
-            --track internal \
-            --json_key /tmp/google-play-service-account.json \
-            --package_name fr.reactif \
-            --skip_upload_images true \
-            --skip_upload_screenshots true \
-            --skip_upload_metadata true
+          fastlane android internal_release
         env:
           SUPPLY_TIMEOUT: 300
+          AAB_PATH: android/app/build/outputs/bundle/release/app-release.aab
+          PLAY_TRACK: internal
+          PLAY_JSON_KEY: /tmp/google-play-service-account.json
+          PLAY_METADATA_PATH: .ci/play-metadata/android

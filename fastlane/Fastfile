@@ -1,0 +1,26 @@
+default_platform(:android)
+
+platform :android do
+  desc "Upload Android AAB to Google Play Internal track with changelog metadata"
+  lane :internal_release do |options|
+    aab_path = options[:aab] || ENV["AAB_PATH"] || "android/app/build/outputs/bundle/release/app-release.aab"
+    track = options[:track] || ENV["PLAY_TRACK"] || "internal"
+    json_key_path = options[:json_key] || ENV["PLAY_JSON_KEY"]
+    metadata_path = options[:metadata_path] || ENV["PLAY_METADATA_PATH"] || ".ci/play-metadata/android"
+
+    UI.user_error!("Missing Google Play service account json path. Set PLAY_JSON_KEY or pass json_key.") if json_key_path.to_s.strip.empty?
+    UI.user_error!("AAB not found at #{aab_path}") unless File.exist?(aab_path)
+    UI.user_error!("Google Play json key file not found at #{json_key_path}") unless File.exist?(json_key_path)
+
+    supply(
+      aab: aab_path,
+      track: track,
+      json_key: json_key_path,
+      metadata_path: metadata_path,
+      skip_upload_changelogs: false,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_metadata: false
+    )
+  end
+end
