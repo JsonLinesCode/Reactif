@@ -1,5 +1,4 @@
-import { useFocusEffect } from "@react-navigation/native";
-import { useIsFocused } from "@react-navigation/native";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   BackHandler,
