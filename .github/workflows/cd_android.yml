@@ -9,7 +9,7 @@ on:
 jobs:
   # CD
   deploy_android:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     # Beta release only
     if: github.ref == 'refs/heads/beta-releases'
     steps:
@@ -131,6 +131,17 @@ jobs:
           cd android
           ./gradlew bundleRelease --no-daemon --parallel --build-cache
 
+      - name: Verify AAB outputs exist
+        run: |
+          echo "AAB files found:"
+          find android/app/build/outputs -type f -name "*.aab" -print || true
+
+          AAB_COUNT=$(find android/app/build/outputs -type f -name "*.aab" | wc -l | tr -d ' ')
+          if [ "$AAB_COUNT" -eq 0 ]; then
+            echo "No .aab artifact found after bundleRelease"
+            exit 1
+          fi
+
       - name: Generate release description txt
         run: |
           VERSION_CODE=""
@@ -187,5 +198,5 @@ jobs:
         env:
           SUPPLY_TIMEOUT: 300
           PLAY_TRACK: internal
-          PLAY_JSON_KEY: .ci/keys/google-play-service-account.json
-          PLAY_METADATA_PATH: .ci/play-metadata/android
+          PLAY_JSON_KEY: ${{ github.workspace }}/.ci/keys/google-play-service-account.json
+          PLAY_METADATA_PATH: ${{ github.workspace }}/.ci/play-metadata/android
