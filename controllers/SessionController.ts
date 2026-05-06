@@ -8,7 +8,7 @@ const STORAGE_KEY_PREVIEW_MAX_VOLUME = "@cpr_settings_preview_max_volume";
 
 export class SessionController {
   constructor(
-    private readonly soundController: SoundController = soundController,
+    private readonly soundController: SoundController = new SoundController(),
   ) {
     // Forward session store updates to controller subscribers
     sessionStore.subscribe(() => this.notify());

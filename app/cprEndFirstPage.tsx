@@ -46,11 +46,6 @@ export default function CprEndFirstPage() {
     router.push({ pathname: "/cprEnd", params: { mode: "racs" } });
   };
 
-  const handleInterventionEnd = async () => {
-    await sessionStore.saveCurrentSession("Arrêt définitif");
-    router.push({ pathname: "/cprEnd", params: { mode: "death" } });
-  };
-
   const bgStyle =
     theme === "dark"
       ? { backgroundColor: "#353636" }
@@ -63,11 +58,6 @@ export default function CprEndFirstPage() {
       <View style={styles.contentContainer}>
         <Text style={[styles.title, theme === "dark" ? { color: "#ccc" } : {}]}>
           Fin de RCP
-        </Text>
-        <Text
-          style={[styles.subtitle, theme === "dark" ? { color: "#ddd" } : {}]}
-        >
-          Résultat de la réanimation
         </Text>
 
         <View style={styles.buttonGroup}>
@@ -92,23 +82,16 @@ export default function CprEndFirstPage() {
             ]}
             onPress={handleRacs}
           >
-            <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
-              RACS
-            </Text>
+            <View>
+              <Text style={[styles.buttonText, { color: neutralButtonColor, fontSize: 17 }]}>
+                Reprise d&#39;activité respiratoire spontannée
+              </Text>
+              <Text style={[styles.buttonText, { color: neutralButtonColor, fontSize: 20 }]}>
+                  (RACS)
+              </Text>
+            </View>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.button,
-              styles.outlineButton,
-              { borderColor: neutralButtonColor },
-            ]}
-            onPress={handleInterventionEnd}
-          >
-            <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
-              Fin d'intervention
-            </Text>
-          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -132,12 +115,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
     color: "#333",
-  },
-  subtitle: {
-    fontSize: 18,
-    textAlign: "center",
-    marginBottom: 40,
-    color: "#666",
   },
   buttonGroup: {
     width: "100%",
