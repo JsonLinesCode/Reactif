@@ -2,13 +2,13 @@ import { CprEvent } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
-import { SoundController, SoundName } from "./SoundController";
+import { SoundController, SoundName, soundController } from "./SoundController";
 
 const STORAGE_KEY_PREVIEW_MAX_VOLUME = "@cpr_settings_preview_max_volume";
 
 export class SessionController {
   constructor(
-    private readonly soundController: SoundController = new SoundController(),
+    private readonly audioController: SoundController = soundController,
   ) {
     // Forward session store updates to controller subscribers
     sessionStore.subscribe(() => this.notify());
@@ -35,7 +35,7 @@ export class SessionController {
 
   async playSound(name: SoundName) {
     try {
-      await this.soundController.play(name);
+      await this.audioController.play(name);
     } catch (e) {
       // ignore
     }
@@ -43,7 +43,7 @@ export class SessionController {
 
   async initAudioAtMaxVolume() {
     try {
-      await this.soundController.setVolume(1);
+      await this.audioController.setVolume(1);
 
       if (Platform.OS !== "android") return;
       const previewMaxVolume =
@@ -66,7 +66,7 @@ export class SessionController {
 
   async playReminderPattern(kind: "first" | "mid" | "end") {
     try {
-      await this.soundController.playReminderPattern(kind);
+      await this.audioController.playReminderPattern(kind);
     } catch (e) {
       // ignore
     }
@@ -74,7 +74,7 @@ export class SessionController {
 
   async stopAllSounds() {
     try {
-      await this.soundController.stopAll();
+      await this.audioController.stopAll();
     } catch (e) {
       // ignore
     }

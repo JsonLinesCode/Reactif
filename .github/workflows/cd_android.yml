@@ -27,8 +27,6 @@ jobs:
 
       - name: Install JS dependencies
         run: npm ci
-      - name: Générer le projet Android (Expo Prebuild)
-        run: npx expo prebuild --platform android
       - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
@@ -51,6 +49,36 @@ jobs:
 
       - name: Add Ruby user gem bin to PATH
         run: echo "$(ruby -e 'print Gem.user_dir')/bin" >> "$GITHUB_PATH"
+
+      - name: Prepare and validate Google Play service account key (early)
+        run: |
+          mkdir -p .ci/keys
+          RAW_KEY='${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}'
+
+          if [ -z "$RAW_KEY" ]; then
+            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is empty or missing"
+            exit 1
+          fi
+
+          # Try as raw JSON first
+          printf '%s' "$RAW_KEY" > .ci/keys/google-play-service-account.json
+          if ! jq -e . .ci/keys/google-play-service-account.json >/dev/null 2>&1; then
+            # If not valid JSON, try interpreting secret as base64-encoded JSON
+            if printf '%s' "$RAW_KEY" | base64 --decode > .ci/keys/google-play-service-account.json 2>/dev/null && jq -e . .ci/keys/google-play-service-account.json >/dev/null 2>&1; then
+              echo "Using base64-decoded GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
+            else
+              echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not valid JSON (raw or base64-decoded)."
+              exit 1
+            fi
+          fi
+
+          if [ ! -s .ci/keys/google-play-service-account.json ]; then
+            echo "Google Play service account key file was not created correctly"
+            exit 1
+          fi
+
+          # Basic shape check to fail fast on wrong JSON files.
+          jq -e '.type == "service_account" and .client_email and .private_key' .ci/keys/google-play-service-account.json >/dev/null
 
       - name: Decode Android keystore from secret
         run: |
@@ -98,26 +126,77 @@ jobs:
             fi
           fi
 
-      - name: Build Android App Bundle and APK
+      - name: Build Android App Bundle
         run: |
           cd android
-          ./gradlew clean bundleRelease assembleRelease --no-daemon
+          ./gradlew bundleRelease --no-daemon --parallel --build-cache
+
+      - name: Verify AAB outputs exist
+        run: |
+          echo "AAB files found:"
+          find android/app/build/outputs -type f -name "*.aab" -print || true
+
+          AAB_COUNT=$(find android/app/build/outputs -type f -name "*.aab" | wc -l | tr -d ' ')
+          if [ "$AAB_COUNT" -eq 0 ]; then
+            echo "No .aab artifact found after bundleRelease"
+            exit 1
+          fi
+
+      - name: Generate release description txt
+        run: |
+          VERSION_CODE=""
+          METADATA_FILE=$(find android/app/build -type f -name output-metadata.json | head -n 1 || true)
+          if [ -n "$METADATA_FILE" ]; then
+            VERSION_CODE=$(node -e "const fs=require('fs'); const p=process.argv[1]; const j=JSON.parse(fs.readFileSync(p,'utf8')); const e=(j.elements&&j.elements[0])||{}; process.stdout.write(String(e.versionCode||j.versionCode||''));" "$METADATA_FILE")
+          fi
+
+          mkdir -p .ci/play-metadata/android/fr-FR/changelogs
+          mkdir -p .ci/play-metadata/android/en-US/changelogs
+
+          BASE_SHA="${{ github.event.before }}"
+          if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            CHANGELOG=$(git log --no-merges --pretty=format:'- %s (%h)' "$BASE_SHA"..HEAD)
+          else
+            CHANGELOG=$(git log --no-merges -n 20 --pretty=format:'- %s (%h)' HEAD)
+          fi
+
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- Internal CI build"
+          fi
+
+          {
+            echo "Reactif CI build"
+            echo "Branch: ${{ github.ref_name }}"
+            echo "Commit: ${GITHUB_SHA::7}"
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            echo "Changes:"
+            echo "$CHANGELOG"
+          } > .ci/release-notes.txt
+
+          cp .ci/release-notes.txt ".ci/play-metadata/android/fr-FR/changelogs/default.txt"
+          cp .ci/release-notes.txt ".ci/play-metadata/android/en-US/changelogs/default.txt"
+
+          if [ -n "$VERSION_CODE" ]; then
+            cp .ci/release-notes.txt ".ci/play-metadata/android/fr-FR/changelogs/${VERSION_CODE}.txt"
+            cp .ci/release-notes.txt ".ci/play-metadata/android/en-US/changelogs/${VERSION_CODE}.txt"
+          fi
+
+      - name: Upload release description artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-description
+          path: .ci/release-notes.txt
+          if-no-files-found: error
 
       - name: Install fastlane
         run: gem install fastlane --user-install -N
 
       - name: Upload to Google Play Internal track
         run: |
-          cat > /tmp/google-play-service-account.json <<EOF
-          ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          EOF
-          fastlane supply \
-            --aab android/app/build/outputs/bundle/release/app-release.aab \
-            --track internal \
-            --json_key /tmp/google-play-service-account.json \
-            --package_name fr.reactif \
-            --skip_upload_images true \
-            --skip_upload_screenshots true \
-            --skip_upload_metadata true
+          fastlane android internal_release
         env:
           SUPPLY_TIMEOUT: 300
+          PLAY_TRACK: internal
+          PLAY_JSON_KEY: ${{ github.workspace }}/.ci/keys/google-play-service-account.json
+          PLAY_METADATA_PATH: ${{ github.workspace }}/.ci/play-metadata/android
