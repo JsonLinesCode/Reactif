@@ -9,6 +9,7 @@ platform :android do
 
     raw_aab_path = options[:aab] || ENV["AAB_PATH"] || "android/app/build/outputs/bundle/release/app-release.aab"
     track = options[:track] || ENV["PLAY_TRACK"] || "internal"
+    release_status = options[:release_status] || ENV["PLAY_RELEASE_STATUS"] || "draft"
     raw_json_key_path = options[:json_key] || ENV["PLAY_JSON_KEY"]
     raw_metadata_path = options[:metadata_path] || ENV["PLAY_METADATA_PATH"] || ".ci/play-metadata/android"
 
@@ -38,6 +39,7 @@ platform :android do
     supply(
       aab: aab_path,
       track: track,
+      release_status: release_status,
       json_key: json_key_path,
       metadata_path: metadata_path,
       skip_upload_changelogs: false,
