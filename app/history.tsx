@@ -16,10 +16,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import { formatDuration, generateSessionHtml } from "@/utils/sessionUtils";
+import ContextualMenu from "@/components/ContextualMenu";
 
 export default function History() {
   const [sessions, setSessions] = useState<CprSession[]>([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [isAllSelected, setIsAllSelected] = useState(false);
   const [selectedSessionIds, setSelectedSessionIds] = useState<Set<string>>(
     new Set(),
   );
@@ -56,6 +58,17 @@ export default function History() {
   const toggleSelectionMode = () => {
     setIsSelectionMode(!isSelectionMode);
     setSelectedSessionIds(new Set());
+    setIsAllSelected(false);
+  };
+  const allSelectionMode = () => {
+    if (!isAllSelected) {
+      setIsAllSelected(true);
+      setIsSelectionMode(true);
+      setSelectedSessionIds(new Set(sessions.map((s) => s.id)));
+    } else {
+      setIsAllSelected(false);
+      setSelectedSessionIds(new Set());
+    }
   };
 
   const toggleSessionSelection = (sessionId: string) => {
@@ -223,7 +236,8 @@ export default function History() {
             color={isDark ? "#fff" : "#000"}
           />
         </TouchableOpacity>
-        <View style={[styles.topBar, bgStyle]}>
+
+        <View style={[styles.topBar, bgStyle, { flexDirection: "row", gap: 12 }]}>
           <TouchableOpacity
             style={[
               styles.selectButton,
@@ -250,6 +264,12 @@ export default function History() {
                 Supprimer ({selectedSessionIds.size})
               </Text>
             </TouchableOpacity>
+          )}
+          {(isAllSelected || isSelectionMode) && (
+              <ContextualMenu
+                 isAllSelected={isAllSelected}
+                 onToggleSelectAll={allSelectionMode}
+              />
           )}
         </View>
       </View>

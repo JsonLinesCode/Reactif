@@ -121,11 +121,12 @@ export default function Index() {
               >
                 <Feather
                   name="settings"
-                  size={22}
+                  size={30}
                   color={isDark ? "#fff" : "#007BFF"}
                 />
               </View>
             </TouchableOpacity>
+            <View style={{flexDirection: "column", gap: 40}}></View>
           </View>
         </View>
       </View>

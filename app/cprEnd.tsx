@@ -22,7 +22,7 @@ import {
   formatEventDetails,
   formatEventType,
   formatHumanReadableDateTime,
-  formatHumanReadableTime,
+  formatHumanReadableTime, formatTimeWithLetters,
   getEventsWithCycles,
 } from "@/utils/sessionUtils";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -131,7 +131,7 @@ export default function CprEnd() {
   const getActions = () => {
     if (!session) return [];
     return getEventsWithCycles(session).filter(({ event }) =>
-      ["cordarone", "adrenaline"].includes(event.type),
+      ["analysis","shock","cordarone", "adrenaline"].includes(event.type),
     );
   };
 
@@ -155,7 +155,7 @@ export default function CprEnd() {
           <Text
             style={[styles.subtitle, theme === "dark" ? { color: "#fff" } : {}]}
           >
-            Retour d&#39;Activité Circulatoire Spontanée
+            Reprise d&#39;Activité Circulatoire Spontanée
           </Text>
 
           <View style={styles.buttonGroupConfirm}>
@@ -177,7 +177,7 @@ export default function CprEnd() {
               style={[styles.buttonConfirm, styles.outlineButton]}
               onPress={handleConfirmEnd}
             >
-              <Text style={[styles.buttonText]}>Fin d'intervention</Text>
+              <Text style={[styles.buttonText]}>Fin d&#39;intervention</Text>
             </TouchableOpacity>
 
             <View
@@ -217,7 +217,7 @@ export default function CprEnd() {
             ]}
           >
             {" "}
-            {summaryTitle === "Décès" ? "DÉCÈS" : "RESUME DE RCP"}
+            {summaryTitle === "Décès" ? "DÉCÈS" : "RÉSUME LA DE RCP"}
           </Text>
         </View>
 
@@ -250,7 +250,77 @@ export default function CprEnd() {
               Chocs délivrés: {getShockCount()}
             </Text>
           </View>
+          <View style={[styles.cardRow, { marginTop: 8 }]}>
+            <FontAwesome5
+                name= "pills"
+                size={18}
+                color="black"
+                style={styles.iconWidth}
+            />
+            <Text style={styles.cardText}>
+              Adrénaline: {actions.filter(({ event }) => event.type === "adrenaline").length} fois
+            </Text>
+          </View>
+          <View style={[styles.cardRow, { marginTop: 8 }]}>
+            <FontAwesome5
+                name= "pills"
+                size={18}
+                color="black"
+                style={styles.iconWidth}
+            />
+            <Text style={styles.cardText}>
+              Cordaronne: {actions.filter(({ event }) => event.type === "cordarone").length} fois
+            </Text>
+          </View>
+          {summaryTitle === "Décès" && (
+          <View style={[styles.cardRow, { marginTop: 8 }]}>
+            <Text style={styles.cardText}>
+              Heure du décès: {session?.endTime ? formatTimeWithLetters(session.endTime) : "N/A"}
+            </Text>
+          </View>
+          )}
         </View>
+
+        {/* Pediatrics Card */}
+        {session?.pediatricData && (
+          <View
+            style={[
+              styles.card,
+              theme === "dark" ? { backgroundColor: "#FFFF" } : {},
+            ]}
+            >
+                <View style={styles.cardHeaderRow}>
+                    <FontAwesome5
+                        name= "child"
+                        size={18}
+                        color="black"
+                        style={styles.iconWidth}
+                    />
+                    <Text style={styles.cardTitle}>Données pédiatriques:</Text>
+                </View>
+                <View
+                    style={[
+                        styles.divider,
+                        theme === "dark" ? { backgroundColor: "black" } : {},
+                    ]}
+                />
+                {session.pediatricData.inputMode === "weight" ? (
+                  <Text style={styles.itemText}>
+                      Poids: {session.pediatricData.weight} kg
+                  </Text>
+                ) : (
+                  <Text style={styles.itemText}>
+                      Age: {session.pediatricData.ageValue} {session.pediatricData.ageMode}
+                  </Text>
+                )}
+                    <Text style={styles.itemText}>
+                        Adrénaline: {session.pediatricData.adrenalineDose ? `${session.pediatricData.adrenalineDose} mg` : "N/A"}
+                    </Text>
+                    <Text style={styles.itemText}>
+                        Cordarone: {session.pediatricData.cordaroneDose ? `${session.pediatricData.cordaroneDose} mg` : "N/A"}
+                    </Text>
+          </View>
+        )}
 
         {/* Actions Card */}
         <View
@@ -286,7 +356,7 @@ export default function CprEnd() {
                 <Text style={styles.itemTimestamp}>
                   Temps écoulé:{" "}
                   {formatElapsedFromStart(session!.startTime, event.timestamp)}{" "}
-                  | Heure: {formatHumanReadableTime(event.timestamp)}
+                  | Heure: {formatTimeWithLetters(event.timestamp)}
                 </Text>
               </View>
             ))
@@ -333,6 +403,7 @@ export default function CprEnd() {
             ))
           )}
         </View>
+      </ScrollView>
 
         {/* Buttons */}
         <View style={styles.actionButtonsContainer}>
@@ -359,7 +430,6 @@ export default function CprEnd() {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -381,7 +451,7 @@ function generateHtml(session: CprSession) {
     .join("");
 
   const pediatricInfo = session.pediatricData
-    ? `<p><strong>Patient:</strong> Enfant (${session.pediatricData.ageValue} ${session.pediatricData.ageMode})</p>`
+    ? `<p><strong>Patient:</strong> Enfant (${session.pediatricData.inputMode === "weight" ? `${session.pediatricData.weight} kg` : `${session.pediatricData.ageValue} ${session.pediatricData.ageMode}`})</p>`
     : `<p><strong>Patient:</strong> Adulte (Standard)</p>`;
 
   return `
@@ -526,8 +596,9 @@ const styles = StyleSheet.create({
   },
 
   actionButtonsContainer: {
-    marginTop: 20,
-    gap: 12,
+    backgroundColor: "transparent",
+    marginTop: 5,
+    gap: 8,
   },
   actionButton: {
     flexDirection: "row",

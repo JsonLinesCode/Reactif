@@ -1,4 +1,4 @@
-import { CprEvent, CprSession } from "@/models/session";
+import { CprEvent, CprSession, PediatricData } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import {
   formatDuration,
@@ -22,7 +22,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function HistoryDetail() {
   const { sessionId } = useLocalSearchParams<{ sessionId?: string }>();
@@ -80,7 +80,7 @@ export default function HistoryDetail() {
 
   if (!session) {
     return (
-      <SafeAreaView
+      <SafeAreaProvider
         style={[
           styles.container,
           { backgroundColor: isDark ? "#111827" : "#f3f4f6" },
@@ -103,7 +103,7 @@ export default function HistoryDetail() {
             <Text style={styles.primaryButtonText}>Retour</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </SafeAreaProvider>
     );
   }
 
@@ -111,7 +111,7 @@ export default function HistoryDetail() {
 
   return (
     <SafeAreaView
-      style={[
+        style={[
         styles.container,
         { backgroundColor: isDark ? "#111827" : "#f3f4f6" },
       ]}
@@ -151,6 +151,30 @@ export default function HistoryDetail() {
           >
             Patient: {session.pediatricData ? "Enfant" : "Standard"}
           </Text>
+          {session.pediatricData && (
+              <View>
+                  {session.pediatricData.inputMode === "weight" && (
+                      <Text style={[styles.headerLine, {color: isDark ? "#d1d5db" : "#374151"}]}>
+                          Poids: {session.pediatricData.weight ? `${session.pediatricData.weight} kg` : "N/A"}
+                      </Text>
+                  )}
+                  {session.pediatricData.inputMode !== "weight" && (
+                      <Text style={[styles.headerLine, {color: isDark ? "#d1d5db" : "#374151"}]}>
+                          Age: {session.pediatricData.ageValue ? `${session.pediatricData.ageValue} ${session.pediatricData.ageMode}` : "N/A"}
+                      </Text>
+                  )}
+                  <Text
+                      style={[
+                          styles.headerLine,
+                          {color: isDark ? "#d1d5db" : "#374151"},
+                      ]}
+                  >
+                      Adrenaline: {session.pediatricData.adrenalineDose ? `${session.pediatricData.adrenalineDose} mg` : "N/A"},
+                      Cordarone: {session.pediatricData.cordaroneDose ? `${session.pediatricData.cordaroneDose} mg` : "N/A"},
+                      Energie: {session.pediatricData.energyDose ? `${session.pediatricData.energyDose} J` : "N/A"}
+                  </Text>
+              </View>
+          )}
           <Text
             style={[
               styles.headerLine,
@@ -173,7 +197,7 @@ export default function HistoryDetail() {
               { color: isDark ? "#d1d5db" : "#374151" },
             ]}
           >
-            Evenements: {session.events.length}
+            Événements: {session.events.length}
           </Text>
         </View>
 
@@ -261,7 +285,7 @@ export default function HistoryDetail() {
         </View>
       </ScrollView>
 
-      <View style={styles.actionBar}>
+      <SafeAreaView style={styles.actionBar}>
         <TouchableOpacity
           style={[
             styles.secondaryButton,
@@ -287,7 +311,7 @@ export default function HistoryDetail() {
           <Ionicons name="share-outline" size={18} color="#fff" />
           <Text style={styles.primaryButtonText}>Exporter PDF</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     </SafeAreaView>
   );
 }

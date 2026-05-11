@@ -38,7 +38,16 @@ export function formatHumanReadableTime(timestamp: number): string {
   return new Date(timestamp).toLocaleTimeString("fr-FR", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
   });
+}
+
+export function formatTimeWithLetters(timestamp: number): string {
+  const date = new Date(timestamp);
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  return `${hours}h ${minutes}m ${seconds}s`;
 }
 
 export function formatHumanReadableDateTime(timestamp: number): string {

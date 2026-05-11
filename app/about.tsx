@@ -37,19 +37,21 @@ export default function About() {
         style={styles.scrollView}
         contentContainerStyle={styles.container}
       >
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={styles.backButton}
-        >
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color={isDark ? "#fff" : "#000"}
-          />
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: isDark ? "#e2e8f0" : "#0A3D62" }]}>
-          À propos de cette application
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20, justifyContent:"flex-end" }}>
+          <TouchableOpacity
+              onPress={() => router.back()}
+              style={styles.backButton}
+          >
+            <Ionicons
+                name="arrow-back"
+                size={24}
+                color={isDark ? "#fff" : "#000"}
+            />
+          </TouchableOpacity>
+          <Text style={[styles.title, { color: isDark ? "#e2e8f0" : "#0A3D62" }]}>
+            À propos de cette application
+          </Text>
+        </View>
 
         <View
           style={[
@@ -68,14 +70,14 @@ export default function About() {
           >
             La gestion automatisée des délais lors d&#39;une RCP limite les
             erreurs tout en améliorant la sécurité et la qualité des soins
-            conformément aux dernières recommandations.
+            conformément aux dernières recommandations (L’European Resuscitation Council ERC et l’International Liaison Committee on Resuscitation ILCOR 2025).
           </Text>
           <Text
             style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
           >
             Cette application répond au double objectif d&#39;améliorer les
             séquences de RCP et donc d&#39;améliorer le pronostic des arrêts
-            cardiaques (AC), mais aussi d'enregistrer des horaires précis afin d’améliorer la saisie des données dans les registres à des fins d’analyse.
+            cardiaques (AC), mais aussi d&#39;enregistrer des horaires précis afin d’améliorer la saisie des données dans les registres à des fins d’analyse.
           </Text>
         </View>
 
@@ -102,6 +104,11 @@ export default function About() {
             saisie de données personnelles concernant les patients. Aucune
             donnée n&#39;est transmise en dehors de l&#39;appareil sans une
             action explicite de l&#39;utilisateur (ex: export PDF).
+          </Text>
+          <Text
+            style={[styles.paragraph, { color: isDark ? "#d1d5db" : "#333" }]}
+            >
+            L’application ne demande aucune donnée personnelle (nom, prénom, mail) ni aucune autorisation particulière de l’utilisateur (accès aux fichiers, caméra ou géolocalisation...) et n’est donc pas soumise au règlement général sur la protection des données (RGPD).
           </Text>
         </View>
 

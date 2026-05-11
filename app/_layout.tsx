@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { Platform, Text, TextInput } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { PaperProvider } from 'react-native-paper';
 
 const APP_FONT_FAMILY = Platform.select({
   ios: "System",
@@ -44,8 +44,8 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
+    <PaperProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <StatusBar
           style={theme === "dark" ? "light" : "dark"}
           backgroundColor={theme === "dark" ? "#353636" : "#ffffff"}
@@ -79,7 +79,7 @@ export default function RootLayout() {
             options={{ headerShown: false }}
           />
         </Stack>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+      </GestureHandlerRootView>
+    </PaperProvider>
   );
 }
