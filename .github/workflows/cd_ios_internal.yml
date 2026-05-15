@@ -1,0 +1,97 @@
+# cd.yml
+name: AppStore - Testflight Deployment
+
+on:
+  push:
+    branches:
+      - beta-releases
+
+jobs:
+  # CD
+  deploy_ios:
+    runs-on: macos-latest
+    # Beta release only
+    if: github.ref == 'refs/heads/beta-releases'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Install iOS pods
+        run: npx pod-install ios
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          check-latest: true
+          cache: "gradle"
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0.4"
+
+      - name: Cache Ruby gems (fastlane)
+        uses: actions/cache@v4
+        with:
+          path: ~/.gem
+          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_ios_internal.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-ruby-gems-
+
+      - name: Add Ruby user gem bin to PATH
+        run: echo "$(ruby -e 'print Gem.user_dir')/bin" >> "$GITHUB_PATH"
+
+      - name: Prepare Google service account key for private Sheets
+        run: |
+          mkdir -p .ci/keys
+          RAW_KEY='${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}'
+
+          if [ -z "$RAW_KEY" ]; then
+            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is empty; private Google Sheet import will be skipped unless another key path is provided."
+            exit 0
+          fi
+
+          printf '%s' "$RAW_KEY" > .ci/keys/google-service-account.json
+          if ! jq -e . .ci/keys/google-service-account.json >/dev/null 2>&1; then
+            if printf '%s' "$RAW_KEY" | base64 --decode > .ci/keys/google-service-account.json 2>/dev/null && jq -e . .ci/keys/google-service-account.json >/dev/null 2>&1; then
+              echo "Using base64-decoded GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
+            else
+              echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not valid JSON (raw or base64-decoded)."
+              exit 1
+            fi
+          fi
+
+          jq -e '.type == "service_account" and .client_email and .private_key' .ci/keys/google-service-account.json >/dev/null
+
+      - name: Decode iOS keystore from secret
+        run: |
+          printf '%s' "${{ secrets.P8_KEY_BASE_64 }}" | base64 --decode > ./AuthKey.p8
+
+      - name: Install fastlane
+        run: gem install fastlane --user-install -N
+
+      - name: Upload to App Store TestFlight track
+        run: |
+          fastlane ios testflight_release
+        env:
+          P8_FILE_PATH: ./AuthKey.p8
+          P8_KEY_ID: ${{ secrets.P8_KEY_ID }}
+          P8_ISSUER_ID: ${{ secrets.P8_ISSUER_ID }}
+          TESTFLIGHT_APP_IDENTIFIER: fr.reactif
+          TESTFLIGHT_GOOGLE_SHEET_ID: ${{ secrets.TESTFLIGHT_GOOGLE_SHEET_ID }}
+          TESTFLIGHT_GOOGLE_SHEET_RANGE: ${{ vars.TESTFLIGHT_GOOGLE_SHEET_RANGE }}
+          TESTFLIGHT_GOOGLE_SERVICE_ACCOUNT_JSON_PATH: ${{ github.workspace }}/.ci/keys/google-service-account.json
+          TESTFLIGHT_DEFAULT_GROUPS: ${{ vars.TESTFLIGHT_DEFAULT_GROUPS }}

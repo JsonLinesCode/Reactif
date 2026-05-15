@@ -1,5 +1,5 @@
 # cd.yml
-name: Android Deployment
+name: Google Play Store - Internal Deployment
 
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.gem
-          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_android.yml') }}
+          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_android_internal.yml') }}
           restore-keys: |
             ${{ runner.os }}-ruby-gems-
 

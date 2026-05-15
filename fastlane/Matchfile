@@ -1,0 +1,16 @@
+git_url(ENV["MATCH_GIT_URL"] || "https://github.com/JsonLinesCode/reactif-certificates.git")
+git_branch(ENV["MATCH_GIT_BRANCH"] || "main")
+storage_mode("git")
+
+type("appstore")
+platform("ios")
+app_identifier("fr.reactif")
+
+
+readonly(ENV.fetch("MATCH_READONLY", "false") == "true")
+git_url("https://github.com/JsonLinesCode/reactif-certificates.git")
+
+
+
+
+
