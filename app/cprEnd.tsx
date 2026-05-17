@@ -183,6 +183,14 @@ export default function CprEnd() {
     router.replace("/");
   };
 
+  const getDurationString = () => {
+    if (!session || !session.endTime) return "0 minutes et 0 secondes";
+    const diff = session.endTime - session.startTime;
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    return `${minutes} minutes et ${seconds} secondes`;
+  };
+
   const formatTime = (totalSeconds: number) => {
     const mins = Math.floor(totalSeconds / 60);
     const secs = totalSeconds % 60;
