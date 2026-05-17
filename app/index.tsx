@@ -3,7 +3,13 @@ import Feather from "@expo/vector-icons/Feather";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Linking, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -153,7 +159,7 @@ export default function Index() {
                 />
               </View>
             </TouchableOpacity>
-            <View style={{flexDirection: "column", gap: 40}}></View>
+            <View style={{ flexDirection: "column", gap: 40 }}></View>
           </View>
         </View>
       </View>
