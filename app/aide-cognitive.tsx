@@ -1,7 +1,7 @@
 import ImageViewer from "@/components/ImageViewer";
 import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useRouter, type Href } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ImageSourcePropType,
@@ -12,50 +12,57 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 type CognitiveDocument = {
-  id: string;
   label: string;
   image?: ImageSourcePropType;
   pdf?: { uri: string } | number;
+  route?: Href;
 };
 
 const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
   {
-    id: "doc-1",
-    label: "RCP Adulte ERC 2025",
-    image: require("@/assets/documents/image.png"),
+    label: "Organisation RCP specialisée",
+    image: require("@/assets/documents/aides-cognitives//organisation-rcp-specialisee/image.png"),
   },
   {
-    id: "doc-2",
-    label: "RCP Néonatale ERC 2025",
-    image: require("@/assets/documents/image-1.png"),
+    label: "Reglages respirateur RCP Adulte",
+    route: "/aide-respiratoire",
+  },
+
+  {
+    label: "Algorithme RCP adulte",
+    image: require("@/assets/documents/aides-cognitives/algorithme-rcp-adulte/image.png"),
   },
   {
-    id: "doc-3",
-    label: "RCP Pédiatrique ERC 2025",
-    image: require("@/assets/documents/image-2.png"),
+    label: "Algorithme RCP pédiatrique",
+    image: require("@/assets/documents/aides-cognitives/algorithme-rcp-pediatrique/image.png"),
   },
   {
-    id: "doc-4",
-    label: "Causes réversible de l'AC pédiatrique 4H/4T",
-    image: require("@/assets/documents/image-3.png"),
+    label: "Algorithme RCP néonatale",
+    image: require("@/assets/documents/aides-cognitives/algorithme-rcp-neonatale/image.png"),
   },
   {
-    id: "doc-5",
-    label:
-      "Organisation RCP spécialisée",
-    image: require("@/assets/documents/image-4.png"),
+    label: "Causes réversibles de l’AC pédiatrique 4H/4T",
+    image: require("@/assets/documents/aides-cognitives/causes-reversibles-ac-pediatrique-4h-4t/image.png"),
+  },
+  {
+    label: "Ressources",
+    route: "/ressources",
   },
 ];
 
 export default function AideCognitive() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [theme, setTheme] = useState(sessionStore.theme);
-  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
-    null,
-  );
+  const [selectedDocumentIndex, setSelectedDocumentIndex] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     const unsubscribe = sessionStore.subscribe(() => {
@@ -66,37 +73,39 @@ export default function AideCognitive() {
 
   const isDark = theme === "dark";
 
-  const selectedDocument = useMemo(
-    () => COGNITIVE_DOCUMENTS.find((doc) => doc.id === selectedDocumentId),
-    [selectedDocumentId],
-  );
+  const selectedDocument = useMemo(() => {
+    if (selectedDocumentIndex === null) return null;
+    return COGNITIVE_DOCUMENTS[selectedDocumentIndex] ?? null;
+  }, [selectedDocumentIndex]);
 
-  const renderDocumentItem = (documentId: string) => {
-    const item = COGNITIVE_DOCUMENTS.find((doc) => doc.id === documentId);
-    if (!item) return null;
+  const renderDocumentItem = (item: CognitiveDocument, index: number) => (
+    <TouchableOpacity
+      key={`${item.label}-${index}`}
+      style={[
+        styles.optionItem,
+        { borderBottomColor: isDark ? "#374151" : "#E5E7EB" },
+      ]}
+      onPress={() => {
+        if (item.route) {
+          router.push(item.route);
+          return;
+        }
 
-    return (
-      <TouchableOpacity
-        key={item.id}
-        style={[
-          styles.optionItem,
-          { borderBottomColor: isDark ? "#374151" : "#E5E7EB" },
-        ]}
-        onPress={() => setSelectedDocumentId(item.id)}
+        setSelectedDocumentIndex(index);
+      }}
+    >
+      <Text
+        style={[styles.optionText, { color: isDark ? "#e5e7eb" : "#111827" }]}
       >
-        <Text
-          style={[styles.optionText, { color: isDark ? "#e5e7eb" : "#111827" }]}
-        >
-          {item.label}
-        </Text>
-        <Ionicons
-          name="chevron-forward"
-          size={22}
-          color={isDark ? "#93c5fd" : "#0D47A1"}
-        />
-      </TouchableOpacity>
-    );
-  };
+        {item.label}
+      </Text>
+      <Ionicons
+        name="chevron-forward"
+        size={22}
+        color={isDark ? "#93c5fd" : "#0D47A1"}
+      />
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView
@@ -134,31 +143,7 @@ export default function AideCognitive() {
             { backgroundColor: isDark ? "#1f2937" : "#fff" },
           ]}
         >
-          {renderDocumentItem("doc-5")}
-          {renderDocumentItem("doc-1")}
-          <TouchableOpacity
-            style={[
-              styles.optionItem,
-              { borderBottomColor: isDark ? "#374151" : "#E5E7EB" },
-            ]}
-            onPress={() => router.push("/aide-respiratoire")}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                { color: isDark ? "#e5e7eb" : "#111827" },
-              ]}
-            >
-              Réglages respirateur RCP Adulte
-            </Text>
-            <Ionicons
-              name="chevron-forward"
-              size={22}
-              color={isDark ? "#93c5fd" : "#0D47A1"}
-            />
-          </TouchableOpacity>
-          {renderDocumentItem("doc-3")}
-          {renderDocumentItem("doc-4")}
+          {COGNITIVE_DOCUMENTS.map(renderDocumentItem)}
         </View>
       </ScrollView>
 
@@ -166,9 +151,10 @@ export default function AideCognitive() {
         visible={!!selectedDocument}
         animationType="slide"
         presentationStyle="fullScreen"
-        onRequestClose={() => setSelectedDocumentId(null)}
+        onRequestClose={() => setSelectedDocumentIndex(null)}
       >
         <SafeAreaView
+          edges={["left", "right", "bottom"]}
           style={[
             styles.viewerContainer,
             { backgroundColor: isDark ? "#0b1220" : "#F5F5F5" },
@@ -177,11 +163,14 @@ export default function AideCognitive() {
           <View
             style={[
               styles.viewerHeader,
-              { backgroundColor: isDark ? "#111827" : "#000" },
+              {
+                backgroundColor: isDark ? "#111827" : "#000",
+                paddingTop: insets.top + 14,
+              },
             ]}
           >
             <TouchableOpacity
-              onPress={() => setSelectedDocumentId(null)}
+              onPress={() => setSelectedDocumentIndex(null)}
               style={styles.backButton}
             >
               <Ionicons name="arrow-back" size={24} color="#fff" />

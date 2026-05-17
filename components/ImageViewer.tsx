@@ -44,6 +44,7 @@ export default function ImageViewer({ imgSource }: Props) {
         {/* imageUrls accepts objects like { url: '...' } or { props: { source: require(...) } } */}
         {/* @ts-ignore dynamic require */}
         <ImageZoomViewer
+          style={styles.zoomViewer}
           imageUrls={[imageItem]}
           enableImageZoom
           saveToLocalByLongPress={false}
@@ -67,6 +68,7 @@ export default function ImageViewer({ imgSource }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, overflow: "hidden" },
+  zoomViewer: { flex: 1 },
   image: { width: "100%", height: "100%" },
 });

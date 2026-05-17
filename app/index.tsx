@@ -92,7 +92,7 @@ export default function Index() {
             onPress={startAideCognitive}
           >
             <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
-              AIDE COGNITIVE
+              AIDES COGNITIVES
             </Text>
           </TouchableOpacity>
           <View style={styles.bottomActionRow}>
