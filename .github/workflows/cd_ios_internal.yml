@@ -77,3 +77,5 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_READONLY: "true"
           IOS_BUILD_NUMBER_OFFSET: ${{ vars.IOS_BUILD_NUMBER_OFFSET }}
+          BETA_APP_DESCRIPTION: ${{ vars.BETA_APP_DESCRIPTION }}
+          BETA_APP_FEEDBACK_EMAIL: ${{ secrets.BETA_APP_FEEDBACK_EMAIL }}
