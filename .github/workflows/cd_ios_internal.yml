@@ -90,6 +90,9 @@ jobs:
           P8_FILE_PATH: ./AuthKey.p8
           P8_KEY_ID: ${{ secrets.P8_KEY_ID }}
           P8_ISSUER_ID: ${{ secrets.P8_ISSUER_ID }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_READONLY: "true"
           TESTFLIGHT_APP_IDENTIFIER: fr.reactif
           TESTFLIGHT_GOOGLE_SHEET_ID: ${{ secrets.TESTFLIGHT_GOOGLE_SHEET_ID }}
           TESTFLIGHT_GOOGLE_SHEET_RANGE: ${{ vars.TESTFLIGHT_GOOGLE_SHEET_RANGE }}

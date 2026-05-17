@@ -126,6 +126,15 @@ jobs:
             fi
           fi
 
+      - name: Set Android version code
+        run: |
+          BASE_VERSION_CODE=$(date +%s)
+          VERSION_CODE_OFFSET="${{ vars.ANDROID_VERSION_CODE_OFFSET }}"
+          if [ -z "$VERSION_CODE_OFFSET" ]; then VERSION_CODE_OFFSET=0; fi
+          VERSION_CODE=$((BASE_VERSION_CODE + VERSION_CODE_OFFSET))
+          echo "ANDROID_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          echo "Using Android versionCode $VERSION_CODE"
+
       - name: Build Android App Bundle
         run: |
           cd android
