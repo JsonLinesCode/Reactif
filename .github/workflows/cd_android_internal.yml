@@ -1,5 +1,5 @@
 # cd.yml
-name: Android Deployment
+name: Google Play Store - Internal Deployment
 
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.gem
-          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_android.yml') }}
+          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_android_internal.yml') }}
           restore-keys: |
             ${{ runner.os }}-ruby-gems-
 
@@ -126,6 +126,15 @@ jobs:
             fi
           fi
 
+      - name: Set Android version code
+        run: |
+          BASE_VERSION_CODE=$(date +%s)
+          VERSION_CODE_OFFSET="${{ vars.ANDROID_VERSION_CODE_OFFSET }}"
+          if [ -z "$VERSION_CODE_OFFSET" ]; then VERSION_CODE_OFFSET=0; fi
+          VERSION_CODE=$((BASE_VERSION_CODE + VERSION_CODE_OFFSET))
+          echo "ANDROID_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          echo "Using Android versionCode $VERSION_CODE"
+
       - name: Build Android App Bundle
         run: |
           cd android
@@ -198,5 +207,6 @@ jobs:
         env:
           SUPPLY_TIMEOUT: 300
           PLAY_TRACK: internal
+          PLAY_RELEASE_STATUS: completed
           PLAY_JSON_KEY: ${{ github.workspace }}/.ci/keys/google-play-service-account.json
           PLAY_METADATA_PATH: ${{ github.workspace }}/.ci/play-metadata/android

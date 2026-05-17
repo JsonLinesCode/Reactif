@@ -1,0 +1,81 @@
+# cd.yml
+name: AppStore - Testflight Deployment
+
+on:
+  push:
+    branches:
+      - beta-releases
+
+jobs:
+  # CD
+  deploy_ios:
+    runs-on: macos-26
+    # Beta release only
+    if: github.ref == 'refs/heads/beta-releases'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Install iOS pods
+        run: npx pod-install ios
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          check-latest: true
+          cache: "gradle"
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0.4"
+
+      - name: Cache Ruby gems (fastlane)
+        uses: actions/cache@v4
+        with:
+          path: ~/.gem
+          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_ios_internal.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-ruby-gems-
+
+      - name: Add Ruby user gem bin to PATH
+        run: echo "$(ruby -e 'print Gem.user_dir')/bin" >> "$GITHUB_PATH"
+
+      - name: Show Xcode version
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Decode iOS keystore from secret
+        run: |
+          printf '%s' "${{ secrets.P8_KEY_BASE_64 }}" | base64 --decode > ./AuthKey.p8
+
+      - name: Install fastlane
+        run: gem install fastlane --user-install -N
+
+      - name: Upload to App Store TestFlight track
+        run: |
+          fastlane ios testflight_release
+        env:
+          P8_FILE_PATH: ./AuthKey.p8
+          P8_KEY_ID: ${{ secrets.P8_KEY_ID }}
+          P8_ISSUER_ID: ${{ secrets.P8_ISSUER_ID }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_READONLY: "true"
+          IOS_BUILD_NUMBER_OFFSET: ${{ vars.IOS_BUILD_NUMBER_OFFSET }}
+          BETA_APP_DESCRIPTION: ${{ vars.BETA_APP_DESCRIPTION }}
+          BETA_APP_FEEDBACK_EMAIL: ${{ secrets.BETA_APP_FEEDBACK_EMAIL }}
