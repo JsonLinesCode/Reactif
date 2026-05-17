@@ -43,10 +43,9 @@ platform :ios do
       changelog: ENV["CHANGELOG"] || "Pas de note de mise à jour fournie. Merci de consulter le changelog in-app.",
       distribute_external: true,
       groups: ["TestReactifExte"],
-      beta_app_description: ENV["BETA_APP_DESCRIPTION"] || "Version beta de Reactif pour les tests externes.",
+      beta_app_description: optional_env("BETA_APP_DESCRIPTION") || "Version beta de Reactif pour les tests externes.",
       beta_app_feedback_email: required_env("BETA_APP_FEEDBACK_EMAIL"),
-      demo_account_required: false,
-  
+      demo_account_required: false
     )
   end
 end
