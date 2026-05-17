@@ -9,7 +9,7 @@ on:
 jobs:
   # CD
   deploy_ios:
-    runs-on: macos-latest
+    runs-on: macos-26
     # Beta release only
     if: github.ref == 'refs/heads/beta-releases'
     steps:
@@ -53,6 +53,11 @@ jobs:
 
       - name: Add Ruby user gem bin to PATH
         run: echo "$(ruby -e 'print Gem.user_dir')/bin" >> "$GITHUB_PATH"
+
+      - name: Show Xcode version
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
 
       - name: Decode iOS keystore from secret
         run: |
