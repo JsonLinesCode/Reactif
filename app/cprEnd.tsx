@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import CprTimer from "@/components/CprTimer";
 import { CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import {
@@ -124,8 +125,20 @@ export default function CprEnd() {
     return `${minutes} minutes et ${seconds} secondes`;
   };
 
-  const getShockCount = () => {
-    return session?.events.filter((e: any) => e.type === "shock").length || 0;
+
+  const formatEventSummary = (type: string) => {
+    if (!session) return "0";
+    const events = session.events.filter((e: any) => e.type === type);
+    if (events.length === 0) return "0";
+
+    const details = events.map((e: any, index: number) => {
+      const date = new Date(e.timestamp);
+      const hh = date.getHours().toString().padStart(2, "0");
+      const mm = date.getMinutes().toString().padStart(2, "0");
+      return `${index + 1}: ${hh}:${mm}`;
+    }).join("; ");
+
+    return `${events.length} (${details})`;
   };
 
   const getActions = () => {
@@ -157,6 +170,31 @@ export default function CprEnd() {
           >
             Reprise d&#39;Activité Circulatoire Spontanée
           </Text>
+
+          <View style={[styles.card, theme === "dark" ? { backgroundColor: "#FFFF" } : {},{justifyContent: "center", alignItems: "center", gap: 12}]}>
+            <CprTimer/>
+
+            <View>
+              <Text style={styles.cardText}>
+                Session RCP complète
+              </Text>
+              <Text style={styles.cardText}>
+                Date: {session ? new Date(session.startTime).toLocaleDateString() : "N/A"}
+              </Text>
+              <Text style={styles.cardText}>
+                Durée: {getDurationString()}
+              </Text>
+              <Text style={styles.cardText}>
+                Chocs : {formatEventSummary("shock")}
+              </Text>
+              <Text style={styles.cardText}>
+                Adrénaline : {formatEventSummary("adrenaline")}
+              </Text>
+              <Text style={styles.cardText}>
+                Cordarone : {formatEventSummary("cordarone")}
+              </Text>
+            </View>
+          </View>
 
           <View style={styles.buttonGroupConfirm}>
             <TouchableOpacity
@@ -247,7 +285,7 @@ export default function CprEnd() {
               style={styles.iconWidth}
             />
             <Text style={styles.cardText}>
-              Chocs délivrés: {getShockCount()}
+              Chocs délivrés : {formatEventSummary("shock")}
             </Text>
           </View>
           <View style={[styles.cardRow, { marginTop: 8 }]}>
@@ -258,7 +296,7 @@ export default function CprEnd() {
                 style={styles.iconWidth}
             />
             <Text style={styles.cardText}>
-              Adrénaline: {actions.filter(({ event }) => event.type === "adrenaline").length} fois
+              Adrénaline : {formatEventSummary("adrenaline")}
             </Text>
           </View>
           <View style={[styles.cardRow, { marginTop: 8 }]}>
@@ -269,7 +307,7 @@ export default function CprEnd() {
                 style={styles.iconWidth}
             />
             <Text style={styles.cardText}>
-              Cordaronne: {actions.filter(({ event }) => event.type === "cordarone").length} fois
+              Cordarone : {formatEventSummary("cordarone")}
             </Text>
           </View>
           {summaryTitle === "Décès" && (
