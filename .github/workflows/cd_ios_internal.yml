@@ -54,28 +54,6 @@ jobs:
       - name: Add Ruby user gem bin to PATH
         run: echo "$(ruby -e 'print Gem.user_dir')/bin" >> "$GITHUB_PATH"
 
-      - name: Prepare Google service account key for private Sheets
-        run: |
-          mkdir -p .ci/keys
-          RAW_KEY='${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}'
-
-          if [ -z "$RAW_KEY" ]; then
-            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is empty; private Google Sheet import will be skipped unless another key path is provided."
-            exit 0
-          fi
-
-          printf '%s' "$RAW_KEY" > .ci/keys/google-service-account.json
-          if ! jq -e . .ci/keys/google-service-account.json >/dev/null 2>&1; then
-            if printf '%s' "$RAW_KEY" | base64 --decode > .ci/keys/google-service-account.json 2>/dev/null && jq -e . .ci/keys/google-service-account.json >/dev/null 2>&1; then
-              echo "Using base64-decoded GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
-            else
-              echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not valid JSON (raw or base64-decoded)."
-              exit 1
-            fi
-          fi
-
-          jq -e '.type == "service_account" and .client_email and .private_key' .ci/keys/google-service-account.json >/dev/null
-
       - name: Decode iOS keystore from secret
         run: |
           printf '%s' "${{ secrets.P8_KEY_BASE_64 }}" | base64 --decode > ./AuthKey.p8
@@ -93,8 +71,3 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_READONLY: "true"
-          TESTFLIGHT_APP_IDENTIFIER: fr.reactif
-          TESTFLIGHT_GOOGLE_SHEET_ID: ${{ secrets.TESTFLIGHT_GOOGLE_SHEET_ID }}
-          TESTFLIGHT_GOOGLE_SHEET_RANGE: ${{ vars.TESTFLIGHT_GOOGLE_SHEET_RANGE }}
-          TESTFLIGHT_GOOGLE_SERVICE_ACCOUNT_JSON_PATH: ${{ github.workspace }}/.ci/keys/google-service-account.json
-          TESTFLIGHT_DEFAULT_GROUPS: ${{ vars.TESTFLIGHT_DEFAULT_GROUPS }}
