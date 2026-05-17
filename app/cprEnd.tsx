@@ -416,18 +416,18 @@ export default function CprEnd() {
     "Fin de session";
 
   return (
-    <SafeAreaView style={[styles.container, styles.summaryBackground, bgStyle]}>
+    <SafeAreaView style={[styles.container, bgStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.summaryScroll}>
         <View style={styles.header}>
           <Text
             style={[
-              styles.headerTitle,
-              theme === "dark" ? { color: "#FFFF" } : {},
+              styles.title,
+              styles.summaryTitle,
+              theme === "dark" ? { color: "#ccc" } : {},
             ]}
           >
-            {" "}
-            {summaryTitle === "Décès" ? "DÉCÈS" : "RÉSUME LA DE RCP"}
+            {summaryTitle === "Décès" ? "DÉCÈS" : "RÉSUME DE LA RCP"}
           </Text>
         </View>
 
@@ -439,53 +439,33 @@ export default function CprEnd() {
           ]}
         >
           <View style={[styles.cardRow]}>
-            <FontAwesome5
-              name="hourglass-half"
-              size={18}
-              color="black"
-              style={styles.iconWidth}
-            />
-            <Text style={styles.cardText}>
-              Durée totale: {getDurationString()}
+            <Text style={styles.summaryCardText}>
+              <Text style={styles.summaryCardLabel}>DURÉE TOTALE</Text>:{" "}
+              {getDurationString()}
             </Text>
           </View>
           <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <FontAwesome5
-              name="bolt"
-              size={18}
-              color="black"
-              style={styles.iconWidth}
-            />
-            <Text style={styles.cardText}>
-              Chocs délivrés : {formatEventSummary("shock")}
+            <Text style={styles.summaryCardText}>
+              <Text style={styles.summaryCardLabel}>CHOCS DÉLIVRÉS</Text> :{" "}
+              {formatEventSummary("shock")}
             </Text>
           </View>
           <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <FontAwesome5
-              name="pills"
-              size={18}
-              color="black"
-              style={styles.iconWidth}
-            />
-            <Text style={styles.cardText}>
-              Adrénaline : {formatEventSummary("adrenaline")}
+            <Text style={styles.summaryCardText}>
+              <Text style={styles.summaryCardLabel}>ADRÉNALINE</Text> :{" "}
+              {formatEventSummary("adrenaline")}
             </Text>
           </View>
           <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <FontAwesome5
-              name="pills"
-              size={18}
-              color="black"
-              style={styles.iconWidth}
-            />
-            <Text style={styles.cardText}>
-              Cordarone : {formatEventSummary("cordarone")}
+            <Text style={styles.summaryCardText}>
+              <Text style={styles.summaryCardLabel}>CORDARONE</Text> :{" "}
+              {formatEventSummary("cordarone")}
             </Text>
           </View>
           {summaryTitle === "Décès" && (
             <View style={[styles.cardRow, { marginTop: 8 }]}>
-              <Text style={styles.cardText}>
-                Heure du décès:{" "}
+              <Text style={styles.summaryCardText}>
+                <Text style={styles.summaryCardLabel}>HEURE DU DÉCÈS</Text>:{" "}
                 {session?.endTime
                   ? formatTimeWithLetters(session.endTime)
                   : "N/A"}
@@ -717,25 +697,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  summaryBackground: {
-    backgroundColor: "#F0F2F5",
-  },
   summaryScroll: {
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
     paddingBottom: 40,
   },
   header: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
-    marginTop: 10,
+    marginBottom: 10,
   },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#0D47A1",
-    marginLeft: 10,
+  summaryTitle: {
+    paddingHorizontal: 16,
+    marginBottom: 0,
   },
   card: {
     backgroundColor: "#fff",
@@ -753,7 +728,7 @@ const styles = StyleSheet.create({
   },
   cardRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   cardHeaderRow: {
     flexDirection: "row",
@@ -768,6 +743,17 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 16,
     color: "#333",
+  },
+  summaryCardText: {
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 22,
+    color: "#333",
+    flexWrap: "wrap",
+  },
+  summaryCardLabel: {
+    fontWeight: "700",
+    textDecorationLine: "underline",
   },
   cardTitle: {
     fontSize: 16,
@@ -814,6 +800,8 @@ const styles = StyleSheet.create({
   actionButtonsContainer: {
     backgroundColor: "transparent",
     marginTop: 5,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
     gap: 8,
   },
   actionButton: {
