@@ -39,7 +39,11 @@ platform :ios do
     )
     build_app(workspace: "ios/Reactif.xcworkspace", scheme: "Reactif", export_method: "app-store") # Change name of workspace
 
-    upload_to_testflight(changelog: ENV["CHANGELOG"] || "Pas de note de mise à jour fournie. Merci de consulter le changelog in-app.")
+    upload_to_testflight(
+      changelog: ENV["CHANGELOG"] || "Pas de note de mise à jour fournie. Merci de consulter le changelog in-app.",
+      distribute_external: true,
+      groups: ["TestReactifExte"]
+    )
   end
 end
 
