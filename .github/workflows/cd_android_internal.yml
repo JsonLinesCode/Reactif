@@ -207,6 +207,6 @@ jobs:
         env:
           SUPPLY_TIMEOUT: 300
           PLAY_TRACK: internal
-          PLAY_RELEASE_STATUS: draft
+          PLAY_RELEASE_STATUS: completed
           PLAY_JSON_KEY: ${{ github.workspace }}/.ci/keys/google-play-service-account.json
           PLAY_METADATA_PATH: ${{ github.workspace }}/.ci/play-metadata/android
