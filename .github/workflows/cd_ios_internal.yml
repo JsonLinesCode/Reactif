@@ -71,3 +71,4 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_READONLY: "true"
+          IOS_BUILD_NUMBER_OFFSET: ${{ vars.IOS_BUILD_NUMBER_OFFSET }}
