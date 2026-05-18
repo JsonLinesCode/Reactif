@@ -1,11 +1,13 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useFocusEffect } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Alert,
+  Animated,
   BackHandler,
   Platform,
   ScrollView,
@@ -33,11 +35,28 @@ import {
 } from "@/utils/sessionUtils";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 
+const AnimatedTouchableOpacity =
+  Animated.createAnimatedComponent(TouchableOpacity);
+
 export default function CprEnd() {
   const { width } = useWindowDimensions();
   const [theme, setTheme] = useState(sessionStore.theme);
-  const bgStyle = theme === "dark" ? { backgroundColor: "#353636" } : {};
-  const neutralButtonColor = "#007BFF";
+  const isDark = theme === "dark";
+  const bgStyle = isDark ? { backgroundColor: "#353636" } : {};
+  const textStyle = { color: isDark ? "#fff" : "#333" };
+  const mutedTextStyle = { color: isDark ? "#cbd5e1" : "#64748b" };
+  const cardStyle = {
+    backgroundColor: isDark ? "#222121" : "#fff",
+    borderColor: isDark ? "#555" : "#E0E0E0",
+  };
+  const cardTitleStyle = { color: isDark ? "#93c5fd" : "#0D47A1" };
+  const dividerStyle = { backgroundColor: isDark ? "#555" : "#EEEEEE" };
+  const neutralButtonColor = isDark ? "#fff" : "#007BFF";
+  const outlineButtonStyle = {
+    backgroundColor: "transparent",
+    borderColor: neutralButtonColor,
+  };
+  const outlineButtonTextStyle = { color: neutralButtonColor };
   const params = useLocalSearchParams();
   const initialMode = params.mode === "death" ? "summary" : "racs";
 
@@ -50,6 +69,7 @@ export default function CprEnd() {
   const [racsElapsedSeconds, setRacsElapsedSeconds] = useState(0);
   const [cprElapsedSeconds, setCprElapsedSeconds] = useState(0);
   const racsStartRef = useRef<number | null>(null);
+  const ecgBounceAnim = useRef(new Animated.Value(1)).current;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -148,10 +168,11 @@ export default function CprEnd() {
   };
 
   const handleOpenAideCognitive = () => {
-    router.push("/aide-cognitive");
+    router.push("/aideCognitive");
   };
 
   const handleEcgPress = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     sessionStore.logEvent("event", "ECG");
   };
 
@@ -244,54 +265,84 @@ export default function CprEnd() {
       <SafeAreaView style={[styles.container, bgStyle]}>
         <Stack.Screen options={{ headerShown: false }} />
         <ScrollView contentContainerStyle={styles.confirmContainer}>
-          <Text
-            style={[styles.title, theme === "dark" ? { color: "#ccc" } : {}]}
-          >
+          <Text style={[styles.title, isDark ? { color: "#ccc" } : {}]}>
             RACS
           </Text>
 
           <View
             style={[
               styles.card,
-              theme === "dark" ? { backgroundColor: "#FFFF" } : {},
+              cardStyle,
               styles.racsSummaryCard,
             ]}
           >
-            <View style={styles.racsTimerCard}>
-              <Text style={styles.racsTimerLabel}>RACS depuis</Text>
-              <Text style={styles.racsTimerValue}>
+            <View
+              style={[
+                styles.racsTimerCard,
+                isDark
+                  ? { backgroundColor: "#353636", borderColor: "#fff" }
+                  : {},
+              ]}
+            >
+              <Text style={[styles.racsTimerLabel, textStyle]}>
+                RACS depuis
+              </Text>
+              <Text style={[styles.racsTimerValue, textStyle]}>
                 {formatTime(racsElapsedSeconds)}
               </Text>
             </View>
 
             <View>
-              <Text style={styles.cardText}>Session RCP complète</Text>
-              <Text style={styles.cardText}>
+              <Text style={[styles.cardText, textStyle]}>
+                Session RCP complète
+              </Text>
+              <Text style={[styles.cardText, textStyle]}>
                 Date:{" "}
                 {session
                   ? new Date(session.startTime).toLocaleDateString()
                   : "N/A"}
               </Text>
-              <Text style={styles.cardText}>
+              <Text style={[styles.cardText, textStyle]}>
                 Durée RCP (totale): {formatTime(cprElapsedSeconds)}
               </Text>
-              <Text style={styles.cardText}>
+              <Text style={[styles.cardText, textStyle]}>
                 Chocs : {formatEventSummary("shock")}
               </Text>
-              <Text style={styles.cardText}>
+              <Text style={[styles.cardText, textStyle]}>
                 Adrénaline : {formatEventSummary("adrenaline")}
               </Text>
-              <Text style={styles.cardText}>
+              <Text style={[styles.cardText, textStyle]}>
                 Cordarone : {formatEventSummary("cordarone")}
               </Text>
             </View>
           </View>
 
           <View style={styles.ecgSection}>
-            <TouchableOpacity
+            <AnimatedTouchableOpacity
               onPress={handleEcgPress}
+              onPressIn={() => {
+                Animated.timing(ecgBounceAnim, {
+                  toValue: 0.95,
+                  duration: 100,
+                  useNativeDriver: true,
+                }).start();
+              }}
+              onPressOut={() => {
+                Animated.timing(ecgBounceAnim, {
+                  toValue: 1,
+                  duration: 100,
+                  useNativeDriver: true,
+                }).start();
+              }}
               activeOpacity={0.8}
-              style={[styles.ecgButton, { width: ecgSize, height: ecgSize }]}
+              style={[
+                styles.ecgButton,
+                {
+                  width: ecgSize,
+                  height: ecgSize,
+                  transform: [{ scale: ecgBounceAnim }],
+                },
+              ]}
             >
               <Svg width={ecgSize} height={ecgSize}>
                 <G rotation="-90" origin={`${ecgCenter}, ${ecgCenter}`}>
@@ -330,7 +381,7 @@ export default function CprEnd() {
                   name="heart-pulse"
                   size={40}
                   style={[
-                    theme === "dark"
+                    isDark
                       ? { color: "#fff", marginBottom: 4 }
                       : { color: "#000", marginBottom: 4 },
                   ]}
@@ -338,7 +389,7 @@ export default function CprEnd() {
                 <Text
                   style={[
                     styles.ecgLabel,
-                    theme === "dark" ? { color: "#FFFF" } : { color: "#000" },
+                    isDark ? { color: "#fff" } : { color: "#000" },
                   ]}
                 >
                   ECG
@@ -346,56 +397,86 @@ export default function CprEnd() {
                 <Text
                   style={[
                     styles.ecgTimer,
-                    theme === "dark" ? { color: "#FFFF" } : { color: "#000" },
+                    isDark ? { color: "#fff" } : { color: "#000" },
                   ]}
                 >
                   {formatTime(ecgTimeLeft)}
                 </Text>
               </View>
-            </TouchableOpacity>
+            </AnimatedTouchableOpacity>
           </View>
 
           <View style={styles.buttonGroupConfirm}>
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.outlineButton]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                outlineButtonStyle,
+              ]}
               onPress={handleResume}
             >
-              <Text style={[styles.buttonText]}>Reprendre la RCP</Text>
+              <Text style={[styles.buttonText, outlineButtonTextStyle]}>
+                Reprendre la RCP
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.outlineButton]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                outlineButtonStyle,
+              ]}
               onPress={handleDeath}
             >
-              <Text style={[styles.buttonText]}>Décès</Text>
+              <Text style={[styles.buttonText, outlineButtonTextStyle]}>
+                Décès
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.outlineButton]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                outlineButtonStyle,
+              ]}
               onPress={handleConfirmEnd}
             >
-              <Text style={[styles.buttonText]}>Fin d&#39;intervention</Text>
+              <Text style={[styles.buttonText, outlineButtonTextStyle]}>
+                Fin d&#39;intervention
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.outlineButton]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                outlineButtonStyle,
+              ]}
               onPress={handleEvent}
             >
-              <Text style={[styles.buttonText]}>Ajouter un évènement</Text>
+              <Text style={[styles.buttonText, outlineButtonTextStyle]}>
+                Ajouter un évènement
+              </Text>
             </TouchableOpacity>
 
             <View
               style={[
                 styles.racsSeparator,
-                { backgroundColor: theme === "dark" ? "#6b7280" : "#d1d5db" },
+                { backgroundColor: isDark ? "#6b7280" : "#d1d5db" },
               ]}
             />
 
             <TouchableOpacity
-              style={[styles.buttonConfirm, styles.outlineButton]}
+              style={[
+                styles.buttonConfirm,
+                styles.outlineButton,
+                outlineButtonStyle,
+              ]}
               onPress={handleOpenAideCognitive}
             >
-              <Text style={[styles.buttonText]}>Aides cognitives</Text>
+              <Text style={[styles.buttonText, outlineButtonTextStyle]}>
+                Aides cognitives
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -424,7 +505,7 @@ export default function CprEnd() {
             style={[
               styles.title,
               styles.summaryTitle,
-              theme === "dark" ? { color: "#ccc" } : {},
+              isDark ? { color: "#ccc" } : {},
             ]}
           >
             {summaryTitle === "Décès" ? "DÉCÈS" : "RÉSUME DE LA RCP"}
@@ -433,38 +514,35 @@ export default function CprEnd() {
 
         {/* Stats Card */}
         <View
-          style={[
-            styles.card,
-            theme === "dark" ? { backgroundColor: "#FFFF" } : {},
-          ]}
+          style={[styles.card, cardStyle]}
         >
           <View style={[styles.cardRow]}>
-            <Text style={styles.summaryCardText}>
+            <Text style={[styles.summaryCardText, textStyle]}>
               <Text style={styles.summaryCardLabel}>DURÉE TOTALE</Text>:{" "}
               {getDurationString()}
             </Text>
           </View>
           <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <Text style={styles.summaryCardText}>
+            <Text style={[styles.summaryCardText, textStyle]}>
               <Text style={styles.summaryCardLabel}>CHOCS DÉLIVRÉS</Text> :{" "}
               {formatEventSummary("shock")}
             </Text>
           </View>
           <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <Text style={styles.summaryCardText}>
+            <Text style={[styles.summaryCardText, textStyle]}>
               <Text style={styles.summaryCardLabel}>ADRÉNALINE</Text> :{" "}
               {formatEventSummary("adrenaline")}
             </Text>
           </View>
           <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <Text style={styles.summaryCardText}>
+            <Text style={[styles.summaryCardText, textStyle]}>
               <Text style={styles.summaryCardLabel}>CORDARONE</Text> :{" "}
               {formatEventSummary("cordarone")}
             </Text>
           </View>
           {summaryTitle === "Décès" && (
             <View style={[styles.cardRow, { marginTop: 8 }]}>
-              <Text style={styles.summaryCardText}>
+              <Text style={[styles.summaryCardText, textStyle]}>
                 <Text style={styles.summaryCardLabel}>HEURE DU DÉCÈS</Text>:{" "}
                 {session?.endTime
                   ? formatTimeWithLetters(session.endTime)
@@ -477,43 +555,37 @@ export default function CprEnd() {
         {/* Pediatrics Card */}
         {session?.pediatricData && (
           <View
-            style={[
-              styles.card,
-              theme === "dark" ? { backgroundColor: "#FFFF" } : {},
-            ]}
+            style={[styles.card, cardStyle]}
           >
             <View style={styles.cardHeaderRow}>
               <FontAwesome5
                 name="child"
                 size={18}
-                color="black"
+                color={isDark ? "#fff" : "black"}
                 style={styles.iconWidth}
               />
-              <Text style={styles.cardTitle}>Données pédiatriques:</Text>
+              <Text style={[styles.cardTitle, cardTitleStyle]}>
+                Données pédiatriques:
+              </Text>
             </View>
-            <View
-              style={[
-                styles.divider,
-                theme === "dark" ? { backgroundColor: "black" } : {},
-              ]}
-            />
+            <View style={[styles.divider, dividerStyle]} />
             {session.pediatricData.inputMode === "weight" ? (
-              <Text style={styles.itemText}>
+              <Text style={[styles.itemText, textStyle]}>
                 Poids: {session.pediatricData.weight} kg
               </Text>
             ) : (
-              <Text style={styles.itemText}>
+              <Text style={[styles.itemText, textStyle]}>
                 Age: {session.pediatricData.ageValue}{" "}
                 {session.pediatricData.ageMode}
               </Text>
             )}
-            <Text style={styles.itemText}>
+            <Text style={[styles.itemText, textStyle]}>
               Adrénaline:{" "}
               {session.pediatricData.adrenalineDose
                 ? `${session.pediatricData.adrenalineDose} mg`
                 : "N/A"}
             </Text>
-            <Text style={styles.itemText}>
+            <Text style={[styles.itemText, textStyle]}>
               Cordarone:{" "}
               {session.pediatricData.cordaroneDose
                 ? `${session.pediatricData.cordaroneDose} mg`
@@ -524,36 +596,27 @@ export default function CprEnd() {
 
         {/* Actions Card */}
         <View
-          style={[
-            styles.card,
-            theme === "dark" ? { backgroundColor: "#FFFF" } : {},
-          ]}
+          style={[styles.card, cardStyle]}
         >
           <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}> Actions réalisées:</Text>
+            <Text style={[styles.cardTitle, textStyle]}>
+              Actions réalisées:
+            </Text>
           </View>
-          <View
-            style={[
-              styles.divider,
-              theme === "dark" ? { backgroundColor: "black" } : {},
-            ]}
-          />
+          <View style={[styles.divider, dividerStyle]} />
           {actions.length === 0 ? (
             <Text
-              style={[
-                styles.emptyText,
-                theme === "dark" ? { color: "#555" } : {},
-              ]}
+              style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}
             >
               Aucune action.
             </Text>
           ) : (
             actions.map(({ event, cycle }, i) => (
               <View key={i} style={styles.itemRow}>
-                <Text style={styles.itemText}>
+                <Text style={[styles.itemText, textStyle]}>
                   • [RCP {cycle}] {formatEventType(event.type)}
                 </Text>
-                <Text style={styles.itemTimestamp}>
+                <Text style={[styles.itemTimestamp, mutedTextStyle]}>
                   Temps écoulé:{" "}
                   {formatElapsedFromStart(session!.startTime, event.timestamp)}{" "}
                   | Heure: {formatTimeWithLetters(event.timestamp)}
@@ -565,36 +628,27 @@ export default function CprEnd() {
 
         {/* Events Card */}
         <View
-          style={[
-            styles.card,
-            theme === "dark" ? { backgroundColor: "#FFFF" } : {},
-          ]}
+          style={[styles.card, cardStyle]}
         >
           <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}> Événements saisis:</Text>
+            <Text style={[styles.cardTitle, textStyle]}>
+              Événements saisis:
+            </Text>
           </View>
-          <View
-            style={[
-              styles.divider,
-              theme === "dark" ? { backgroundColor: "black" } : {},
-            ]}
-          />
+          <View style={[styles.divider, dividerStyle]} />
           {customEvents.length === 0 ? (
             <Text
-              style={[
-                styles.emptyText,
-                theme === "dark" ? { color: "#555" } : {},
-              ]}
+              style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}
             >
               Aucun événement.
             </Text>
           ) : (
             customEvents.map(({ event, cycle }, i: number) => (
               <View key={i} style={styles.itemRow}>
-                <Text style={styles.itemText}>
+                <Text style={[styles.itemText, textStyle]}>
                   • [RCP {cycle}] {formatEventDetails(event.details)}
                 </Text>
-                <Text style={styles.itemTimestamp}>
+                <Text style={[styles.itemTimestamp, mutedTextStyle]}>
                   Temps écoulé:{" "}
                   {formatElapsedFromStart(session!.startTime, event.timestamp)}{" "}
                   | Heure: {formatHumanReadableTime(event.timestamp)}
@@ -608,19 +662,30 @@ export default function CprEnd() {
       {/* Buttons */}
       <View style={styles.actionButtonsContainer}>
         <TouchableOpacity
-          style={[styles.actionButton, styles.outlineSummaryButton]}
+          style={[
+            styles.actionButton,
+            styles.outlineSummaryButton,
+            outlineButtonStyle,
+          ]}
           onPress={handleExportPdf}
         >
           <FontAwesome5 name="file-pdf" size={18} color={neutralButtonColor} />
-          <Text style={[styles.actionButtonText]}> Exporter en PDF</Text>
+          <Text style={[styles.actionButtonText, outlineButtonTextStyle]}>
+            {" "}
+            Exporter en PDF
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.actionButton, styles.outlineSummaryButton]}
+          style={[
+            styles.actionButton,
+            styles.outlineSummaryButton,
+            outlineButtonStyle,
+          ]}
           onPress={handleGoHome}
         >
           <FontAwesome5 name="home" size={18} color={neutralButtonColor} />
-          <Text style={[styles.actionButtonText]}>
+          <Text style={[styles.actionButtonText, outlineButtonTextStyle]}>
             {" "}
             Retour à l&apos;accueil
           </Text>

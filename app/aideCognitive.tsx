@@ -31,7 +31,7 @@ const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
   },
   {
     label: "Reglages respirateur RCP Adulte",
-    route: "/aide-respiratoire",
+    route: "/aideRespiratoire",
   },
 
   {
@@ -83,7 +83,7 @@ export default function AideCognitive() {
       key={`${item.label}-${index}`}
       style={[
         styles.optionItem,
-        { borderBottomColor: isDark ? "#374151" : "#E5E7EB" },
+        { borderBottomColor: isDark ? "#444" : "#E5E7EB" },
       ]}
       onPress={() => {
         if (item.route) {
@@ -102,7 +102,7 @@ export default function AideCognitive() {
       <Ionicons
         name="chevron-forward"
         size={22}
-        color={isDark ? "#93c5fd" : "#0D47A1"}
+        color={isDark ? "#fff" : "#0D47A1"}
       />
     </TouchableOpacity>
   );
@@ -111,14 +111,14 @@ export default function AideCognitive() {
     <SafeAreaView
       style={[
         styles.container,
-        { backgroundColor: isDark ? "#111827" : "#F5F5F5" },
+        { backgroundColor: isDark ? "#353636" : "#F5F5F5" },
       ]}
     >
       <Stack.Screen
         options={{
           title: "Aides cognitives",
           headerStyle: {
-            backgroundColor: isDark ? "#111827" : "#F5F5F5",
+            backgroundColor: isDark ? "#353636" : "#F5F5F5",
           },
           headerTintColor: isDark ? "#e5e7eb" : "#0f172a",
           headerLeft: () => (
@@ -140,7 +140,7 @@ export default function AideCognitive() {
         <View
           style={[
             styles.optionsList,
-            { backgroundColor: isDark ? "#1f2937" : "#fff" },
+            { backgroundColor: isDark ? "#222121" : "#fff" },
           ]}
         >
           {COGNITIVE_DOCUMENTS.map(renderDocumentItem)}
@@ -157,14 +157,14 @@ export default function AideCognitive() {
           edges={["left", "right", "bottom"]}
           style={[
             styles.viewerContainer,
-            { backgroundColor: isDark ? "#0b1220" : "#F5F5F5" },
+            { backgroundColor: isDark ? "#353636" : "#F5F5F5" },
           ]}
         >
           <View
             style={[
               styles.viewerHeader,
               {
-                backgroundColor: isDark ? "#111827" : "#000",
+                backgroundColor: isDark ? "#222121" : "#000",
                 paddingTop: insets.top + 14,
               },
             ]}

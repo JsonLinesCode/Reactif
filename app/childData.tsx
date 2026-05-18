@@ -45,6 +45,11 @@ export default function ChildData() {
     backgroundColor: isDark ? "#353636" : "#f9f9f9",
     borderTopColor: isDark ? "#333" : "#ccc",
   };
+  const aideButtonStyle = {
+    backgroundColor: isDark ? "transparent" : "#fff",
+    borderColor: isDark ? "#fff" : "#007BFF",
+  };
+  const aideButtonTextStyle = { color: isDark ? "#fff" : "#007BFF" };
 
   const [inputMode, setInputMode] = useState<"age" | "weight" | null>(null);
 
@@ -291,8 +296,6 @@ export default function ChildData() {
             style={[
               {
                 paddingVertical: 18,
-                backgroundColor: "#fff",
-                borderColor: "#007BFF",
                 borderWidth: 2,
                 borderRadius: 12,
                 marginBottom: 12,
@@ -307,18 +310,21 @@ export default function ChildData() {
                 height: 62,
                 justifyContent: "center",
               },
+              aideButtonStyle,
             ]}
-            onPress={() => router.push("/aide-cognitive")}
+            onPress={() => router.push("/aideCognitive")}
           >
             <Text
-              style={{
-                color: "#007BFF",
-                fontSize: 18,
-                fontWeight: "bold",
-                textTransform: "uppercase",
-                lineHeight: 22,
-                includeFontPadding: false,
-              }}
+              style={[
+                {
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  lineHeight: 22,
+                  includeFontPadding: false,
+                },
+                aideButtonTextStyle,
+              ]}
             >
               Ouvrir les aides cognitives
             </Text>

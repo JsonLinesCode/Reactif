@@ -172,6 +172,28 @@ export default function SettingsScreen() {
 
       <View style={styles.body}>
         <ScrollView contentContainerStyle={styles.content}>
+          <Text
+            style={[styles.sectionTitle, sectionTitleColor, { marginTop: 20 }]}
+          >
+            Thème de l&#39;application
+          </Text>
+          <View style={{ alignItems: "center", marginBottom: 20 }}>
+            <CustomSwitch
+              selectionMode={theme === "light" ? 1 : 2}
+              roundCorner={true}
+              option1={"Clair"}
+              option2={"Sombre"}
+              onSelectSwitch={onSelectSwitch}
+              selectionColor={"#007BFF"}
+              isDark={isDark}
+            />
+          </View>
+          <View
+            style={[
+              styles.divider,
+              { backgroundColor: isDark ? "#3a3b3c" : "#e5e7eb" },
+            ]}
+          />
           <Text style={[styles.sectionTitle, sectionTitleColor]}>
             Durées par défaut (minutes)
           </Text>
@@ -238,6 +260,13 @@ export default function SettingsScreen() {
             </View>
           </View>
 
+          <View
+            style={[
+              styles.divider,
+              { backgroundColor: isDark ? "#3a3b3c" : "#e5e7eb" },
+            ]}
+          />
+
           <Text style={[styles.sectionTitle, sectionTitleColor]}>Sons</Text>
           <TouchableOpacity
             style={[
@@ -247,7 +276,7 @@ export default function SettingsScreen() {
                 backgroundColor: isDark ? "#222121" : "#f9fafb",
               },
             ]}
-            onPress={() => router.push("/sound-settings" as any)}
+            onPress={() => router.push("/soundSettings" as any)}
           >
             <View style={styles.navigationRowContent}>
               <Ionicons
@@ -270,25 +299,15 @@ export default function SettingsScreen() {
               color={isDark ? "#e2e8f0" : "#334155"}
             />
           </TouchableOpacity>
-
-          <Text
-            style={[styles.sectionTitle, sectionTitleColor, { marginTop: 20 }]}
-          >
-            Thème de l&#39;application
-          </Text>
-          <View style={{ alignItems: "center", marginBottom: 20 }}>
-            <CustomSwitch
-              selectionMode={theme === "light" ? 1 : 2}
-              roundCorner={true}
-              option1={"Clair"}
-              option2={"Sombre"}
-              onSelectSwitch={onSelectSwitch}
-              selectionColor={"#007BFF"}
-            />
-          </View>
+          <View
+            style={[
+              styles.divider,
+              { backgroundColor: isDark ? "#3a3b3c" : "#e5e7eb" },
+            ]}
+          />
 
           <Text style={[styles.sectionTitle, sectionTitleColor]}>
-            Sécurité - Fin de la RCP
+            Comportement - Fin de la RCP
           </Text>
           <TouchableOpacity
             style={[
@@ -318,23 +337,28 @@ export default function SettingsScreen() {
               </Text>
             </View>
           </TouchableOpacity>
-
-          <Text style={[styles.sectionTitle, sectionTitleColor]}>Preview</Text>
-          <TouchableOpacity
+          {/*
+          <Text style={[styles.sectionTitle, sectionTitleColor]}>
+            Fonctionnalités expérimentales
+          </Text>
+         <TouchableOpacity
             style={[
               styles.toggleRow,
               { borderColor: isDark ? "#444" : "#d1d5db" },
             ]}
             onPress={() => setPreviewMaxVolume(!previewMaxVolume)}
           >
-            <View style={styles.toggleTextBlock}>
+               <View style={styles.toggleTextBlock}>
               <Text style={[styles.toggleTitle, textStyle]}>
                 Maximiser le volume sur Android
               </Text>
               <Text style={[styles.toggleSubtitle, labelColor]}>
-                {"Le volume sera monté au maximum à l'ouverture de l'application."}
+                {
+                  "Le volume sera monté au maximum à l'ouverture de l'application."
+                }
               </Text>
-            </View>
+            </View> 
+
             <View
               style={[
                 styles.pill,
@@ -347,7 +371,14 @@ export default function SettingsScreen() {
                 {previewMaxVolume ? "ACTIF" : "INACTIF"}
               </Text>
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity>*/}
+
+          <View
+            style={[
+              styles.divider,
+              { backgroundColor: isDark ? "#3a3b3c" : "#e5e7eb" },
+            ]}
+          />
 
           <TouchableOpacity
             style={styles.resetButton}
@@ -400,7 +431,6 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
       </View>
-
     </SafeAreaView>
   );
 }
@@ -496,6 +526,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     minWidth: 32,
     textAlign: "center",
+  },
+  divider: {
+    height: 2,
+    marginVertical: 20,
   },
   resetButton: {
     marginTop: 28,

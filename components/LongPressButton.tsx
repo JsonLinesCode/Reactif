@@ -188,7 +188,7 @@ export default function LongPressButton({
         <Text
           style={[
             styles.label,
-            theme === "dark" ? { color: "#ccc" } : { color: "black" },
+            theme === "dark" ? { color: "#fff" } : { color: "black" },
           ]}
           numberOfLines={1}
         >

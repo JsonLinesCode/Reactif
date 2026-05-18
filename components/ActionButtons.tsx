@@ -28,16 +28,26 @@ export default function ActionButtons({
   };
 
   const theme = sessionStore.theme;
+  const actionLabelColor = theme === "dark" ? "#fff" : "#000";
 
   return (
     <View style={styles.container}>
       <View style={styles.actionItem}>
         {useShortTapEndButton ? (
           <TouchableOpacity
-            style={[styles.circleButton, { backgroundColor: "#FF5252" }]}
+            style={[
+              styles.circleButton,
+              {
+                width: BUTTON_SIZE,
+                height: BUTTON_SIZE,
+                borderRadius: BUTTON_SIZE / 2,
+                backgroundColor: "transparent",
+                borderColor: "#FF5252",
+              },
+            ]}
             onPress={handleEndPress}
           >
-            <Ionicons name="close" size={40} color="bla" />
+            <Ionicons name="close-outline" size={65} color="#FF5252" />
           </TouchableOpacity>
         ) : (
           <LongPressButton
@@ -50,7 +60,7 @@ export default function ActionButtons({
         )}
         {useShortTapEndButton && (
           <Text
-            style={styles.actionLabel}
+            style={[styles.actionLabel, { color: actionLabelColor }]}
             numberOfLines={1}
             adjustsFontSizeToFit
             minimumFontScale={0.72}
@@ -75,10 +85,7 @@ export default function ActionButtons({
           <Ionicons name="add" size={40} color="#448AFF" />
         </TouchableOpacity>
         <Text
-          style={[
-            styles.actionLabel,
-            theme === "dark" ? { color: "#ccc" } : { color: "#000" },
-          ]}
+          style={[styles.actionLabel, { color: actionLabelColor }]}
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={0.72}
@@ -104,10 +111,7 @@ export default function ActionButtons({
           <Ionicons name="book-outline" size={34} color="#448AFF" />
         </TouchableOpacity>
         <Text
-          style={[
-            styles.actionLabel,
-            theme === "dark" ? { color: "#ccc" } : { color: "#000" },
-          ]}
+          style={[styles.actionLabel, { color: actionLabelColor }]}
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={0.72}

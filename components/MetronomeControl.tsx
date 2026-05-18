@@ -41,7 +41,7 @@ export default function MetronomeControl({
     <View
       style={[
         styles.container,
-        isDark ? { backgroundColor: "#1f2937", borderColor: "#94a3b8" } : {},
+        isDark ? { backgroundColor: "#1f2937", borderColor: "#fff" } : {},
       ]}
     >
       {/* BPM Control */}
@@ -68,7 +68,7 @@ export default function MetronomeControl({
           >
             {bpm}
           </Text>
-          <Text style={[styles.bpmLabel, isDark ? { color: "#94a3b8" } : {}]}>
+          <Text style={[styles.bpmLabel, isDark ? { color: "#fff" } : {}]}>
             BPM
           </Text>
         </View>
