@@ -40,6 +40,14 @@ export default function EventSelectionModal({
   const [theme, setTheme] = useState(sessionStore.theme);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const isDark = theme === "dark";
+  const pageStyle = { backgroundColor: isDark ? "#353636" : "#F5F5F5" };
+  const panelStyle = { backgroundColor: isDark ? "#222121" : "#fff" };
+  const textStyle = { color: isDark ? "#fff" : "#333" };
+  const checkboxStyle = { borderColor: isDark ? "#fff" : "#0D47A1" };
+  const validateButtonStyle = {
+    backgroundColor: isDark ? "transparent" : "#28a745",
+    borderColor: isDark ? "#fff" : "#28a745",
+  };
 
   React.useEffect(() => {
     const unsubscribe = sessionStore.subscribe(() => {
@@ -78,14 +86,14 @@ export default function EventSelectionModal({
       <SafeAreaView
         style={[
           styles.container,
-          { backgroundColor: isDark ? "#111827" : "#F5F5F5" },
+          pageStyle,
         ]}
       >
         {/* Header */}
         <View
           style={[
             styles.header,
-            { backgroundColor: isDark ? "#0f172a" : "#000" },
+            { backgroundColor: isDark ? "#222121" : "#000" },
           ]}
         >
           <TouchableOpacity onPress={handleClose} style={styles.backButton}>
@@ -96,20 +104,15 @@ export default function EventSelectionModal({
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.titleContainer}>
-            <Text
-              style={[
-                styles.pageTitle,
-                { color: isDark ? "#93c5fd" : "#0D47A1" },
-              ]}
-            >
-              📝 Saisie Événements
+            <Text style={[styles.pageTitle, textStyle]}>
+              Saisie Événements
             </Text>
           </View>
 
           <View
             style={[
               styles.optionsList,
-              { backgroundColor: isDark ? "#1f2937" : "#fff" },
+              panelStyle,
             ]}
           >
             {EVENT_OPTIONS.map((item) => {
@@ -119,26 +122,30 @@ export default function EventSelectionModal({
                   key={item}
                   style={[
                     styles.optionItem,
-                    { borderBottomColor: isDark ? "#374151" : "#eee" },
+                    { borderBottomColor: isDark ? "#444" : "#eee" },
                   ]}
                   onPress={() => toggleEvent(item)}
                 >
                   <View
                     style={[
                       styles.checkbox,
+                      checkboxStyle,
                       isSelected && styles.checkboxSelected,
+                      isSelected &&
+                        (isDark
+                          ? styles.checkboxSelectedDark
+                          : styles.checkboxSelectedLight),
                     ]}
                   >
                     {isSelected && (
-                      <Ionicons name="checkmark" size={16} color="#fff" />
+                      <Ionicons
+                        name="checkmark"
+                        size={16}
+                        color={isDark ? "#353636" : "#fff"}
+                      />
                     )}
                   </View>
-                  <Text
-                    style={[
-                      styles.optionText,
-                      { color: isDark ? "#e5e7eb" : "#333" },
-                    ]}
-                  >
+                  <Text style={[styles.optionText, textStyle]}>
                     {item}
                   </Text>
                 </TouchableOpacity>
@@ -152,19 +159,24 @@ export default function EventSelectionModal({
           style={[
             styles.footer,
             {
-              backgroundColor: isDark ? "#111827" : "#F5F5F5",
-              borderTopColor: isDark ? "#374151" : "#ddd",
+              backgroundColor: isDark ? "#353636" : "#F5F5F5",
+              borderTopColor: isDark ? "#444" : "#ddd",
             },
           ]}
         >
-          <TouchableOpacity style={styles.validateButton} onPress={handleSave}>
+          <TouchableOpacity
+            style={[styles.validateButton, validateButtonStyle]}
+            onPress={handleSave}
+          >
             <Ionicons
               name="checkbox-outline"
               size={24}
               color="#fff"
               style={{ marginRight: 8 }}
             />
-            <Text style={[styles.validateButtonText, { textAlign: "center" }]}>Valider et Retour</Text>
+            <Text style={[styles.validateButtonText, { textAlign: "center" }]}>
+              Valider et Retour
+            </Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -231,6 +243,14 @@ const styles = StyleSheet.create({
   checkboxSelected: {
     backgroundColor: "#0D47A1",
   },
+  checkboxSelectedLight: {
+    backgroundColor: "#0D47A1",
+    borderColor: "#0D47A1",
+  },
+  checkboxSelectedDark: {
+    backgroundColor: "#fff",
+    borderColor: "#fff",
+  },
   optionText: {
     fontSize: 16,
     color: "#333",
@@ -243,6 +263,8 @@ const styles = StyleSheet.create({
   },
   validateButton: {
     backgroundColor: "#28a745",
+    borderColor: "#28a745",
+    borderWidth: 2,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
