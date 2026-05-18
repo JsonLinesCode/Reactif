@@ -197,7 +197,7 @@ export default function ShockTimer({
 
     if (timeLeft === 0) {
       if (!soundPlayedRef.current) {
-        sessionController.playReminderPattern("end");
+        sessionController.playReminderPattern("end", "shock");
         soundPlayedRef.current = true;
       }
       startBlinking();
@@ -207,7 +207,7 @@ export default function ShockTimer({
         timeLeft === warningSeconds &&
         !firstReminderPlayedRef.current
       ) {
-        sessionController.playReminderPattern("first");
+        sessionController.playReminderPattern("first", "shock");
         firstReminderPlayedRef.current = true;
       }
 
@@ -217,7 +217,7 @@ export default function ShockTimer({
         timeLeft < warningSeconds &&
         !midReminderPlayedRef.current
       ) {
-        sessionController.playReminderPattern("mid");
+        sessionController.playReminderPattern("mid", "shock");
         midReminderPlayedRef.current = true;
       }
 

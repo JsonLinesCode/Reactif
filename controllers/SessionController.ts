@@ -3,6 +3,7 @@ import { sessionStore } from "@/store/sessionStore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 import { SoundController, SoundName, soundController } from "./SoundController";
+import { TimerSoundKind } from "@/utils/soundChoices";
 
 const STORAGE_KEY_PREVIEW_MAX_VOLUME = "@cpr_settings_preview_max_volume";
 
@@ -64,9 +65,12 @@ export class SessionController {
     }
   }
 
-  async playReminderPattern(kind: "first" | "mid" | "end") {
+  async playReminderPattern(
+    kind: "first" | "mid" | "end",
+    timerKind?: TimerSoundKind,
+  ) {
     try {
-      await this.audioController.playReminderPattern(kind);
+      await this.audioController.playReminderPattern(kind, timerKind);
     } catch (e) {
       // ignore
     }

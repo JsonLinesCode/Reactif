@@ -132,7 +132,7 @@ export default function ActionProgressBar({
 
     if (isExpired) {
       if (!soundPlayedRef.current) {
-        sessionController.playReminderPattern("end");
+        sessionController.playReminderPattern("end", resetKey);
         triggerHaptic();
         soundPlayedRef.current = true;
       }
@@ -143,7 +143,7 @@ export default function ActionProgressBar({
         timeLeft === warningSeconds &&
         !firstReminderPlayedRef.current
       ) {
-        sessionController.playReminderPattern("first");
+        sessionController.playReminderPattern("first", resetKey);
         firstReminderPlayedRef.current = true;
       }
 
@@ -153,7 +153,7 @@ export default function ActionProgressBar({
         timeLeft < warningSeconds &&
         !midReminderPlayedRef.current
       ) {
-        sessionController.playReminderPattern("mid");
+        sessionController.playReminderPattern("mid", resetKey);
         midReminderPlayedRef.current = true;
       }
 

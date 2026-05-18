@@ -1,6 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 
+import { soundController } from "@/controllers/SoundController";
+
 const STORAGE_KEY_SHOCK = "@cpr_settings_shock_duration";
 const STORAGE_KEY_CORDARONE = "@cpr_settings_cordarone_duration";
 const STORAGE_KEY_ADRENALINE = "@cpr_settings_adrenaline_duration";
@@ -138,6 +140,7 @@ export function useCprSettings(): CprSettings {
       setWarningSeconds(DEFAULT_WARNING_SECONDS);
       setEndButtonShortTapState(false);
       setPreviewMaxVolumeState(false);
+      await soundController.resetSoundChoices();
     } catch (e) {
       console.error("Failed to reset settings", e);
     }

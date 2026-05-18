@@ -3,7 +3,13 @@ import Feather from "@expo/vector-icons/Feather";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -38,6 +44,22 @@ export default function Index() {
     sessionStore.startNewSession();
     router.push("/aide-cognitive");
   };
+
+  const partners = [
+    {
+      url: "https://www.chsf.fr/portail/offre-de-soins-18-25.html?args=Y29tcF9pZD00NyZhY3Rpb249ZmljaGVfc2VydmljZSZpZD0xMDMmY29tcG9uZW50PSZtb2R1bGU9Jnw%3D&offre_soin_service_id=103",
+      icon: require("@/assets/documents/home/partners/smur-corbeil-essonnes.png"),
+    },
+  ];
+
+  const handleOpenPartner = async (url: string) => {
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      }
+    } catch {}
+  };
   return (
     <View
       id="coucou"
@@ -65,6 +87,17 @@ export default function Index() {
       >
         <View style={{ width: "100%", alignItems: "center" }}>
           <View style={{ height: 20 }} />
+          <View style={styles.partnersRow}>
+            {partners.map((partner, index) => (
+              <TouchableOpacity
+                key={`${partner.url}-${index}`}
+                style={styles.partnerLink}
+                onPress={() => handleOpenPartner(partner.url)}
+              >
+                <Image source={partner.icon} style={styles.partnerLogo} />
+              </TouchableOpacity>
+            ))}
+          </View>
           <TouchableOpacity
             style={[styles.menuButton, outlineButtonStyle]}
             onPress={startAdultCpr}
@@ -92,7 +125,7 @@ export default function Index() {
             onPress={startAideCognitive}
           >
             <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
-              AIDE COGNITIVE
+              AIDES COGNITIVES
             </Text>
           </TouchableOpacity>
           <View style={styles.bottomActionRow}>
@@ -126,7 +159,7 @@ export default function Index() {
                 />
               </View>
             </TouchableOpacity>
-            <View style={{flexDirection: "column", gap: 40}}></View>
+            <View style={{ flexDirection: "column", gap: 40 }}></View>
           </View>
         </View>
       </View>
@@ -233,6 +266,26 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     textTransform: "uppercase",
+  },
+  partnersRow: {
+    width: "100%",
+    maxWidth: 400,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginBottom: 24,
+    gap: 12,
+  },
+  partnerLink: {
+    width: 84,
+    height: 84,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  partnerLogo: {
+    width: 76,
+    height: 76,
+    resizeMode: "contain",
   },
   buttonHistoryText: {
     color: "#007BFF",

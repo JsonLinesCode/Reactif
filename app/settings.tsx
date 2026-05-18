@@ -57,7 +57,13 @@ export default function SettingsScreen() {
       setAdrenalineInput(adrenalineMinutes.toString());
       setWarningInput(warningSeconds.toString());
     }
-  }, [loading]);
+  }, [
+    adrenalineDuration,
+    cordaroneDuration,
+    loading,
+    shockDuration,
+    warningSeconds,
+  ]);
 
   const handleAdrenalinePickerChange = (nextMinutes: number) => {
     const clamped = Math.min(5, Math.max(3, Math.round(nextMinutes)));
@@ -130,6 +136,10 @@ export default function SettingsScreen() {
   const onSelectSwitch = async (val: number) => {
     const newTheme = val === 1 ? "light" : "dark";
     await sessionStore.setTheme(newTheme);
+  };
+
+  const handleResetSettings = async () => {
+    await resetSettings();
   };
 
   const isDark = theme === "dark";
@@ -215,7 +225,7 @@ export default function SettingsScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, labelColor]}>
-              Alerte sonore avant l'échéance des timers
+              {"Alerte sonore avant l'échéance des timers"}
             </Text>
             <View style={[styles.inputWrapper, inputBgStyle]}>
               <TextInput
@@ -227,6 +237,39 @@ export default function SettingsScreen() {
               <Text style={styles.unit}>sec</Text>
             </View>
           </View>
+
+          <Text style={[styles.sectionTitle, sectionTitleColor]}>Sons</Text>
+          <TouchableOpacity
+            style={[
+              styles.navigationRow,
+              {
+                borderColor: isDark ? "#444" : "#d1d5db",
+                backgroundColor: isDark ? "#222121" : "#f9fafb",
+              },
+            ]}
+            onPress={() => router.push("/sound-settings" as any)}
+          >
+            <View style={styles.navigationRowContent}>
+              <Ionicons
+                name="musical-notes-outline"
+                size={22}
+                color={isDark ? "#e2e8f0" : "#334155"}
+              />
+              <View style={styles.toggleTextBlock}>
+                <Text style={[styles.toggleTitle, textStyle]}>
+                  Configurer les sons
+                </Text>
+                <Text style={[styles.toggleSubtitle, labelColor]}>
+                  Métronome et alertes par type de timer
+                </Text>
+              </View>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color={isDark ? "#e2e8f0" : "#334155"}
+            />
+          </TouchableOpacity>
 
           <Text
             style={[styles.sectionTitle, sectionTitleColor, { marginTop: 20 }]}
@@ -289,7 +332,7 @@ export default function SettingsScreen() {
                 Maximiser le volume sur Android
               </Text>
               <Text style={[styles.toggleSubtitle, labelColor]}>
-                Le volume sera monté au maximum à l'ouverture de l'application.
+                {"Le volume sera monté au maximum à l'ouverture de l'application."}
               </Text>
             </View>
             <View
@@ -306,7 +349,10 @@ export default function SettingsScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.resetButton} onPress={resetSettings}>
+          <TouchableOpacity
+            style={styles.resetButton}
+            onPress={() => void handleResetSettings()}
+          >
             <Text style={styles.resetButtonText}>Réinitialiser par défaut</Text>
           </TouchableOpacity>
 
@@ -347,13 +393,14 @@ export default function SettingsScreen() {
             },
           ]}
         >
-          <TouchableOpacity style={styles.saveButton} onPress={router.back}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>
               Sauvegarder les paramètres
             </Text>
           </TouchableOpacity>
         </View>
       </View>
+
     </SafeAreaView>
   );
 }
@@ -519,6 +566,23 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    gap: 12,
+  },
+  navigationRow: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  navigationRowContent: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   toggleTextBlock: {

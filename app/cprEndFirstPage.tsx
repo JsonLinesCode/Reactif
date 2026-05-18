@@ -84,7 +84,7 @@ export default function CprEndFirstPage() {
           >
             <View>
               <Text style={[styles.buttonText, { color: neutralButtonColor, fontSize: 17 }]}>
-                Reprise d&#39;activité respiratoire spontannée
+                Reprise d&#39;activité respiratoire spontanée
               </Text>
               <Text style={[styles.buttonText, { color: neutralButtonColor, fontSize: 20 }]}>
                   (RACS)
