@@ -240,7 +240,7 @@ export default function Cpr() {
   };
 
   const handleOpenAideCognitive = () => {
-    router.push("/aide-cognitive" as any);
+    router.push("/aideCognitive" as any);
   };
 
   const handleCancel = () => {
