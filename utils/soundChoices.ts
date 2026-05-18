@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type SoundAssetName =
-  | "metronomeTickWav"
   | "metronomeTickMp3"
   | "beep"
   | "beepShock"
@@ -22,8 +21,7 @@ export const SOUND_ASSET_OPTIONS: {
   name: SoundAssetName;
   label: string;
 }[] = [
-  { name: "metronomeTickWav", label: "Métronome tick (WAV)" },
-  { name: "metronomeTickMp3", label: "Métronome tick (MP3)" },
+  { name: "metronomeTickMp3", label: "Métronome tick" },
   { name: "beep", label: "Beep standard" },
   { name: "beepShock", label: "Beep fin de timer" },
   { name: "beep2", label: "Beep 2" },
@@ -61,7 +59,7 @@ export function makeTimerSoundSlot(
 
 function buildDefaultSoundChoices() {
   const defaults = {
-    tick: "metronomeTickWav",
+    tick: "metronomeTickMp3",
   } as Record<SoundSlot, SoundAssetName>;
 
   for (const { kind: timerKind } of TIMER_SOUND_OPTIONS) {
@@ -91,6 +89,9 @@ export const SOUND_SLOT_OPTIONS: {
 const STORAGE_KEY_SOUND_CHOICES = "@cpr_settings_sound_choices";
 const SOUND_ASSET_NAMES = new Set(SOUND_ASSET_OPTIONS.map((item) => item.name));
 const SOUND_SLOTS = SOUND_SLOT_OPTIONS.map((item) => item.slot);
+const LEGACY_SOUND_ASSET_NAMES: Partial<Record<string, SoundAssetName>> = {
+  metronomeTickWav: "metronomeTickMp3",
+};
 
 export function getSoundAssetLabel(name: SoundAssetName) {
   return SOUND_ASSET_OPTIONS.find((item) => item.name === name)?.label ?? name;
@@ -107,6 +108,17 @@ function getLegacySlotCandidate(
   return undefined;
 }
 
+function normalizeSoundAssetName(candidate: unknown) {
+  if (typeof candidate !== "string") return null;
+  if (candidate in LEGACY_SOUND_ASSET_NAMES) {
+    return LEGACY_SOUND_ASSET_NAMES[candidate] ?? null;
+  }
+  if (SOUND_ASSET_NAMES.has(candidate as SoundAssetName)) {
+    return candidate as SoundAssetName;
+  }
+  return null;
+}
+
 function normalizeSoundChoices(value: unknown) {
   const source =
     value && typeof value === "object"
@@ -116,11 +128,9 @@ function normalizeSoundChoices(value: unknown) {
 
   for (const slot of SOUND_SLOTS) {
     const candidate = source[slot] ?? getLegacySlotCandidate(source, slot);
-    if (
-      typeof candidate === "string" &&
-      SOUND_ASSET_NAMES.has(candidate as SoundAssetName)
-    ) {
-      normalized[slot] = candidate as SoundAssetName;
+    const assetName = normalizeSoundAssetName(candidate);
+    if (assetName) {
+      normalized[slot] = assetName;
     }
   }
 

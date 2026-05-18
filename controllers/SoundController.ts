@@ -16,7 +16,6 @@ import {
 export type SoundName = SoundSlot;
 
 const SOUND_FILES: Record<SoundAssetName, any> = {
-  metronomeTickWav: require("@/assets/audio/metronome_tick.wav"),
   metronomeTickMp3: require("@/assets/audio/metronome_tick.mp3"),
   beep: require("@/assets/audio/beep.wav"),
   beepShock: require("@/assets/audio/beep_shock.wav"),
