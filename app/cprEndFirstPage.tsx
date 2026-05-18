@@ -63,7 +63,7 @@ export default function CprEndFirstPage() {
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.contentContainer}>
         <Text style={[styles.title, isDark ? { color: "#ccc" } : {}]}>
-          Fin de RCP
+          FIN DE RCP
         </Text>
 
         <View style={styles.buttonGroup}>

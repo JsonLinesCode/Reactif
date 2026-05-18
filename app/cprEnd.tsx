@@ -168,7 +168,7 @@ export default function CprEnd() {
   };
 
   const handleOpenAideCognitive = () => {
-    router.push("/aide-cognitive");
+    router.push("/aideCognitive");
   };
 
   const handleEcgPress = () => {
@@ -599,7 +599,7 @@ export default function CprEnd() {
           style={[styles.card, cardStyle]}
         >
           <View style={styles.cardHeaderRow}>
-            <Text style={[styles.cardTitle, cardTitleStyle]}>
+            <Text style={[styles.cardTitle, textStyle]}>
               Actions réalisées:
             </Text>
           </View>
@@ -631,7 +631,7 @@ export default function CprEnd() {
           style={[styles.card, cardStyle]}
         >
           <View style={styles.cardHeaderRow}>
-            <Text style={[styles.cardTitle, cardTitleStyle]}>
+            <Text style={[styles.cardTitle, textStyle]}>
               Événements saisis:
             </Text>
           </View>

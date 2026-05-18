@@ -31,7 +31,7 @@ const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
   },
   {
     label: "Reglages respirateur RCP Adulte",
-    route: "/aide-respiratoire",
+    route: "/aideRespiratoire",
   },
 
   {

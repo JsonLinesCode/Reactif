@@ -254,7 +254,7 @@ export default function SettingsScreen() {
                 backgroundColor: isDark ? "#222121" : "#f9fafb",
               },
             ]}
-            onPress={() => router.push("/sound-settings" as any)}
+            onPress={() => router.push("/soundSettings" as any)}
           >
             <View style={styles.navigationRowContent}>
               <Ionicons
@@ -298,6 +298,7 @@ export default function SettingsScreen() {
               option2={"Sombre"}
               onSelectSwitch={onSelectSwitch}
               selectionColor={"#007BFF"}
+              isDark={isDark}
             />
           </View>
 

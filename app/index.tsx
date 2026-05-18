@@ -42,7 +42,7 @@ export default function Index() {
   };
   const startAideCognitive = () => {
     sessionStore.startNewSession();
-    router.push("/aide-cognitive");
+    router.push("/aideCognitive");
   };
 
   const partners = [

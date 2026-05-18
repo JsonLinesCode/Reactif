@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { Platform, Text, TextInput } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { PaperProvider } from 'react-native-paper';
+import { PaperProvider } from "react-native-paper";
 
 const APP_FONT_FAMILY = Platform.select({
   ios: "System",
@@ -73,7 +73,7 @@ export default function RootLayout() {
           <Stack.Screen name="childData" options={{ headerShown: false }} />
           <Stack.Screen name="cprPediatric" options={{ headerShown: false }} />
           <Stack.Screen name="settings" options={{ headerShown: false }} />
-          <Stack.Screen name="sound-settings" options={{ headerShown: false }} />
+          <Stack.Screen name="soundSettings" options={{ headerShown: false }} />
           <Stack.Screen name="history" options={{ headerShown: false }} />
           <Stack.Screen
             name="displayChildData"
