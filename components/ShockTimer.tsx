@@ -486,11 +486,6 @@ const styles = StyleSheet.create({
   buttonCircle: {
     justifyContent: "center",
     alignItems: "center",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
     borderWidth: 12,
     borderColor: "#FF5252", // Outline color for button
   },

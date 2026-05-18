@@ -28,6 +28,26 @@ export default function History() {
 
   const [theme, setTheme] = useState(sessionStore.theme);
   const isDark = theme === "dark";
+  const pageStyle = { backgroundColor: isDark ? "#353636" : "#f5f5f5" };
+  const cardStyle = {
+    backgroundColor: isDark ? "#222121" : "#fff",
+    borderColor: isDark ? "#555" : "transparent",
+    borderWidth: isDark ? 1 : 0,
+  };
+  const selectedCardStyle = {
+    backgroundColor: isDark ? "#2b2c2d" : "#cce5ff",
+    borderColor: isDark ? "#fff" : "#007BFF",
+    borderWidth: 1,
+  };
+  const primaryTextStyle = { color: isDark ? "#fff" : "#333" };
+  const secondaryTextStyle = { color: isDark ? "#ddd" : "#444" };
+  const outlineColor = isDark ? "#fff" : "#007BFF";
+  const outlineButtonStyle = {
+    backgroundColor: "transparent",
+    borderColor: outlineColor,
+  };
+  const outlineButtonTextStyle = { color: outlineColor };
+
   useEffect(() => {
     // Load history
     const history = sessionStore.getHistory();
@@ -125,35 +145,21 @@ export default function History() {
         <View
           style={[
             styles.card,
-            { backgroundColor: isDark ? "#1f2937" : "#fff" },
-            isSelected && {
-              backgroundColor: isDark ? "#1e3a8a" : "#cce5ff",
-              borderColor: isDark ? "#93c5fd" : "#007BFF",
-              borderWidth: 1,
-            },
+            cardStyle,
+            isSelected && selectedCardStyle,
           ]}
         >
           <View
             style={[
               styles.cardHeader,
-              { borderBottomColor: isDark ? "#374151" : "#eee" },
+              { borderBottomColor: isDark ? "#444" : "#eee" },
             ]}
           >
             <View>
-              <Text
-                style={[
-                  styles.cardTitle,
-                  { color: isDark ? "#f9fafb" : "#333" },
-                ]}
-              >
+              <Text style={[styles.cardTitle, primaryTextStyle]}>
                 Session #{sessionNumber}
               </Text>
-              <Text
-                style={[
-                  styles.infoText,
-                  { color: isDark ? "#d1d5db" : "#444" },
-                ]}
-              >
+              <Text style={[styles.infoText, secondaryTextStyle]}>
                 Temps écoulé: {formatDuration(item.startTime, item.endTime)}
               </Text>
             </View>
@@ -165,7 +171,7 @@ export default function History() {
                 <Ionicons
                   name="share-outline"
                   size={24}
-                  color={isDark ? "#93c5fd" : "#007BFF"}
+                  color={outlineColor}
                 />
               </TouchableOpacity>
             )}
@@ -173,37 +179,23 @@ export default function History() {
               <Ionicons
                 name={isSelected ? "checkbox" : "square-outline"}
                 size={24}
-                color={
-                  isSelected ? (isDark ? "#bfdbfe" : "#007BFF") : "#9ca3af"
-                }
+                color={isSelected ? outlineColor : isDark ? "#aaa" : "#9ca3af"}
               />
             )}
           </View>
 
           <View style={styles.cardContent}>
             {item.pediatricData ? (
-              <Text
-                style={[
-                  styles.infoText,
-                  { color: isDark ? "#d1d5db" : "#444" },
-                ]}
-              >
+              <Text style={[styles.infoText, secondaryTextStyle]}>
                 Patient: Enfant ({item.pediatricData.ageValue}{" "}
                 {item.pediatricData.ageMode})
               </Text>
             ) : (
-              <Text
-                style={[
-                  styles.infoText,
-                  { color: isDark ? "#d1d5db" : "#444" },
-                ]}
-              >
+              <Text style={[styles.infoText, secondaryTextStyle]}>
                 Patient: Standard
               </Text>
             )}
-            <Text
-              style={[styles.infoText, { color: isDark ? "#d1d5db" : "#444" }]}
-            >
+            <Text style={[styles.infoText, secondaryTextStyle]}>
               Événements: {item.events.length}
             </Text>
           </View>
@@ -211,9 +203,8 @@ export default function History() {
       </TouchableOpacity>
     );
   };
-  const bgStyle = { backgroundColor: isDark ? "#111827" : "#f5f5f5" };
   return (
-    <SafeAreaView style={[styles.container, bgStyle]}>
+    <SafeAreaView style={[styles.container, pageStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={{ justifyContent: "flex-start" }}>
         <TouchableOpacity
@@ -221,8 +212,8 @@ export default function History() {
             styles.backButton,
             isDark
               ? {
-                  backgroundColor: "#374151",
-                  borderColor: "#9ca3af",
+                  backgroundColor: "#353636",
+                  borderColor: "#fff",
                   borderWidth: 1,
                   borderRadius: 999,
                 }
@@ -237,18 +228,20 @@ export default function History() {
           />
         </TouchableOpacity>
 
-        <View style={[styles.topBar, bgStyle, { flexDirection: "row", gap: 12 }]}>
+        <View
+          style={[styles.topBar, pageStyle, { flexDirection: "row", gap: 12 }]}
+        >
           <TouchableOpacity
             style={[
               styles.selectButton,
-              { borderColor: isDark ? "#93c5fd" : "#007BFF" },
+              outlineButtonStyle,
             ]}
             onPress={toggleSelectionMode}
           >
             <Text
               style={[
                 styles.selectButtonText,
-                { color: isDark ? "#bfdbfe" : "#007BFF" },
+                outlineButtonTextStyle,
               ]}
             >
               {isSelectionMode ? "Annuler" : "Sélectionner"}
@@ -266,10 +259,10 @@ export default function History() {
             </TouchableOpacity>
           )}
           {(isAllSelected || isSelectionMode) && (
-              <ContextualMenu
-                 isAllSelected={isAllSelected}
-                 onToggleSelectAll={allSelectionMode}
-              />
+            <ContextualMenu
+              isAllSelected={isAllSelected}
+              onToggleSelectAll={allSelectionMode}
+            />
           )}
         </View>
       </View>
@@ -278,7 +271,7 @@ export default function History() {
       {sessions.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text
-            style={[styles.emptyText, { color: isDark ? "#9ca3af" : "#888" }]}
+            style={[styles.emptyText, { color: isDark ? "#aaa" : "#888" }]}
           >
             Aucune session enregistrée.
           </Text>

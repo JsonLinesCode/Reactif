@@ -50,13 +50,19 @@ export default function CprEndFirstPage() {
     theme === "dark"
       ? { backgroundColor: "#353636" }
       : { backgroundColor: "#fff" };
-  const neutralButtonColor = "#007BFF";
+  const isDark = theme === "dark";
+  const neutralButtonColor = isDark ? "#fff" : "#007BFF";
+  const outlineButtonStyle = {
+    backgroundColor: "transparent",
+    borderColor: neutralButtonColor,
+  };
+  const outlineButtonTextStyle = { color: neutralButtonColor };
 
   return (
     <SafeAreaView style={[styles.container, bgStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.contentContainer}>
-        <Text style={[styles.title, theme === "dark" ? { color: "#ccc" } : {}]}>
+        <Text style={[styles.title, isDark ? { color: "#ccc" } : {}]}>
           Fin de RCP
         </Text>
 
@@ -65,11 +71,11 @@ export default function CprEndFirstPage() {
             style={[
               styles.button,
               styles.outlineButton,
-              { borderColor: neutralButtonColor },
+              outlineButtonStyle,
             ]}
             onPress={handleDeath}
           >
-            <Text style={[styles.buttonText, { color: neutralButtonColor }]}>
+            <Text style={[styles.buttonText, outlineButtonTextStyle]}>
               Décès
             </Text>
           </TouchableOpacity>
@@ -78,16 +84,28 @@ export default function CprEndFirstPage() {
             style={[
               styles.button,
               styles.outlineButton,
-              { borderColor: neutralButtonColor },
+              outlineButtonStyle,
             ]}
             onPress={handleRacs}
           >
             <View>
-              <Text style={[styles.buttonText, { color: neutralButtonColor, fontSize: 17 }]}>
+              <Text
+                style={[
+                  styles.buttonText,
+                  outlineButtonTextStyle,
+                  { fontSize: 17 },
+                ]}
+              >
                 Reprise d&#39;activité respiratoire spontanée
               </Text>
-              <Text style={[styles.buttonText, { color: neutralButtonColor, fontSize: 20 }]}>
-                  (RACS)
+              <Text
+                style={[
+                  styles.buttonText,
+                  outlineButtonTextStyle,
+                  { fontSize: 20 },
+                ]}
+              >
+                (RACS)
               </Text>
             </View>
           </TouchableOpacity>

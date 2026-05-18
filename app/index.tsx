@@ -159,7 +159,6 @@ export default function Index() {
                 />
               </View>
             </TouchableOpacity>
-            <View style={{ flexDirection: "column", gap: 40 }}></View>
           </View>
         </View>
       </View>
@@ -184,11 +183,6 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
   },
   buttonHistory: {
     paddingVertical: 18,
@@ -200,11 +194,6 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
   },
   buttonRow: {
     flexDirection: "row",
@@ -238,6 +227,7 @@ const styles = StyleSheet.create({
     height: 62,
     justifyContent: "center",
     marginBottom: 0,
+    marginLeft: "auto",
     paddingVertical: 0,
   },
   menuSubButton: {
@@ -250,11 +240,6 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 160,
     alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
   },
   menuSubButtonText: {
     color: "#007BFF",
