@@ -25,12 +25,15 @@ import { sessionController } from "@/controllers/SessionController";
 import { CprEvent, CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import {
+  CprEpisodeSummary,
   formatElapsedFromStart,
   formatEventDetails,
   formatEventType,
   formatHumanReadableDateTime,
   formatHumanReadableTime,
   formatTimeWithLetters,
+  getCprDurationMs,
+  getCprEpisodeSummaries,
   getEventsWithCycles,
 } from "@/utils/sessionUtils";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -38,90 +41,27 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
 
-type CprEpisodeSummary = {
-  cycle: number;
-  startTime: number;
-  endTime: number;
-  shock: CprEvent[];
-  adrenaline: CprEvent[];
-  cordarone: CprEvent[];
-};
-
-const isRacsEvent = (event: CprEvent) =>
-  event.type === "event" &&
-  String(event.details || "").toUpperCase() === "RACS";
-
-const isResumeEvent = (event: CprEvent) =>
-  event.type === "event" &&
-  String(event.details || "").toUpperCase() === "RESUME";
-
-const createEmptyActions = () => ({
-  shock: [] as CprEvent[],
-  adrenaline: [] as CprEvent[],
-  cordarone: [] as CprEvent[],
-});
-
-const getCprEpisodeSummaries = (session: CprSession): CprEpisodeSummary[] => {
-  const sortedEvents = [...session.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
-  const summaries: CprEpisodeSummary[] = [];
-  let cycle = 1;
-  let cycleStartTime = session.startTime;
-  let actions = createEmptyActions();
-
-  for (const event of sortedEvents) {
-    if (isResumeEvent(event)) {
-      cycleStartTime = event.timestamp;
-      actions = createEmptyActions();
-      continue;
-    }
-
-    if (event.type === "shock") {
-      actions.shock.push(event);
-    } else if (event.type === "adrenaline") {
-      actions.adrenaline.push(event);
-    } else if (event.type === "cordarone") {
-      actions.cordarone.push(event);
-    }
-
-    if (isRacsEvent(event)) {
-      summaries.push({
-        cycle,
-        startTime: cycleStartTime,
-        endTime: event.timestamp,
-        shock: [...actions.shock],
-        adrenaline: [...actions.adrenaline],
-        cordarone: [...actions.cordarone],
-      });
-      cycle += 1;
-      cycleStartTime = event.timestamp;
-      actions = createEmptyActions();
-    }
-  }
-
-  return summaries;
-};
-
 export default function CprEnd() {
   const { width } = useWindowDimensions();
   const [theme, setTheme] = useState(sessionStore.theme);
   const isDark = theme === "dark";
   const bgStyle = isDark ? { backgroundColor: "#353636" } : {};
-  const textStyle = { color: isDark ? "#fff" : "#333" };
+  const textStyle = { color: isDark ? "#fff" : "#374151" };
   const mutedTextStyle = { color: isDark ? "#cbd5e1" : "#64748b" };
   const cardStyle = {
     backgroundColor: isDark ? "#222121" : "#fff",
-    borderColor: isDark ? "#555" : "#E0E0E0",
+    borderColor: isDark ? "#555" : "#e5e7eb",
   };
-  const cardTitleStyle = { color: isDark ? "#93c5fd" : "#0D47A1" };
-  const dividerStyle = { backgroundColor: isDark ? "#555" : "#EEEEEE" };
+  const dividerStyle = { backgroundColor: isDark ? "#444" : "#f1f5f9" };
   const neutralButtonColor = isDark ? "#fff" : "#007BFF";
   const outlineButtonStyle = {
     backgroundColor: "transparent",
     borderColor: neutralButtonColor,
+    borderWidth: 2,
   };
   const outlineButtonTextStyle = { color: neutralButtonColor };
+  const summaryPrimaryIconColor = isDark ? neutralButtonColor : "#fff";
+  const summarySecondaryIconColor = isDark ? neutralButtonColor : "#334155";
   const params = useLocalSearchParams();
   const initialMode = params.mode === "death" ? "summary" : "racs";
 
@@ -134,6 +74,22 @@ export default function CprEnd() {
   const [racsElapsedSeconds, setRacsElapsedSeconds] = useState(0);
   const racsStartRef = useRef<number | null>(null);
   const ecgBounceAnim = useRef(new Animated.Value(1)).current;
+  const fadeColor =
+    isDark ? "#353636" : step === "summary" ? "#f3f4f6" : "#fff";
+
+  const renderBottomFade = (style?: object) => (
+    <View pointerEvents="none" style={[styles.bottomScrollFade, style]}>
+      {[0.05, 0.18, 0.36, 0.62, 0.9].map((opacity) => (
+        <View
+          key={opacity}
+          style={[
+            styles.bottomScrollFadeBand,
+            { backgroundColor: fadeColor, opacity },
+          ]}
+        />
+      ))}
+    </View>
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -266,16 +222,7 @@ export default function CprEnd() {
   const getDurationString = () => {
     if (!session) return "0 minutes et 0 secondes";
 
-    const summaries = getCprEpisodeSummaries(session);
-    const diff =
-      summaries.length > 0
-        ? summaries.reduce(
-            (total, episode) => total + episode.endTime - episode.startTime,
-            0,
-          )
-        : session.endTime
-          ? session.endTime - session.startTime
-          : 0;
+    const diff = getCprDurationMs(session);
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     return `${minutes} minutes et ${seconds} secondes`;
@@ -400,95 +347,95 @@ export default function CprEnd() {
                 <Text style={[styles.cardText, textStyle]}>Résumé RCP</Text>
               )}
             </View>
-          </View>
 
-          <View style={styles.ecgSection}>
-            <AnimatedTouchableOpacity
-              onPress={handleEcgPress}
-              onPressIn={() => {
-                Animated.timing(ecgBounceAnim, {
-                  toValue: 0.95,
-                  duration: 100,
-                  useNativeDriver: true,
-                }).start();
-              }}
-              onPressOut={() => {
-                Animated.timing(ecgBounceAnim, {
-                  toValue: 1,
-                  duration: 100,
-                  useNativeDriver: true,
-                }).start();
-              }}
-              activeOpacity={0.8}
-              style={[
-                styles.ecgButton,
-                {
-                  width: ecgSize,
-                  height: ecgSize,
-                  transform: [{ scale: ecgBounceAnim }],
-                },
-              ]}
-            >
-              <Svg width={ecgSize} height={ecgSize}>
-                <G rotation="-90" origin={`${ecgCenter}, ${ecgCenter}`}>
-                  <Circle
-                    cx={ecgCenter}
-                    cy={ecgCenter}
-                    r={ecgRadius}
-                    stroke="#f5dd4b"
-                    strokeWidth={ecgStrokeWidth}
-                    fill="none"
-                  />
-                  <Circle
-                    cx={ecgCenter}
-                    cy={ecgCenter}
-                    r={ecgRadius}
-                    stroke="#FF5252"
-                    strokeWidth={ecgStrokeWidth}
-                    strokeDasharray={ecgCircumference}
-                    strokeDashoffset={ecgStrokeDashoffset}
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                </G>
-              </Svg>
-              <View
+            <View style={styles.ecgSection}>
+              <AnimatedTouchableOpacity
+                onPress={handleEcgPress}
+                onPressIn={() => {
+                  Animated.timing(ecgBounceAnim, {
+                    toValue: 0.95,
+                    duration: 100,
+                    useNativeDriver: true,
+                  }).start();
+                }}
+                onPressOut={() => {
+                  Animated.timing(ecgBounceAnim, {
+                    toValue: 1,
+                    duration: 100,
+                    useNativeDriver: true,
+                  }).start();
+                }}
+                activeOpacity={0.8}
                 style={[
-                  styles.ecgInner,
+                  styles.ecgButton,
                   {
-                    width: ecgInnerSize,
-                    height: ecgInnerSize,
-                    borderRadius: ecgInnerRadius,
+                    width: ecgSize,
+                    height: ecgSize,
+                    transform: [{ scale: ecgBounceAnim }],
                   },
                 ]}
               >
-                <MaterialCommunityIcons
-                  name="heart-pulse"
-                  size={40}
+                <Svg width={ecgSize} height={ecgSize}>
+                  <G rotation="-90" origin={`${ecgCenter}, ${ecgCenter}`}>
+                    <Circle
+                      cx={ecgCenter}
+                      cy={ecgCenter}
+                      r={ecgRadius}
+                      stroke="#f5dd4b"
+                      strokeWidth={ecgStrokeWidth}
+                      fill="none"
+                    />
+                    <Circle
+                      cx={ecgCenter}
+                      cy={ecgCenter}
+                      r={ecgRadius}
+                      stroke="#FF5252"
+                      strokeWidth={ecgStrokeWidth}
+                      strokeDasharray={ecgCircumference}
+                      strokeDashoffset={ecgStrokeDashoffset}
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                  </G>
+                </Svg>
+                <View
                   style={[
-                    isDark
-                      ? { color: "#fff", marginBottom: 4 }
-                      : { color: "#000", marginBottom: 4 },
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.ecgLabel,
-                    isDark ? { color: "#fff" } : { color: "#000" },
+                    styles.ecgInner,
+                    {
+                      width: ecgInnerSize,
+                      height: ecgInnerSize,
+                      borderRadius: ecgInnerRadius,
+                    },
                   ]}
                 >
-                  ECG
-                </Text>
-                <Text
-                  style={[
-                    styles.ecgTimer,
-                    isDark ? { color: "#fff" } : { color: "#000" },
-                  ]}
-                >
-                  {formatTime(ecgTimeLeft)}
-                </Text>
-              </View>
-            </AnimatedTouchableOpacity>
+                  <MaterialCommunityIcons
+                    name="heart-pulse"
+                    size={40}
+                    style={[
+                      isDark
+                        ? { color: "#fff", marginBottom: 4 }
+                        : { color: "#000", marginBottom: 4 },
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.ecgLabel,
+                      isDark ? { color: "#fff" } : { color: "#000" },
+                    ]}
+                  >
+                    ECG
+                  </Text>
+                  <Text
+                    style={[
+                      styles.ecgTimer,
+                      isDark ? { color: "#fff" } : { color: "#000" },
+                    ]}
+                  >
+                    {formatTime(ecgTimeLeft)}
+                  </Text>
+                </View>
+              </AnimatedTouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.buttonGroupConfirm}>
@@ -571,6 +518,7 @@ export default function CprEnd() {
           onClose={() => setModalVisible(false)}
           onSave={handleSaveEvents}
         />
+        {renderBottomFade()}
       </SafeAreaView>
     );
   }
@@ -582,15 +530,14 @@ export default function CprEnd() {
     "Fin de session";
 
   return (
-    <SafeAreaView style={[styles.container, bgStyle]}>
+    <SafeAreaView style={[styles.container, styles.summaryContainer, bgStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.summaryScroll}>
-        <View style={styles.header}>
+        <View style={[styles.headerCard, cardStyle]}>
           <Text
             style={[
-              styles.title,
-              styles.summaryTitle,
-              isDark ? { color: "#ccc" } : {},
+              styles.headerTitle,
+              isDark ? { color: "#fff" } : { color: "#111827" },
             ]}
           >
             {summaryTitle === "Décès" ? "DÉCÈS" : "RÉSUME DE LA RCP"}
@@ -752,13 +699,22 @@ export default function CprEnd() {
         <TouchableOpacity
           style={[
             styles.actionButton,
-            styles.outlineSummaryButton,
-            outlineButtonStyle,
+            styles.primarySummaryButton,
+            isDark ? outlineButtonStyle : undefined,
           ]}
           onPress={handleExportPdf}
         >
-          <FontAwesome5 name="file-pdf" size={18} color={neutralButtonColor} />
-          <Text style={[styles.actionButtonText, outlineButtonTextStyle]}>
+          <FontAwesome5
+            name="file-pdf"
+            size={18}
+            color={summaryPrimaryIconColor}
+          />
+          <Text
+            style={[
+              styles.actionButtonText,
+              isDark ? outlineButtonTextStyle : styles.primaryActionButtonText,
+            ]}
+          >
             {" "}
             Exporter en PDF
           </Text>
@@ -767,18 +723,30 @@ export default function CprEnd() {
         <TouchableOpacity
           style={[
             styles.actionButton,
-            styles.outlineSummaryButton,
-            outlineButtonStyle,
+            styles.secondarySummaryButton,
+            isDark ? outlineButtonStyle : undefined,
           ]}
           onPress={handleGoHome}
         >
-          <FontAwesome5 name="home" size={18} color={neutralButtonColor} />
-          <Text style={[styles.actionButtonText, outlineButtonTextStyle]}>
+          <FontAwesome5
+            name="home"
+            size={18}
+            color={summarySecondaryIconColor}
+          />
+          <Text
+            style={[
+              styles.actionButtonText,
+              isDark
+                ? outlineButtonTextStyle
+                : styles.secondaryActionButtonText,
+            ]}
+          >
             {" "}
             Retour à l&apos;accueil
           </Text>
         </TouchableOpacity>
       </View>
+      {renderBottomFade(styles.summaryBottomScrollFade)}
     </SafeAreaView>
   );
 }
@@ -850,10 +818,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  summaryContainer: {
+    backgroundColor: "#f3f4f6",
+  },
   summaryScroll: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
+    padding: 16,
+    paddingBottom: 100,
+    gap: 12,
   },
   header: {
     flexDirection: "row",
@@ -865,19 +836,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 0,
   },
+  headerCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+  },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 16,
-    marginBottom: 16,
-    // Shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: "#e5e7eb",
   },
   cardRow: {
     flexDirection: "row",
@@ -894,14 +870,15 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   cardText: {
-    fontSize: 16,
-    color: "#333",
+    fontSize: 14,
+    color: "#374151",
+    marginBottom: 4,
   },
   summaryCardText: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 22,
-    color: "#333",
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#374151",
     flexWrap: "wrap",
   },
   summaryCardLabel: {
@@ -915,12 +892,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   cprSummaryTitle: {
+    fontSize: 20,
     fontWeight: "700",
-    marginBottom: 4,
+    color: "#111827",
+    marginBottom: 8,
   },
   cprEpisodeBlock: {
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: "#f1f5f9",
     paddingTop: 10,
     marginTop: 10,
   },
@@ -928,29 +907,31 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#0D47A1",
-    marginLeft: 8,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 10,
   },
   divider: {
     height: 1,
-    backgroundColor: "#EEEEEE",
+    backgroundColor: "#f1f5f9",
     marginVertical: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: "#777",
+    color: "#6b7280",
     fontStyle: "italic",
     marginTop: 4,
   },
   itemText: {
     fontSize: 15,
-    color: "#333",
+    color: "#0f172a",
     marginBottom: 4,
   },
   itemRow: {
-    marginBottom: 8,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
   },
   itemTimestamp: {
     fontSize: 13,
@@ -971,35 +952,57 @@ const styles = StyleSheet.create({
 
   actionButtonsContainer: {
     backgroundColor: "transparent",
-    marginTop: 5,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    gap: 8,
+    position: "absolute",
+    left: 16,
+    right: 16,
+    bottom: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
   },
   actionButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
-    borderRadius: 8,
-    borderColor: "#007BFF",
-    borderWidth: 2,
+    minHeight: 46,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 8,
   },
   actionButtonText: {
-    color: "#007BFF",
-
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 10,
+    fontSize: 15,
+    fontWeight: "700",
     textTransform: "uppercase",
-    lineHeight: 20,
     textAlign: "center",
     flexShrink: 1,
     includeFontPadding: false,
   },
-  outlineSummaryButton: {
-    backgroundColor: "transparent",
-    borderColor: "#007BFF",
+  primarySummaryButton: {
+    backgroundColor: "#2563eb",
+  },
+  secondarySummaryButton: {
+    backgroundColor: "#e2e8f0",
+  },
+  primaryActionButtonText: {
+    color: "#fff",
+  },
+  secondaryActionButtonText: {
+    color: "#334155",
+  },
+  bottomScrollFade: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 42,
+  },
+  summaryBottomScrollFade: {
+    bottom: 74,
+  },
+  bottomScrollFadeBand: {
+    flex: 1,
   },
 
   // Confirm styles
@@ -1027,6 +1030,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     width: "100%",
+    paddingBottom: 8,
   },
   racsTimerCard: {
     width: "100%",
@@ -1052,6 +1056,7 @@ const styles = StyleSheet.create({
   buttonGroupConfirm: {
     width: "100%",
     gap: 15,
+    marginTop: 16,
   },
   racsSeparator: {
     height: 1,
@@ -1096,7 +1101,7 @@ const styles = StyleSheet.create({
   ecgSection: {
     width: "100%",
     alignItems: "center",
-    marginBottom: 24,
+    marginTop: 8,
   },
   ecgButton: {
     position: "relative",
