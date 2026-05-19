@@ -25,9 +25,9 @@ interface ActionProgressBarProps {
   subtitle?: string;
   resetRequest?: {
     token: number;
-    target: "shockTimer" | "cordarone" | "adrenaline" | null;
+    target: "shockTimer" | "cordarone" | "adrenaline" | "remplissage" | null;
   };
-  resetKey?: "cordarone" | "adrenaline";
+  resetKey?: "cordarone" | "adrenaline" | "remplissage";
 }
 
 const AnimatedTouchableOpacity =
@@ -240,9 +240,9 @@ export default function ActionProgressBar({
 
   const progressPercent = Math.min(
     100,
-    Math.max(0, (timeLeft / durationSeconds) * 100),
+    Math.max(0, durationSeconds > 0 ? (timeLeft / durationSeconds) * 100 : 100),
   );
-  const timeLeftText = formatSecondsToClock(timeLeft);
+  const timeLeftText = durationSeconds > 0 ? formatSecondsToClock(timeLeft) : "";
 
   return (
     <View style={styles.buttonContainer}>
@@ -300,7 +300,7 @@ export default function ActionProgressBar({
                 <Text style={[styles.subtitle, { color }]}>{subtitle}</Text>
               ) : null}
             </View>
-            <Text style={[styles.timerRight, { color }]}>{timeLeftText}</Text>
+            {durationSeconds > 0 && <Text style={[styles.timerRight, { color }]}>{timeLeftText}</Text>}
           </View>
         </View>
 
@@ -341,7 +341,7 @@ export default function ActionProgressBar({
                 </Text>
               ) : null}
             </View>
-            <Text style={styles.timerRight}>{timeLeftText}</Text>
+            {durationSeconds > 0 && <Text style={styles.timerRight}>{timeLeftText}</Text>}
           </View>
         </View>
       </AnimatedTouchableOpacity>

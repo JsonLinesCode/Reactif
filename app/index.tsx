@@ -32,18 +32,22 @@ export default function Index() {
   const outlineTextStyle = isDark ? { color: "#fff" } : { color: "#007BFF" };
 
   const startAdultCpr = () => {
-    sessionStore.startNewSession();
+    sessionStore.startNewSession("adult");
     router.push("/cpr");
   };
 
   const startPediatricCpr = () => {
-    sessionStore.startNewSession();
+    sessionStore.startNewSession("pediatric");
     router.push("/childData");
   };
   const startAideCognitive = () => {
-    sessionStore.startNewSession();
+    sessionStore.startNewSession("adult");
     router.push("/aideCognitive");
   };
+  function startNeonatalCpr() {
+    sessionStore.startNewSession("neonatal");
+    router.push("/cpr");
+  }
 
   const partners = [
     {
@@ -79,7 +83,7 @@ export default function Index() {
       />
       <View
         style={{
-          gap: 100,
+          gap: 30,
           justifyContent: "center",
           width: "100%",
           alignItems: "center",
@@ -106,14 +110,40 @@ export default function Index() {
               RCP ADULTE
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.menuButton, outlineButtonStyle]}
-            onPress={startPediatricCpr}
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 10,
+              width: "100%",
+              maxWidth: 400,
+              justifyContent: "center",
+            }}
           >
-            <Text style={[styles.menuButtonText, outlineTextStyle]}>
-              RCP PEDIATRIQUE
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.menuButton,
+                outlineButtonStyle,
+                { flex: 1, width: "auto", paddingHorizontal: 5 },
+              ]}
+              onPress={startPediatricCpr}
+            >
+              <Text style={[styles.menuSmallButtonText, outlineTextStyle]}>
+                RCP PEDIATRIQUE
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.menuButton,
+                outlineButtonStyle,
+                { flex: 1, width: "auto", paddingHorizontal: 5 },
+              ]}
+              onPress={startNeonatalCpr}
+            >
+              <Text style={[styles.menuSmallButtonText, outlineTextStyle]}>
+                RCP NEONATALE
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={{ width: "100%", alignItems: "center" }}>
           <TouchableOpacity
@@ -183,6 +213,7 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     alignItems: "center",
+    justifyContent: "center",
   },
   buttonHistory: {
     paddingVertical: 18,
@@ -251,6 +282,13 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     textTransform: "uppercase",
+  },
+  menuSmallButtonText: {
+    color: "#007BFF",
+    fontSize: 18,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    textAlign: "center",
   },
   partnersRow: {
     width: "100%",
