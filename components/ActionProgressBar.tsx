@@ -113,8 +113,9 @@ export default function ActionProgressBar({
     stopBlinking();
   }, [resetRequest, resetKey]);
 
+  const hasTimer = durationSeconds > 0;
   const timeLeft = Math.max(0, durationSeconds - elapsed);
-  const isExpired = elapsed >= durationSeconds;
+  const isExpired = hasTimer && elapsed >= durationSeconds;
   const midpointWarning = Math.max(1, Math.floor(warningSeconds / 2));
 
   useEffect(() => {
@@ -240,9 +241,9 @@ export default function ActionProgressBar({
 
   const progressPercent = Math.min(
     100,
-    Math.max(0, durationSeconds > 0 ? (timeLeft / durationSeconds) * 100 : 100),
+    Math.max(0, hasTimer ? (timeLeft / durationSeconds) * 100 : 100),
   );
-  const timeLeftText = durationSeconds > 0 ? formatSecondsToClock(timeLeft) : "";
+  const timeLeftText = hasTimer ? formatSecondsToClock(timeLeft) : "";
 
   return (
     <View style={styles.buttonContainer}>
@@ -300,7 +301,7 @@ export default function ActionProgressBar({
                 <Text style={[styles.subtitle, { color }]}>{subtitle}</Text>
               ) : null}
             </View>
-            {durationSeconds > 0 && <Text style={[styles.timerRight, { color }]}>{timeLeftText}</Text>}
+            {hasTimer && <Text style={[styles.timerRight, { color }]}>{timeLeftText}</Text>}
           </View>
         </View>
 
