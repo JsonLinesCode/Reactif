@@ -22,12 +22,12 @@ type ResourceItem = {
 
 const RESOURCES: ResourceItem[] = [
   {
-    label: "Ilcor",
+    label: "ILCOR",
     image: require("@/assets/documents/aides-cognitives/ressources/ilcor.png"),
-    url: "https://example.com/reactif",
+    url: "https://www.ilcor.org/",
   },
   {
-    label: "Cprguidelines",
+    label: "ERC",
     image: require("@/assets/documents/aides-cognitives/ressources/cprguidelines.png"),
     url: "https://cprguidelines.eu/guidelines-2025",
   },
@@ -42,17 +42,17 @@ const RESOURCES: ResourceItem[] = [
     url: "https://www.sfmu.org/fr/vie-professionnelle/outils-professionnels/referentiels-sfmu",
   },
   {
-    label: "Registre Electronique des Arrêts caradiaques",
+    label: "RéAC",
     image: require("@/assets/documents/aides-cognitives/ressources/reac-univ-lille-2.png"),
     url: "https://reac.univ-lille2.fr/saisie/index.php",
   },
   {
-    label: "Urgences Ara",
+    label: "Urg’ARA",
     image: require("@/assets/documents/aides-cognitives/ressources/urgara.png"),
     url: "https://www.urgences-ara.fr/les-referentiels/",
   },
   {
-    label: "sauvlife",
+    label: "SAUV Life",
     image: require("@/assets/documents/aides-cognitives/ressources/sauvlife.png"),
     url: "https://sauvlife.org",
   },
