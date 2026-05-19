@@ -117,6 +117,7 @@ export default function ActionProgressBar({
   const timeLeft = Math.max(0, durationSeconds - elapsed);
   const isExpired = hasTimer && elapsed >= durationSeconds;
   const midpointWarning = Math.max(1, Math.floor(warningSeconds / 2));
+  const reminderSoundKind = resetKey === "remplissage" ? undefined : resetKey;
 
   useEffect(() => {
     if (!isActive) {
@@ -133,7 +134,7 @@ export default function ActionProgressBar({
 
     if (isExpired) {
       if (!soundPlayedRef.current) {
-        sessionController.playReminderPattern("end", resetKey);
+        sessionController.playReminderPattern("end", reminderSoundKind);
         triggerHaptic();
         soundPlayedRef.current = true;
       }
@@ -144,7 +145,7 @@ export default function ActionProgressBar({
         timeLeft === warningSeconds &&
         !firstReminderPlayedRef.current
       ) {
-        sessionController.playReminderPattern("first", resetKey);
+        sessionController.playReminderPattern("first", reminderSoundKind);
         firstReminderPlayedRef.current = true;
       }
 
@@ -154,7 +155,7 @@ export default function ActionProgressBar({
         timeLeft < warningSeconds &&
         !midReminderPlayedRef.current
       ) {
-        sessionController.playReminderPattern("mid", resetKey);
+        sessionController.playReminderPattern("mid", reminderSoundKind);
         midReminderPlayedRef.current = true;
       }
 
@@ -175,6 +176,7 @@ export default function ActionProgressBar({
     warningSeconds,
     count,
     resetKey,
+    reminderSoundKind,
   ]);
 
   const triggerHaptic = async () => {
@@ -342,7 +344,7 @@ export default function ActionProgressBar({
                 </Text>
               ) : null}
             </View>
-            {durationSeconds > 0 && <Text style={styles.timerRight}>{timeLeftText}</Text>}
+            {hasTimer && <Text style={styles.timerRight}>{timeLeftText}</Text>}
           </View>
         </View>
       </AnimatedTouchableOpacity>

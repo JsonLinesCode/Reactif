@@ -155,7 +155,7 @@ export default function HistoryDetail() {
           ]}
         >
           <Text style={[styles.headerTitle, primaryTextStyle]}>
-            Session RCP complète
+            Résumé RCP
           </Text>
           <Text style={[styles.headerLine, secondaryTextStyle]}>
             Date: {startDate.toLocaleDateString()}

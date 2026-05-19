@@ -22,7 +22,7 @@ import Svg, { Circle, G } from "react-native-svg";
 
 import EventSelectionModal from "@/components/EventSelectionModal";
 import { sessionController } from "@/controllers/SessionController";
-import { CprSession } from "@/models/session";
+import { CprEvent, CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import {
   formatElapsedFromStart,
@@ -37,6 +37,71 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
+
+type CprEpisodeSummary = {
+  cycle: number;
+  startTime: number;
+  endTime: number;
+  shock: CprEvent[];
+  adrenaline: CprEvent[];
+  cordarone: CprEvent[];
+};
+
+const isRacsEvent = (event: CprEvent) =>
+  event.type === "event" &&
+  String(event.details || "").toUpperCase() === "RACS";
+
+const isResumeEvent = (event: CprEvent) =>
+  event.type === "event" &&
+  String(event.details || "").toUpperCase() === "RESUME";
+
+const createEmptyActions = () => ({
+  shock: [] as CprEvent[],
+  adrenaline: [] as CprEvent[],
+  cordarone: [] as CprEvent[],
+});
+
+const getCprEpisodeSummaries = (session: CprSession): CprEpisodeSummary[] => {
+  const sortedEvents = [...session.events].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
+  const summaries: CprEpisodeSummary[] = [];
+  let cycle = 1;
+  let cycleStartTime = session.startTime;
+  let actions = createEmptyActions();
+
+  for (const event of sortedEvents) {
+    if (isResumeEvent(event)) {
+      cycleStartTime = event.timestamp;
+      actions = createEmptyActions();
+      continue;
+    }
+
+    if (event.type === "shock") {
+      actions.shock.push(event);
+    } else if (event.type === "adrenaline") {
+      actions.adrenaline.push(event);
+    } else if (event.type === "cordarone") {
+      actions.cordarone.push(event);
+    }
+
+    if (isRacsEvent(event)) {
+      summaries.push({
+        cycle,
+        startTime: cycleStartTime,
+        endTime: event.timestamp,
+        shock: [...actions.shock],
+        adrenaline: [...actions.adrenaline],
+        cordarone: [...actions.cordarone],
+      });
+      cycle += 1;
+      cycleStartTime = event.timestamp;
+      actions = createEmptyActions();
+    }
+  }
+
+  return summaries;
+};
 
 export default function CprEnd() {
   const { width } = useWindowDimensions();
@@ -67,7 +132,6 @@ export default function CprEnd() {
   const ecgAlertedRef = useRef(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [racsElapsedSeconds, setRacsElapsedSeconds] = useState(0);
-  const [cprElapsedSeconds, setCprElapsedSeconds] = useState(0);
   const racsStartRef = useRef<number | null>(null);
   const ecgBounceAnim = useRef(new Animated.Value(1)).current;
 
@@ -134,17 +198,12 @@ export default function CprEnd() {
           Math.floor((Date.now() - racsStartRef.current) / 1000),
         );
       }
-      if (session?.startTime) {
-        setCprElapsedSeconds(
-          Math.floor((Date.now() - session.startTime) / 1000),
-        );
-      }
     };
 
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, [session?.startTime, step]);
+  }, [step]);
 
   const handleResume = () => {
     // "Reprendre la RCP"
@@ -205,8 +264,18 @@ export default function CprEnd() {
   };
 
   const getDurationString = () => {
-    if (!session || !session.endTime) return "0 minutes et 0 secondes";
-    const diff = session.endTime - session.startTime;
+    if (!session) return "0 minutes et 0 secondes";
+
+    const summaries = getCprEpisodeSummaries(session);
+    const diff =
+      summaries.length > 0
+        ? summaries.reduce(
+            (total, episode) => total + episode.endTime - episode.startTime,
+            0,
+          )
+        : session.endTime
+          ? session.endTime - session.startTime
+          : 0;
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     return `${minutes} minutes et ${seconds} secondes`;
@@ -218,21 +287,53 @@ export default function CprEnd() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const formatEventSummary = (type: string) => {
-    if (!session) return "0";
-    const events = session.events.filter((e: any) => e.type === type);
-    if (events.length === 0) return "0";
+  const formatShortClockTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const hh = date.getHours().toString().padStart(2, "0");
+    const mm = date.getMinutes().toString().padStart(2, "0");
+    return `${hh}:${mm}`;
+  };
 
-    const details = events
-      .map((e: any, index: number) => {
-        const date = new Date(e.timestamp);
-        const hh = date.getHours().toString().padStart(2, "0");
-        const mm = date.getMinutes().toString().padStart(2, "0");
-        return `${index + 1}: ${hh}:${mm}`;
-      })
-      .join("; ");
+  const renderEventSummaryLine = (label: string, events: CprEvent[]) => (
+    <Text style={[styles.cardText, textStyle]}>
+      <Text style={styles.summaryLineLabel}>{label}</Text> :{" "}
+      <Text style={styles.boldValue}>{events.length}</Text>
+      {events.map((event, index) => (
+        <Text key={`${label}-${event.timestamp}-${index}`}>
+          {" "}
+          <Text style={styles.boldValue}>({index + 1})</Text>{" "}
+          {formatShortClockTime(event.timestamp)}
+        </Text>
+      ))}
+    </Text>
+  );
 
-    return `${events.length} (${details})`;
+  const renderCprEpisodeSummary = (
+    episode: CprEpisodeSummary,
+    hasMultipleEpisodes: boolean,
+  ) => {
+    const durationSeconds = Math.max(
+      0,
+      Math.floor((episode.endTime - episode.startTime) / 1000),
+    );
+
+    return (
+      <View
+        key={`cpr-summary-${episode.cycle}`}
+        style={hasMultipleEpisodes ? styles.cprEpisodeBlock : undefined}
+      >
+        <Text style={[styles.cardText, styles.cprSummaryTitle, textStyle]}>
+          {hasMultipleEpisodes ? `Résumé RCP ${episode.cycle}` : "Résumé RCP"}
+        </Text>
+        <Text style={[styles.cardText, textStyle]}>
+          Durée RCP {episode.cycle} :{" "}
+          <Text style={styles.boldValue}>{formatTime(durationSeconds)}</Text>
+        </Text>
+        {renderEventSummaryLine("Chocs", episode.shock)}
+        {renderEventSummaryLine("Adrénaline", episode.adrenaline)}
+        {renderEventSummaryLine("Cordarone", episode.cordarone)}
+      </View>
+    );
   };
 
   const getActions = () => {
@@ -259,6 +360,7 @@ export default function CprEnd() {
   const ecgProgress =
     ecgDurationSeconds > 0 ? ecgTimeLeft / ecgDurationSeconds : 0;
   const ecgStrokeDashoffset = ecgCircumference * (1 - ecgProgress);
+  const cprEpisodeSummaries = session ? getCprEpisodeSummaries(session) : [];
 
   if (step === "racs") {
     return (
@@ -269,13 +371,7 @@ export default function CprEnd() {
             RACS
           </Text>
 
-          <View
-            style={[
-              styles.card,
-              cardStyle,
-              styles.racsSummaryCard,
-            ]}
-          >
+          <View style={[styles.card, cardStyle, styles.racsSummaryCard]}>
             <View
               style={[
                 styles.racsTimerCard,
@@ -293,27 +389,16 @@ export default function CprEnd() {
             </View>
 
             <View>
-              <Text style={[styles.cardText, textStyle]}>
-                Session RCP complète
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Date:{" "}
-                {session
-                  ? new Date(session.startTime).toLocaleDateString()
-                  : "N/A"}
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Durée RCP (totale): {formatTime(cprElapsedSeconds)}
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Chocs : {formatEventSummary("shock")}
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Adrénaline : {formatEventSummary("adrenaline")}
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Cordarone : {formatEventSummary("cordarone")}
-              </Text>
+              {cprEpisodeSummaries.length > 0 ? (
+                cprEpisodeSummaries.map((episode) =>
+                  renderCprEpisodeSummary(
+                    episode,
+                    cprEpisodeSummaries.length > 1,
+                  ),
+                )
+              ) : (
+                <Text style={[styles.cardText, textStyle]}>Résumé RCP</Text>
+              )}
             </View>
           </View>
 
@@ -513,33 +598,54 @@ export default function CprEnd() {
         </View>
 
         {/* Stats Card */}
-        <View
-          style={[styles.card, cardStyle]}
-        >
+        <View style={[styles.card, cardStyle]}>
           <View style={[styles.cardRow]}>
             <Text style={[styles.summaryCardText, textStyle]}>
               <Text style={styles.summaryCardLabel}>DURÉE TOTALE</Text>:{" "}
               {getDurationString()}
             </Text>
           </View>
-          <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <Text style={[styles.summaryCardText, textStyle]}>
-              <Text style={styles.summaryCardLabel}>CHOCS DÉLIVRÉS</Text> :{" "}
-              {formatEventSummary("shock")}
-            </Text>
-          </View>
-          <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <Text style={[styles.summaryCardText, textStyle]}>
-              <Text style={styles.summaryCardLabel}>ADRÉNALINE</Text> :{" "}
-              {formatEventSummary("adrenaline")}
-            </Text>
-          </View>
-          <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <Text style={[styles.summaryCardText, textStyle]}>
-              <Text style={styles.summaryCardLabel}>CORDARONE</Text> :{" "}
-              {formatEventSummary("cordarone")}
-            </Text>
-          </View>
+          {cprEpisodeSummaries.length > 0 ? (
+            <View style={styles.summaryEpisodesContainer}>
+              {cprEpisodeSummaries.map((episode) =>
+                renderCprEpisodeSummary(
+                  episode,
+                  cprEpisodeSummaries.length > 1,
+                ),
+              )}
+            </View>
+          ) : (
+            <React.Fragment>
+              <View style={[styles.cardRow, { marginTop: 8 }]}>
+                {renderEventSummaryLine(
+                  "CHOCS DÉLIVRÉS",
+                  session
+                    ? session.events.filter((event) => event.type === "shock")
+                    : [],
+                )}
+              </View>
+              <View style={[styles.cardRow, { marginTop: 8 }]}>
+                {renderEventSummaryLine(
+                  "ADRÉNALINE",
+                  session
+                    ? session.events.filter(
+                        (event) => event.type === "adrenaline",
+                      )
+                    : [],
+                )}
+              </View>
+              <View style={[styles.cardRow, { marginTop: 8 }]}>
+                {renderEventSummaryLine(
+                  "CORDARONE",
+                  session
+                    ? session.events.filter(
+                        (event) => event.type === "cordarone",
+                      )
+                    : [],
+                )}
+              </View>
+            </React.Fragment>
+          )}
           {summaryTitle === "Décès" && (
             <View style={[styles.cardRow, { marginTop: 8 }]}>
               <Text style={[styles.summaryCardText, textStyle]}>
@@ -554,20 +660,10 @@ export default function CprEnd() {
 
         {/* Pediatrics Card */}
         {session?.pediatricData && (
-          <View
-            style={[styles.card, cardStyle]}
-          >
-            <View style={styles.cardHeaderRow}>
-              <FontAwesome5
-                name="child"
-                size={18}
-                color={isDark ? "#fff" : "black"}
-                style={styles.iconWidth}
-              />
-              <Text style={[styles.cardTitle, cardTitleStyle]}>
-                Données pédiatriques:
-              </Text>
-            </View>
+          <View style={[styles.card, cardStyle]}>
+            <Text style={[styles.cardTitle, textStyle]}>
+              Données pédiatriques:
+            </Text>
             <View style={[styles.divider, dividerStyle]} />
             {session.pediatricData.inputMode === "weight" ? (
               <Text style={[styles.itemText, textStyle]}>
@@ -595,9 +691,7 @@ export default function CprEnd() {
         )}
 
         {/* Actions Card */}
-        <View
-          style={[styles.card, cardStyle]}
-        >
+        <View style={[styles.card, cardStyle]}>
           <View style={styles.cardHeaderRow}>
             <Text style={[styles.cardTitle, textStyle]}>
               Actions réalisées:
@@ -605,9 +699,7 @@ export default function CprEnd() {
           </View>
           <View style={[styles.divider, dividerStyle]} />
           {actions.length === 0 ? (
-            <Text
-              style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}
-            >
+            <Text style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}>
               Aucune action.
             </Text>
           ) : (
@@ -627,9 +719,7 @@ export default function CprEnd() {
         </View>
 
         {/* Events Card */}
-        <View
-          style={[styles.card, cardStyle]}
-        >
+        <View style={[styles.card, cardStyle]}>
           <View style={styles.cardHeaderRow}>
             <Text style={[styles.cardTitle, textStyle]}>
               Événements saisis:
@@ -637,9 +727,7 @@ export default function CprEnd() {
           </View>
           <View style={[styles.divider, dividerStyle]} />
           {customEvents.length === 0 ? (
-            <Text
-              style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}
-            >
+            <Text style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}>
               Aucun événement.
             </Text>
           ) : (
@@ -819,6 +907,25 @@ const styles = StyleSheet.create({
   summaryCardLabel: {
     fontWeight: "700",
     textDecorationLine: "underline",
+  },
+  summaryLineLabel: {
+    fontWeight: "700",
+  },
+  boldValue: {
+    fontWeight: "700",
+  },
+  cprSummaryTitle: {
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  cprEpisodeBlock: {
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+    paddingTop: 10,
+    marginTop: 10,
+  },
+  summaryEpisodesContainer: {
+    marginTop: 8,
   },
   cardTitle: {
     fontSize: 16,

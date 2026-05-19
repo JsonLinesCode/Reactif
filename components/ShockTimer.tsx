@@ -29,8 +29,14 @@ interface ShockTimerProps {
   shockCount?: number;
   resetRequest?: {
     token: number;
-    target: "shockTimer" | "cordarone" | "adrenaline" | null;
-    sourceEventType?: "shock" | "analysis" | "cordarone" | "adrenaline" | null;
+    target: "shockTimer" | "cordarone" | "adrenaline" | "remplissage" | null;
+    sourceEventType?:
+      | "shock"
+      | "analysis"
+      | "cordarone"
+      | "adrenaline"
+      | "event"
+      | null;
   };
 }
 
@@ -502,6 +508,8 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#000",
     textTransform: "uppercase",
+    textAlign: "center",
+    alignSelf: "stretch",
     marginTop: 4,
   },
   badge: {
