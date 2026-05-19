@@ -34,6 +34,8 @@ import {
   getEventsWithCycles,
 } from "@/utils/sessionUtils";
 import { router, Stack, useLocalSearchParams } from "expo-router";
+import {asyncWrapProviders} from "node:async_hooks";
+import NONE = module
 
 const AnimatedTouchableOpacity =
   Animated.createAnimatedComponent(TouchableOpacity);
@@ -114,6 +116,9 @@ export default function CprEnd() {
     backgroundColor: isDark ? "#222121" : "#fff",
     borderColor: isDark ? "#555" : "#E0E0E0",
   };
+
+  const cprMode = session?.mode || sessionStore.getSession()?.mode || "adult";
+
   const cardTitleStyle = { color: isDark ? "#93c5fd" : "#0D47A1" };
   const dividerStyle = { backgroundColor: isDark ? "#555" : "#EEEEEE" };
   const neutralButtonColor = isDark ? "#fff" : "#007BFF";
@@ -402,6 +407,7 @@ export default function CprEnd() {
             </View>
           </View>
 
+          {cprMode !== "neonatal" ? (
           <View style={styles.ecgSection}>
             <AnimatedTouchableOpacity
               onPress={handleEcgPress}
@@ -490,6 +496,7 @@ export default function CprEnd() {
               </View>
             </AnimatedTouchableOpacity>
           </View>
+          ) : null}
 
           <View style={styles.buttonGroupConfirm}>
             <TouchableOpacity
