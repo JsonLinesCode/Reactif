@@ -29,8 +29,14 @@ interface ShockTimerProps {
   shockCount?: number;
   resetRequest?: {
     token: number;
-    target: "shockTimer" | "cordarone" | "adrenaline" | null;
-    sourceEventType?: "shock" | "analysis" | "cordarone" | "adrenaline" | null;
+    target: "shockTimer" | "cordarone" | "adrenaline" | "remplissage" | null;
+    sourceEventType?:
+      | "shock"
+      | "analysis"
+      | "cordarone"
+      | "adrenaline"
+      | "event"
+      | null;
   };
 }
 
@@ -44,13 +50,17 @@ export default function ShockTimer({
   isActive = true,
   lastShockTime,
   lastAnalysisTime,
-  durationSeconds = 120,
+  durationSeconds = 120, // default override later
   warningSeconds = 10,
   shockCount = 0,
   resetRequest,
 }: ShockTimerProps) {
+  const cprMode = sessionStore.getSession()?.mode || "adult";
+  const isNeonatal = cprMode === "neonatal";
+  const effectiveDurationSeconds = isNeonatal ? 30 : durationSeconds;
+
   const { width } = useWindowDimensions();
-  const [timeLeft, setTimeLeft] = useState(durationSeconds);
+  const [timeLeft, setTimeLeft] = useState(effectiveDurationSeconds);
   const [localStartTime, setLocalStartTime] = useState<number | null>(null);
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -78,6 +88,7 @@ export default function ShockTimer({
   const [localShockCount, setLocalShockCount] = useState<number>(
     shockCount || 0,
   );
+
   const [localLastAnalysisTime, setLocalLastAnalysisTime] = useState<
     number | null
   >(null);
@@ -95,7 +106,7 @@ export default function ShockTimer({
 
     // If there's no start time for shock or analysis, show full duration
     if (!effectiveStartTime && !effectiveAnalysisStart) {
-      setTimeLeft(durationSeconds);
+      setTimeLeft(effectiveDurationSeconds);
       stopBlinking();
       scaleAnim.setValue(1);
       soundPlayedRef.current = false;
@@ -109,29 +120,29 @@ export default function ShockTimer({
       if (
         !analysisSuppressedByShock &&
         effectiveAnalysisStart &&
-        (!lastShockTime || effectiveAnalysisStart > lastShockTime)
+        (!lastShockTime || effectiveAnalysisStart > lastShockTime || isNeonatal)
       ) {
         const elapsedAnalysis = Math.floor(
           (now - effectiveAnalysisStart) / 1000,
         );
         const remainingAnalysis = Math.max(
           0,
-          durationSeconds - elapsedAnalysis,
+          effectiveDurationSeconds - elapsedAnalysis,
         );
         setTimeLeft(remainingAnalysis);
         return;
-      } else if (lastShockTime || effectiveStartTime) {
+      } else if (!isNeonatal && (lastShockTime || effectiveStartTime)) {
         const shockBase = lastShockTime ?? effectiveStartTime;
         if (!shockBase) {
-          setTimeLeft(durationSeconds);
+          setTimeLeft(effectiveDurationSeconds);
           return;
         }
         const elapsedShock = Math.floor((now - shockBase) / 1000);
-        const remainingShock = Math.max(0, durationSeconds - elapsedShock);
+        const remainingShock = Math.max(0, effectiveDurationSeconds - elapsedShock);
         setTimeLeft(remainingShock);
         return;
       }
-      setTimeLeft(durationSeconds);
+      setTimeLeft(effectiveDurationSeconds);
     };
 
     updateTimer();
@@ -174,12 +185,13 @@ export default function ShockTimer({
   // Reset this timer only when cancel targets the shock/analyse timer
   useEffect(() => {
     if (!resetRequest || resetRequest.target !== "shockTimer") return;
+
     setLocalStartTime(null);
     setLocalLastAnalysisTime(null);
     if (resetRequest.sourceEventType === "shock") {
       setLocalShockCount((c) => Math.max(0, c - 1));
     }
-    setTimeLeft(durationSeconds);
+    setTimeLeft(effectiveDurationSeconds);
     stopBlinking();
     scaleAnim.setValue(1);
     soundPlayedRef.current = false;
@@ -278,7 +290,7 @@ export default function ShockTimer({
     setLocalShockCount((c) => c + 1);
     setLocalLastAnalysisTime(null);
     setAnalysisSuppressedByShock(true);
-    setTimeLeft(durationSeconds);
+    setTimeLeft(effectiveDurationSeconds);
     onShock();
   };
 
@@ -292,7 +304,7 @@ export default function ShockTimer({
     const now = Date.now();
     setAnalysisSuppressedByShock(false);
     setLocalLastAnalysisTime(now);
-    setTimeLeft(durationSeconds);
+    setTimeLeft(effectiveDurationSeconds);
     onAnalysis();
   };
 
@@ -309,78 +321,65 @@ export default function ShockTimer({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const progress = durationSeconds > 0 ? timeLeft / durationSeconds : 0;
+  const progress = effectiveDurationSeconds > 0 ? timeLeft / effectiveDurationSeconds : 0;
   const strokeDashoffset = circumference * (1 - progress);
 
   return (
     <View style={styles.container}>
-      <AnimatedTouchableOpacity
-        onPress={handleShockPress}
-        onPressIn={() => {
-          Animated.timing(shockBounceAnim, {
-            toValue: 0.95,
-            duration: 100,
-            useNativeDriver: true,
-          }).start();
-        }}
-        onPressOut={() => {
-          Animated.timing(shockBounceAnim, {
-            toValue: 1,
-            duration: 100,
-            useNativeDriver: true,
-          }).start();
-        }}
-        activeOpacity={0.8}
-        style={{
-          transform: [{ scale: Animated.multiply(scaleAnim, shockBounceAnim) }],
-        }}
-      >
-        <View
-          style={[
-            styles.buttonCircle,
-            {
-              width: circleSize - 6,
-              height: circleSize - 6,
-              borderRadius: (circleSize - 6) / 2,
-            },
-            theme === "dark"
-              ? { backgroundColor: "#353636" }
-              : { backgroundColor: "#F5F5F5" },
-          ]}
+      {!isNeonatal && (
+        <AnimatedTouchableOpacity
+          onPress={handleShockPress}
+          onPressIn={() => {
+            Animated.timing(shockBounceAnim, {
+              toValue: 0.95,
+              duration: 100,
+              useNativeDriver: true,
+            }).start();
+          }}
+          onPressOut={() => {
+            Animated.timing(shockBounceAnim, {
+              toValue: 1,
+              duration: 100,
+              useNativeDriver: true,
+            }).start();
+          }}
+          activeOpacity={0.8}
+          style={{
+            transform: [{ scale: Animated.multiply(scaleAnim, shockBounceAnim) }],
+          }}
         >
-          <Ionicons
-            name="flash"
-            size={40}
-            color={theme === "dark" ? "#FFFF" : "#000"}
-          />
-          <Text
+          <View
             style={[
-              styles.labelText,
-              { color: theme === "dark" ? "#FFFF" : "#000" },
+              styles.buttonCircle,
+              {
+                width: circleSize - 6,
+                height: circleSize - 6,
+                borderRadius: (circleSize - 6) / 2,
+              },
+              theme === "dark"
+                ? { backgroundColor: "#353636" }
+                : { backgroundColor: "#F5F5F5" },
             ]}
           >
-            CHOC
-          </Text>
-          {energyDose ? (
+            <Ionicons
+              name="flash"
+              size={40}
+              color={theme === "dark" ? "#FFFF" : "#000"}
+            />
             <Text
               style={[
-                styles.pediatricHint,
+                styles.labelText,
                 { color: theme === "dark" ? "#FFFF" : "#000" },
               ]}
             >
-              {energyDose}J
+              CHOC
             </Text>
-          ) : null}
-          <Pressable
-            style={styles.badge}
-            onPress={handleShockBadgePress}
-            onPressIn={(event) => event.stopPropagation()}
-            hitSlop={10}
-          >
-            <Text style={styles.badgeText}>{localShockCount}</Text>
-          </Pressable>
-        </View>
-      </AnimatedTouchableOpacity>
+            {energyDose ? (
+              <Text style={styles.energyText}>{energyDose}J</Text>
+            ) : null}
+          </View>
+        </AnimatedTouchableOpacity>
+      )}
 
       <AnimatedTouchableOpacity
         onPress={handleAnalysisPress}
@@ -458,7 +457,7 @@ export default function ShockTimer({
               theme === "dark" ? { color: "#FFFF" } : { color: "#000" },
             ]}
           >
-            ANALYSE
+            {isNeonatal ? "ANALYSE FC" : "ANALYSE"}
           </Text>
           <Text
             style={[
@@ -509,6 +508,8 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#000",
     textTransform: "uppercase",
+    textAlign: "center",
+    alignSelf: "stretch",
     marginTop: 4,
   },
   badge: {
@@ -528,6 +529,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   pediatricHint: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 6,
+  },
+  energyText: {
     fontSize: 16,
     fontWeight: "700",
     marginTop: 6,

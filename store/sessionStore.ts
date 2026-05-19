@@ -43,13 +43,14 @@ class SessionStore {
 
   constructor() {
     this.loadHistory();
-    this.startNewSession();
+    this.startNewSession("adult");
   }
 
-  startNewSession() {
+  startNewSession(mode: "adult" | "pediatric" | "neonatal" = "adult") {
     this.currentSession = {
       id: this.createSessionId(),
       startTime: Date.now(),
+      mode,
       events: [],
     };
     this.notifyListeners();

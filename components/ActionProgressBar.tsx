@@ -25,9 +25,9 @@ interface ActionProgressBarProps {
   subtitle?: string;
   resetRequest?: {
     token: number;
-    target: "shockTimer" | "cordarone" | "adrenaline" | null;
+    target: "shockTimer" | "cordarone" | "adrenaline" | "remplissage" | null;
   };
-  resetKey?: "cordarone" | "adrenaline";
+  resetKey?: "cordarone" | "adrenaline" | "remplissage";
 }
 
 const AnimatedTouchableOpacity =
@@ -113,9 +113,11 @@ export default function ActionProgressBar({
     stopBlinking();
   }, [resetRequest, resetKey]);
 
+  const hasTimer = durationSeconds > 0;
   const timeLeft = Math.max(0, durationSeconds - elapsed);
-  const isExpired = elapsed >= durationSeconds;
+  const isExpired = hasTimer && elapsed >= durationSeconds;
   const midpointWarning = Math.max(1, Math.floor(warningSeconds / 2));
+  const reminderSoundKind = resetKey === "remplissage" ? undefined : resetKey;
 
   useEffect(() => {
     if (!isActive) {
@@ -132,7 +134,7 @@ export default function ActionProgressBar({
 
     if (isExpired) {
       if (!soundPlayedRef.current) {
-        sessionController.playReminderPattern("end", resetKey);
+        sessionController.playReminderPattern("end", reminderSoundKind);
         triggerHaptic();
         soundPlayedRef.current = true;
       }
@@ -143,7 +145,7 @@ export default function ActionProgressBar({
         timeLeft === warningSeconds &&
         !firstReminderPlayedRef.current
       ) {
-        sessionController.playReminderPattern("first", resetKey);
+        sessionController.playReminderPattern("first", reminderSoundKind);
         firstReminderPlayedRef.current = true;
       }
 
@@ -153,7 +155,7 @@ export default function ActionProgressBar({
         timeLeft < warningSeconds &&
         !midReminderPlayedRef.current
       ) {
-        sessionController.playReminderPattern("mid", resetKey);
+        sessionController.playReminderPattern("mid", reminderSoundKind);
         midReminderPlayedRef.current = true;
       }
 
@@ -174,6 +176,7 @@ export default function ActionProgressBar({
     warningSeconds,
     count,
     resetKey,
+    reminderSoundKind,
   ]);
 
   const triggerHaptic = async () => {
@@ -240,9 +243,9 @@ export default function ActionProgressBar({
 
   const progressPercent = Math.min(
     100,
-    Math.max(0, (timeLeft / durationSeconds) * 100),
+    Math.max(0, hasTimer ? (timeLeft / durationSeconds) * 100 : 100),
   );
-  const timeLeftText = formatSecondsToClock(timeLeft);
+  const timeLeftText = hasTimer ? formatSecondsToClock(timeLeft) : "";
 
   return (
     <View style={styles.buttonContainer}>
@@ -300,7 +303,7 @@ export default function ActionProgressBar({
                 <Text style={[styles.subtitle, { color }]}>{subtitle}</Text>
               ) : null}
             </View>
-            <Text style={[styles.timerRight, { color }]}>{timeLeftText}</Text>
+            {hasTimer && <Text style={[styles.timerRight, { color }]}>{timeLeftText}</Text>}
           </View>
         </View>
 
@@ -341,7 +344,7 @@ export default function ActionProgressBar({
                 </Text>
               ) : null}
             </View>
-            <Text style={styles.timerRight}>{timeLeftText}</Text>
+            {hasTimer && <Text style={styles.timerRight}>{timeLeftText}</Text>}
           </View>
         </View>
       </AnimatedTouchableOpacity>

@@ -68,11 +68,7 @@ export default function CprEndFirstPage() {
 
         <View style={styles.buttonGroup}>
           <TouchableOpacity
-            style={[
-              styles.button,
-              styles.outlineButton,
-              outlineButtonStyle,
-            ]}
+            style={[styles.button, styles.outlineButton, outlineButtonStyle]}
             onPress={handleDeath}
           >
             <Text style={[styles.buttonText, outlineButtonTextStyle]}>
@@ -81,11 +77,7 @@ export default function CprEndFirstPage() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.button,
-              styles.outlineButton,
-              outlineButtonStyle,
-            ]}
+            style={[styles.button, styles.outlineButton, outlineButtonStyle]}
             onPress={handleRacs}
           >
             <View>
@@ -93,23 +85,22 @@ export default function CprEndFirstPage() {
                 style={[
                   styles.buttonText,
                   outlineButtonTextStyle,
-                  { fontSize: 17 },
+                  { fontSize: 20 },
                 ]}
               >
-                Reprise d&#39;activité respiratoire spontanée
+                RACS
               </Text>
               <Text
                 style={[
                   styles.buttonText,
                   outlineButtonTextStyle,
-                  { fontSize: 20 },
+                  { fontSize: 15 },
                 ]}
               >
-                (RACS)
+                (Reprise d&#39;activité circulatoire spontanée)
               </Text>
             </View>
           </TouchableOpacity>
-
         </View>
       </View>
     </SafeAreaView>

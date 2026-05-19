@@ -1,12 +1,14 @@
 import { CprEvent, CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import {
-  formatDuration,
+  CprEpisodeSummary,
   formatElapsedFromStart,
   formatEventDetails,
   formatEventType,
   formatHumanReadableDateTime,
   generateSessionHtml,
+  getCprDurationMs,
+  getCprEpisodeSummaries,
   getEventsWithCycles,
 } from "@/utils/sessionUtils";
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
@@ -71,11 +73,70 @@ export default function HistoryDetail() {
     return getEventsWithCycles(session);
   }, [session]);
 
-  const shockCount = useMemo(() => {
-    if (!session) return 0;
-    return session.events.filter((evt: CprEvent) => evt.type === "shock")
-      .length;
+  const cprEpisodeSummaries = useMemo(() => {
+    if (!session) return [];
+    return getCprEpisodeSummaries(session);
   }, [session]);
+
+  const formatTime = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const formatShortClockTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const hh = date.getHours().toString().padStart(2, "0");
+    const mm = date.getMinutes().toString().padStart(2, "0");
+    return `${hh}:${mm}`;
+  };
+
+  const formatDurationMs = (durationMs: number) =>
+    formatTime(Math.floor(Math.max(0, durationMs) / 1000));
+
+  const renderEventSummaryLine = (label: string, events: CprEvent[]) => (
+    <Text style={[styles.headerLine, secondaryTextStyle]}>
+      <Text style={styles.summaryLineLabel}>{label}</Text> :{" "}
+      <Text style={styles.boldValue}>{events.length}</Text>
+      {events.map((event, index) => (
+        <Text key={`${label}-${event.timestamp}-${index}`}>
+          {" "}
+          <Text style={styles.boldValue}>({index + 1})</Text>{" "}
+          {formatShortClockTime(event.timestamp)}
+        </Text>
+      ))}
+    </Text>
+  );
+
+  const renderCprEpisodeSummary = (
+    episode: CprEpisodeSummary,
+    hasMultipleEpisodes: boolean,
+  ) => {
+    const durationSeconds = Math.max(
+      0,
+      Math.floor((episode.endTime - episode.startTime) / 1000),
+    );
+
+    return (
+      <View
+        key={`history-cpr-summary-${episode.cycle}`}
+        style={hasMultipleEpisodes ? styles.cprEpisodeBlock : undefined}
+      >
+        {hasMultipleEpisodes ? (
+          <Text style={[styles.headerTitle, primaryTextStyle]}>
+            Résumé RCP {episode.cycle}
+          </Text>
+        ) : null}
+        <Text style={[styles.headerLine, secondaryTextStyle]}>
+          Durée RCP {episode.cycle} :{" "}
+          <Text style={styles.boldValue}>{formatTime(durationSeconds)}</Text>
+        </Text>
+        {renderEventSummaryLine("Chocs", episode.shock)}
+        {renderEventSummaryLine("Adrénaline", episode.adrenaline)}
+        {renderEventSummaryLine("Cordarone", episode.cordarone)}
+      </View>
+    );
+  };
 
   const handleExport = async () => {
     if (!session) return;
@@ -132,6 +193,8 @@ export default function HistoryDetail() {
   }
 
   const startDate = new Date(session.startTime);
+  const cprDurationText = formatDurationMs(getCprDurationMs(session));
+  const hasMultipleEpisodes = cprEpisodeSummaries.length > 1;
 
   return (
     <SafeAreaView
@@ -155,7 +218,7 @@ export default function HistoryDetail() {
           ]}
         >
           <Text style={[styles.headerTitle, primaryTextStyle]}>
-            Session RCP complète
+            Résumé RCP
           </Text>
           <Text style={[styles.headerLine, secondaryTextStyle]}>
             Date: {startDate.toLocaleDateString()}
@@ -213,11 +276,30 @@ export default function HistoryDetail() {
             </View>
           )}
           <Text style={[styles.headerLine, secondaryTextStyle]}>
-            Duree: {formatDuration(session.startTime, session.endTime)}
+            Durée totale : <Text style={styles.boldValue}>{cprDurationText}</Text>
           </Text>
-          <Text style={[styles.headerLine, secondaryTextStyle]}>
-            Chocs: {shockCount}
-          </Text>
+          {cprEpisodeSummaries.length > 0 ? (
+            <View style={styles.summaryEpisodesContainer}>
+              {cprEpisodeSummaries.map((episode) =>
+                renderCprEpisodeSummary(episode, hasMultipleEpisodes),
+              )}
+            </View>
+          ) : (
+            <View style={styles.summaryEpisodesContainer}>
+              {renderEventSummaryLine(
+                "Chocs",
+                session.events.filter((event) => event.type === "shock"),
+              )}
+              {renderEventSummaryLine(
+                "Adrénaline",
+                session.events.filter((event) => event.type === "adrenaline"),
+              )}
+              {renderEventSummaryLine(
+                "Cordarone",
+                session.events.filter((event) => event.type === "cordarone"),
+              )}
+            </View>
+          )}
           <Text style={[styles.headerLine, secondaryTextStyle]}>
             Événements: {session.events.length}
           </Text>
@@ -353,6 +435,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#374151",
     marginBottom: 4,
+  },
+  summaryLineLabel: {
+    fontWeight: "700",
+  },
+  boldValue: {
+    fontWeight: "700",
+  },
+  summaryEpisodesContainer: {
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  cprEpisodeBlock: {
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+    paddingTop: 10,
+    marginTop: 10,
   },
   timelineCard: {
     backgroundColor: "#fff",

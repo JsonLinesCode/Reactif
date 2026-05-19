@@ -22,15 +22,18 @@ import Svg, { Circle, G } from "react-native-svg";
 
 import EventSelectionModal from "@/components/EventSelectionModal";
 import { sessionController } from "@/controllers/SessionController";
-import { CprSession } from "@/models/session";
+import { CprEvent, CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import {
+  CprEpisodeSummary,
   formatElapsedFromStart,
   formatEventDetails,
   formatEventType,
   formatHumanReadableDateTime,
   formatHumanReadableTime,
   formatTimeWithLetters,
+  getCprDurationMs,
+  getCprEpisodeSummaries,
   getEventsWithCycles,
 } from "@/utils/sessionUtils";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -43,33 +46,52 @@ export default function CprEnd() {
   const [theme, setTheme] = useState(sessionStore.theme);
   const isDark = theme === "dark";
   const bgStyle = isDark ? { backgroundColor: "#353636" } : {};
-  const textStyle = { color: isDark ? "#fff" : "#333" };
+  const textStyle = { color: isDark ? "#fff" : "#374151" };
   const mutedTextStyle = { color: isDark ? "#cbd5e1" : "#64748b" };
   const cardStyle = {
     backgroundColor: isDark ? "#222121" : "#fff",
-    borderColor: isDark ? "#555" : "#E0E0E0",
+    borderColor: isDark ? "#555" : "#e5e7eb",
   };
-  const cardTitleStyle = { color: isDark ? "#93c5fd" : "#0D47A1" };
+
   const dividerStyle = { backgroundColor: isDark ? "#555" : "#EEEEEE" };
   const neutralButtonColor = isDark ? "#fff" : "#007BFF";
   const outlineButtonStyle = {
     backgroundColor: "transparent",
     borderColor: neutralButtonColor,
+    borderWidth: 2,
   };
   const outlineButtonTextStyle = { color: neutralButtonColor };
+  const summaryPrimaryIconColor = isDark ? neutralButtonColor : "#fff";
+  const summarySecondaryIconColor = isDark ? neutralButtonColor : "#334155";
   const params = useLocalSearchParams();
   const initialMode = params.mode === "death" ? "summary" : "racs";
 
   const [step, setStep] = useState<"racs" | "summary">(initialMode as any);
   const [session, setSession] = useState<CprSession | null>(null);
+  const cprMode = session?.mode || sessionStore.getSession()?.mode || "adult";
   const ecgDurationSeconds = 8 * 60;
   const [ecgTimeLeft, setEcgTimeLeft] = useState(ecgDurationSeconds);
   const ecgAlertedRef = useRef(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [racsElapsedSeconds, setRacsElapsedSeconds] = useState(0);
-  const [cprElapsedSeconds, setCprElapsedSeconds] = useState(0);
   const racsStartRef = useRef<number | null>(null);
   const ecgBounceAnim = useRef(new Animated.Value(1)).current;
+  const fadeColor =
+    isDark ? "#353636" : step === "summary" ? "#f3f4f6" : "#fff";
+
+  const renderBottomFade = (style?: object) => (
+    <View pointerEvents="none" style={[styles.bottomScrollFade, style]}>
+      {[0.05, 0.18, 0.36, 0.62, 0.9].map((opacity) => (
+        <View
+          key={opacity}
+          style={[
+            styles.bottomScrollFadeBand,
+            { backgroundColor: fadeColor, opacity },
+          ]}
+        />
+      ))}
+    </View>
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -134,17 +156,12 @@ export default function CprEnd() {
           Math.floor((Date.now() - racsStartRef.current) / 1000),
         );
       }
-      if (session?.startTime) {
-        setCprElapsedSeconds(
-          Math.floor((Date.now() - session.startTime) / 1000),
-        );
-      }
     };
 
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, [session?.startTime, step]);
+  }, [step]);
 
   const handleResume = () => {
     // "Reprendre la RCP"
@@ -205,8 +222,9 @@ export default function CprEnd() {
   };
 
   const getDurationString = () => {
-    if (!session || !session.endTime) return "0 minutes et 0 secondes";
-    const diff = session.endTime - session.startTime;
+    if (!session) return "0 minutes et 0 secondes";
+
+    const diff = getCprDurationMs(session);
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     return `${minutes} minutes et ${seconds} secondes`;
@@ -218,21 +236,53 @@ export default function CprEnd() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const formatEventSummary = (type: string) => {
-    if (!session) return "0";
-    const events = session.events.filter((e: any) => e.type === type);
-    if (events.length === 0) return "0";
+  const formatShortClockTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const hh = date.getHours().toString().padStart(2, "0");
+    const mm = date.getMinutes().toString().padStart(2, "0");
+    return `${hh}:${mm}`;
+  };
 
-    const details = events
-      .map((e: any, index: number) => {
-        const date = new Date(e.timestamp);
-        const hh = date.getHours().toString().padStart(2, "0");
-        const mm = date.getMinutes().toString().padStart(2, "0");
-        return `${index + 1}: ${hh}:${mm}`;
-      })
-      .join("; ");
+  const renderEventSummaryLine = (label: string, events: CprEvent[]) => (
+    <Text style={[styles.cardText, textStyle]}>
+      <Text style={styles.summaryLineLabel}>{label}</Text> :{" "}
+      <Text style={styles.boldValue}>{events.length}</Text>
+      {events.map((event, index) => (
+        <Text key={`${label}-${event.timestamp}-${index}`}>
+          {" "}
+          <Text style={styles.boldValue}>({index + 1})</Text>{" "}
+          {formatShortClockTime(event.timestamp)}
+        </Text>
+      ))}
+    </Text>
+  );
 
-    return `${events.length} (${details})`;
+  const renderCprEpisodeSummary = (
+    episode: CprEpisodeSummary,
+    hasMultipleEpisodes: boolean,
+  ) => {
+    const durationSeconds = Math.max(
+      0,
+      Math.floor((episode.endTime - episode.startTime) / 1000),
+    );
+
+    return (
+      <View
+        key={`cpr-summary-${episode.cycle}`}
+        style={hasMultipleEpisodes ? styles.cprEpisodeBlock : undefined}
+      >
+        <Text style={[styles.cardText, styles.cprSummaryTitle, textStyle]}>
+          {hasMultipleEpisodes ? `Résumé RCP ${episode.cycle}` : "Résumé RCP"}
+        </Text>
+        <Text style={[styles.cardText, textStyle]}>
+          Durée RCP {episode.cycle} :{" "}
+          <Text style={styles.boldValue}>{formatTime(durationSeconds)}</Text>
+        </Text>
+        {renderEventSummaryLine("Chocs", episode.shock)}
+        {renderEventSummaryLine("Adrénaline", episode.adrenaline)}
+        {renderEventSummaryLine("Cordarone", episode.cordarone)}
+      </View>
+    );
   };
 
   const getActions = () => {
@@ -259,6 +309,7 @@ export default function CprEnd() {
   const ecgProgress =
     ecgDurationSeconds > 0 ? ecgTimeLeft / ecgDurationSeconds : 0;
   const ecgStrokeDashoffset = ecgCircumference * (1 - ecgProgress);
+  const cprEpisodeSummaries = session ? getCprEpisodeSummaries(session) : [];
 
   if (step === "racs") {
     return (
@@ -269,13 +320,7 @@ export default function CprEnd() {
             RACS
           </Text>
 
-          <View
-            style={[
-              styles.card,
-              cardStyle,
-              styles.racsSummaryCard,
-            ]}
-          >
+          <View style={[styles.card, cardStyle, styles.racsSummaryCard]}>
             <View
               style={[
                 styles.racsTimerCard,
@@ -293,117 +338,108 @@ export default function CprEnd() {
             </View>
 
             <View>
-              <Text style={[styles.cardText, textStyle]}>
-                Session RCP complète
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Date:{" "}
-                {session
-                  ? new Date(session.startTime).toLocaleDateString()
-                  : "N/A"}
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Durée RCP (totale): {formatTime(cprElapsedSeconds)}
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Chocs : {formatEventSummary("shock")}
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Adrénaline : {formatEventSummary("adrenaline")}
-              </Text>
-              <Text style={[styles.cardText, textStyle]}>
-                Cordarone : {formatEventSummary("cordarone")}
-              </Text>
+              {cprEpisodeSummaries.length > 0 ? (
+                cprEpisodeSummaries.map((episode) =>
+                  renderCprEpisodeSummary(
+                    episode,
+                    cprEpisodeSummaries.length > 1,
+                  ),
+                )
+              ) : (
+                <Text style={[styles.cardText, textStyle]}>Résumé RCP</Text>
+              )}
             </View>
-          </View>
 
-          <View style={styles.ecgSection}>
-            <AnimatedTouchableOpacity
-              onPress={handleEcgPress}
-              onPressIn={() => {
-                Animated.timing(ecgBounceAnim, {
-                  toValue: 0.95,
-                  duration: 100,
-                  useNativeDriver: true,
-                }).start();
-              }}
-              onPressOut={() => {
-                Animated.timing(ecgBounceAnim, {
-                  toValue: 1,
-                  duration: 100,
-                  useNativeDriver: true,
-                }).start();
-              }}
-              activeOpacity={0.8}
-              style={[
-                styles.ecgButton,
-                {
-                  width: ecgSize,
-                  height: ecgSize,
-                  transform: [{ scale: ecgBounceAnim }],
-                },
-              ]}
-            >
-              <Svg width={ecgSize} height={ecgSize}>
-                <G rotation="-90" origin={`${ecgCenter}, ${ecgCenter}`}>
-                  <Circle
-                    cx={ecgCenter}
-                    cy={ecgCenter}
-                    r={ecgRadius}
-                    stroke="#f5dd4b"
-                    strokeWidth={ecgStrokeWidth}
-                    fill="none"
-                  />
-                  <Circle
-                    cx={ecgCenter}
-                    cy={ecgCenter}
-                    r={ecgRadius}
-                    stroke="#FF5252"
-                    strokeWidth={ecgStrokeWidth}
-                    strokeDasharray={ecgCircumference}
-                    strokeDashoffset={ecgStrokeDashoffset}
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                </G>
-              </Svg>
-              <View
-                style={[
-                  styles.ecgInner,
-                  {
-                    width: ecgInnerSize,
-                    height: ecgInnerSize,
-                    borderRadius: ecgInnerRadius,
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="heart-pulse"
-                  size={40}
+            {cprMode !== "neonatal" ? (
+              <View style={styles.ecgSection}>
+                <AnimatedTouchableOpacity
+                  onPress={handleEcgPress}
+                  onPressIn={() => {
+                    Animated.timing(ecgBounceAnim, {
+                      toValue: 0.95,
+                      duration: 100,
+                      useNativeDriver: true,
+                    }).start();
+                  }}
+                  onPressOut={() => {
+                    Animated.timing(ecgBounceAnim, {
+                      toValue: 1,
+                      duration: 100,
+                      useNativeDriver: true,
+                    }).start();
+                  }}
+                  activeOpacity={0.8}
                   style={[
-                    isDark
-                      ? { color: "#fff", marginBottom: 4 }
-                      : { color: "#000", marginBottom: 4 },
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.ecgLabel,
-                    isDark ? { color: "#fff" } : { color: "#000" },
+                    styles.ecgButton,
+                    {
+                      width: ecgSize,
+                      height: ecgSize,
+                      transform: [{ scale: ecgBounceAnim }],
+                    },
                   ]}
                 >
-                  ECG
-                </Text>
-                <Text
-                  style={[
-                    styles.ecgTimer,
-                    isDark ? { color: "#fff" } : { color: "#000" },
-                  ]}
-                >
-                  {formatTime(ecgTimeLeft)}
-                </Text>
+                  <Svg width={ecgSize} height={ecgSize}>
+                    <G rotation="-90" origin={`${ecgCenter}, ${ecgCenter}`}>
+                      <Circle
+                        cx={ecgCenter}
+                        cy={ecgCenter}
+                        r={ecgRadius}
+                        stroke="#f5dd4b"
+                        strokeWidth={ecgStrokeWidth}
+                        fill="none"
+                      />
+                      <Circle
+                        cx={ecgCenter}
+                        cy={ecgCenter}
+                        r={ecgRadius}
+                        stroke="#FF5252"
+                        strokeWidth={ecgStrokeWidth}
+                        strokeDasharray={ecgCircumference}
+                        strokeDashoffset={ecgStrokeDashoffset}
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                    </G>
+                  </Svg>
+                  <View
+                    style={[
+                      styles.ecgInner,
+                      {
+                        width: ecgInnerSize,
+                        height: ecgInnerSize,
+                        borderRadius: ecgInnerRadius,
+                      },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name="heart-pulse"
+                      size={40}
+                      style={[
+                        isDark
+                          ? { color: "#fff", marginBottom: 4 }
+                          : { color: "#000", marginBottom: 4 },
+                      ]}
+                    />
+                    <Text
+                      style={[
+                        styles.ecgLabel,
+                        isDark ? { color: "#fff" } : { color: "#000" },
+                      ]}
+                    >
+                      ECG
+                    </Text>
+                    <Text
+                      style={[
+                        styles.ecgTimer,
+                        isDark ? { color: "#fff" } : { color: "#000" },
+                      ]}
+                    >
+                      {formatTime(ecgTimeLeft)}
+                    </Text>
+                  </View>
+                </AnimatedTouchableOpacity>
               </View>
-            </AnimatedTouchableOpacity>
+            ) : null}
           </View>
 
           <View style={styles.buttonGroupConfirm}>
@@ -486,6 +522,7 @@ export default function CprEnd() {
           onClose={() => setModalVisible(false)}
           onSave={handleSaveEvents}
         />
+        {renderBottomFade()}
       </SafeAreaView>
     );
   }
@@ -497,15 +534,14 @@ export default function CprEnd() {
     "Fin de session";
 
   return (
-    <SafeAreaView style={[styles.container, bgStyle]}>
+    <SafeAreaView style={[styles.container, styles.summaryContainer, bgStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
       <ScrollView contentContainerStyle={styles.summaryScroll}>
-        <View style={styles.header}>
+        <View style={[styles.headerCard, cardStyle]}>
           <Text
             style={[
-              styles.title,
-              styles.summaryTitle,
-              isDark ? { color: "#ccc" } : {},
+              styles.headerTitle,
+              isDark ? { color: "#fff" } : { color: "#111827" },
             ]}
           >
             {summaryTitle === "Décès" ? "DÉCÈS" : "RÉSUME DE LA RCP"}
@@ -513,33 +549,54 @@ export default function CprEnd() {
         </View>
 
         {/* Stats Card */}
-        <View
-          style={[styles.card, cardStyle]}
-        >
+        <View style={[styles.card, cardStyle]}>
           <View style={[styles.cardRow]}>
             <Text style={[styles.summaryCardText, textStyle]}>
               <Text style={styles.summaryCardLabel}>DURÉE TOTALE</Text>:{" "}
               {getDurationString()}
             </Text>
           </View>
-          <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <Text style={[styles.summaryCardText, textStyle]}>
-              <Text style={styles.summaryCardLabel}>CHOCS DÉLIVRÉS</Text> :{" "}
-              {formatEventSummary("shock")}
-            </Text>
-          </View>
-          <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <Text style={[styles.summaryCardText, textStyle]}>
-              <Text style={styles.summaryCardLabel}>ADRÉNALINE</Text> :{" "}
-              {formatEventSummary("adrenaline")}
-            </Text>
-          </View>
-          <View style={[styles.cardRow, { marginTop: 8 }]}>
-            <Text style={[styles.summaryCardText, textStyle]}>
-              <Text style={styles.summaryCardLabel}>CORDARONE</Text> :{" "}
-              {formatEventSummary("cordarone")}
-            </Text>
-          </View>
+          {cprEpisodeSummaries.length > 0 ? (
+            <View style={styles.summaryEpisodesContainer}>
+              {cprEpisodeSummaries.map((episode) =>
+                renderCprEpisodeSummary(
+                  episode,
+                  cprEpisodeSummaries.length > 1,
+                ),
+              )}
+            </View>
+          ) : (
+            <React.Fragment>
+              <View style={[styles.cardRow, { marginTop: 8 }]}>
+                {renderEventSummaryLine(
+                  "CHOCS DÉLIVRÉS",
+                  session
+                    ? session.events.filter((event) => event.type === "shock")
+                    : [],
+                )}
+              </View>
+              <View style={[styles.cardRow, { marginTop: 8 }]}>
+                {renderEventSummaryLine(
+                  "ADRÉNALINE",
+                  session
+                    ? session.events.filter(
+                        (event) => event.type === "adrenaline",
+                      )
+                    : [],
+                )}
+              </View>
+              <View style={[styles.cardRow, { marginTop: 8 }]}>
+                {renderEventSummaryLine(
+                  "CORDARONE",
+                  session
+                    ? session.events.filter(
+                        (event) => event.type === "cordarone",
+                      )
+                    : [],
+                )}
+              </View>
+            </React.Fragment>
+          )}
           {summaryTitle === "Décès" && (
             <View style={[styles.cardRow, { marginTop: 8 }]}>
               <Text style={[styles.summaryCardText, textStyle]}>
@@ -554,20 +611,10 @@ export default function CprEnd() {
 
         {/* Pediatrics Card */}
         {session?.pediatricData && (
-          <View
-            style={[styles.card, cardStyle]}
-          >
-            <View style={styles.cardHeaderRow}>
-              <FontAwesome5
-                name="child"
-                size={18}
-                color={isDark ? "#fff" : "black"}
-                style={styles.iconWidth}
-              />
-              <Text style={[styles.cardTitle, cardTitleStyle]}>
-                Données pédiatriques:
-              </Text>
-            </View>
+          <View style={[styles.card, cardStyle]}>
+            <Text style={[styles.cardTitle, textStyle]}>
+              Données pédiatriques:
+            </Text>
             <View style={[styles.divider, dividerStyle]} />
             {session.pediatricData.inputMode === "weight" ? (
               <Text style={[styles.itemText, textStyle]}>
@@ -595,9 +642,7 @@ export default function CprEnd() {
         )}
 
         {/* Actions Card */}
-        <View
-          style={[styles.card, cardStyle]}
-        >
+        <View style={[styles.card, cardStyle]}>
           <View style={styles.cardHeaderRow}>
             <Text style={[styles.cardTitle, textStyle]}>
               Actions réalisées:
@@ -605,9 +650,7 @@ export default function CprEnd() {
           </View>
           <View style={[styles.divider, dividerStyle]} />
           {actions.length === 0 ? (
-            <Text
-              style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}
-            >
+            <Text style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}>
               Aucune action.
             </Text>
           ) : (
@@ -627,9 +670,7 @@ export default function CprEnd() {
         </View>
 
         {/* Events Card */}
-        <View
-          style={[styles.card, cardStyle]}
-        >
+        <View style={[styles.card, cardStyle]}>
           <View style={styles.cardHeaderRow}>
             <Text style={[styles.cardTitle, textStyle]}>
               Événements saisis:
@@ -637,9 +678,7 @@ export default function CprEnd() {
           </View>
           <View style={[styles.divider, dividerStyle]} />
           {customEvents.length === 0 ? (
-            <Text
-              style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}
-            >
+            <Text style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}>
               Aucun événement.
             </Text>
           ) : (
@@ -664,13 +703,22 @@ export default function CprEnd() {
         <TouchableOpacity
           style={[
             styles.actionButton,
-            styles.outlineSummaryButton,
-            outlineButtonStyle,
+            styles.primarySummaryButton,
+            isDark ? outlineButtonStyle : undefined,
           ]}
           onPress={handleExportPdf}
         >
-          <FontAwesome5 name="file-pdf" size={18} color={neutralButtonColor} />
-          <Text style={[styles.actionButtonText, outlineButtonTextStyle]}>
+          <FontAwesome5
+            name="file-pdf"
+            size={18}
+            color={summaryPrimaryIconColor}
+          />
+          <Text
+            style={[
+              styles.actionButtonText,
+              isDark ? outlineButtonTextStyle : styles.primaryActionButtonText,
+            ]}
+          >
             {" "}
             Exporter en PDF
           </Text>
@@ -679,18 +727,30 @@ export default function CprEnd() {
         <TouchableOpacity
           style={[
             styles.actionButton,
-            styles.outlineSummaryButton,
-            outlineButtonStyle,
+            styles.secondarySummaryButton,
+            isDark ? outlineButtonStyle : undefined,
           ]}
           onPress={handleGoHome}
         >
-          <FontAwesome5 name="home" size={18} color={neutralButtonColor} />
-          <Text style={[styles.actionButtonText, outlineButtonTextStyle]}>
+          <FontAwesome5
+            name="home"
+            size={18}
+            color={summarySecondaryIconColor}
+          />
+          <Text
+            style={[
+              styles.actionButtonText,
+              isDark
+                ? outlineButtonTextStyle
+                : styles.secondaryActionButtonText,
+            ]}
+          >
             {" "}
             Retour à l&apos;accueil
           </Text>
         </TouchableOpacity>
       </View>
+      {renderBottomFade(styles.summaryBottomScrollFade)}
     </SafeAreaView>
   );
 }
@@ -762,10 +822,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  summaryContainer: {
+    backgroundColor: "#f3f4f6",
+  },
   summaryScroll: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
+    padding: 16,
+    paddingBottom: 100,
+    gap: 12,
   },
   header: {
     flexDirection: "row",
@@ -777,19 +840,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 0,
   },
+  headerCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+  },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 16,
-    marginBottom: 16,
-    // Shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: "#e5e7eb",
   },
   cardRow: {
     flexDirection: "row",
@@ -806,44 +874,68 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   cardText: {
-    fontSize: 16,
-    color: "#333",
+    fontSize: 14,
+    color: "#374151",
+    marginBottom: 4,
   },
   summaryCardText: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 22,
-    color: "#333",
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#374151",
     flexWrap: "wrap",
   },
   summaryCardLabel: {
     fontWeight: "700",
     textDecorationLine: "underline",
   },
+  summaryLineLabel: {
+    fontWeight: "700",
+  },
+  boldValue: {
+    fontWeight: "700",
+  },
+  cprSummaryTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 8,
+  },
+  cprEpisodeBlock: {
+    borderTopWidth: 1,
+    borderTopColor: "#f1f5f9",
+    paddingTop: 10,
+    marginTop: 10,
+  },
+  summaryEpisodesContainer: {
+    marginTop: 8,
+  },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#0D47A1",
-    marginLeft: 8,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 10,
   },
   divider: {
     height: 1,
-    backgroundColor: "#EEEEEE",
+    backgroundColor: "#f1f5f9",
     marginVertical: 8,
   },
   emptyText: {
     fontSize: 14,
-    color: "#777",
+    color: "#6b7280",
     fontStyle: "italic",
     marginTop: 4,
   },
   itemText: {
     fontSize: 15,
-    color: "#333",
+    color: "#0f172a",
     marginBottom: 4,
   },
   itemRow: {
-    marginBottom: 8,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
   },
   itemTimestamp: {
     fontSize: 13,
@@ -864,35 +956,57 @@ const styles = StyleSheet.create({
 
   actionButtonsContainer: {
     backgroundColor: "transparent",
-    marginTop: 5,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    gap: 8,
+    position: "absolute",
+    left: 16,
+    right: 16,
+    bottom: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 10,
   },
   actionButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
-    borderRadius: 8,
-    borderColor: "#007BFF",
-    borderWidth: 2,
+    minHeight: 46,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 8,
   },
   actionButtonText: {
-    color: "#007BFF",
-
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 10,
+    fontSize: 15,
+    fontWeight: "700",
     textTransform: "uppercase",
-    lineHeight: 20,
     textAlign: "center",
     flexShrink: 1,
     includeFontPadding: false,
   },
-  outlineSummaryButton: {
-    backgroundColor: "transparent",
-    borderColor: "#007BFF",
+  primarySummaryButton: {
+    backgroundColor: "#2563eb",
+  },
+  secondarySummaryButton: {
+    backgroundColor: "#e2e8f0",
+  },
+  primaryActionButtonText: {
+    color: "#fff",
+  },
+  secondaryActionButtonText: {
+    color: "#334155",
+  },
+  bottomScrollFade: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 42,
+  },
+  summaryBottomScrollFade: {
+    bottom: 74,
+  },
+  bottomScrollFadeBand: {
+    flex: 1,
   },
 
   // Confirm styles
@@ -920,6 +1034,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     width: "100%",
+    paddingBottom: 8,
   },
   racsTimerCard: {
     width: "100%",
@@ -945,6 +1060,7 @@ const styles = StyleSheet.create({
   buttonGroupConfirm: {
     width: "100%",
     gap: 15,
+    marginTop: 16,
   },
   racsSeparator: {
     height: 1,
@@ -989,7 +1105,7 @@ const styles = StyleSheet.create({
   ecgSection: {
     width: "100%",
     alignItems: "center",
-    marginBottom: 24,
+    marginTop: 8,
   },
   ecgButton: {
     position: "relative",

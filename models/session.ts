@@ -19,6 +19,7 @@ export interface CprSession {
   id: string; // Unique session ID
   startTime: number;
   endTime?: number;
+  mode?: "adult" | "pediatric" | "neonatal";
   pediatricData?: PediatricData; // Optional, as adult CPR might not use it or use different fields
   events: CprEvent[];
 }

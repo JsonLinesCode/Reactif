@@ -27,8 +27,8 @@ type ResetTarget = "shockTimer" | "cordarone" | "adrenaline";
 
 interface CancelResetRequest {
   token: number;
-  target: ResetTarget | null;
-  sourceEventType: "shock" | "analysis" | "cordarone" | "adrenaline" | null;
+  target: ResetTarget | "remplissage" | null;
+  sourceEventType: "shock" | "analysis" | "cordarone" | "adrenaline" | "event" | null;
 }
 
 export default function Cpr() {
@@ -55,6 +55,8 @@ export default function Cpr() {
   const [bpm, setBpm] = useState(100);
   const [isMuted, setIsMuted] = useState(true);
   const isScreenActive = useIsFocused();
+
+  const cprMode = sessionStore.getSession()?.mode || "adult";
 
   // Doses State
   const [doses, setDoses] = useState({
@@ -244,8 +246,9 @@ export default function Cpr() {
   };
 
   const handleCancel = () => {
-    const lastEventType = sessionStore.getSession()?.events.at(-1)?.type;
-    let target: ResetTarget | null = null;
+    const lastEvent = sessionStore.getSession()?.events.at(-1);
+    const lastEventType = lastEvent?.type;
+    let target: ResetTarget | "remplissage" | null = null;
 
     if (lastEventType === "shock" || lastEventType === "analysis") {
       target = "shockTimer";
@@ -256,6 +259,9 @@ export default function Cpr() {
     if (lastEventType === "adrenaline") {
       target = "adrenaline";
     }
+    if (lastEventType === "event" && lastEvent?.details === "REMPLISSAGE") {
+      target = "remplissage";
+    }
 
     sessionController.cancelLast();
     setCancelResetRequest((prev) => ({
@@ -265,7 +271,8 @@ export default function Cpr() {
         lastEventType === "shock" ||
         lastEventType === "analysis" ||
         lastEventType === "cordarone" ||
-        lastEventType === "adrenaline"
+        lastEventType === "adrenaline" ||
+        lastEventType === "event"
           ? lastEventType
           : null,
     }));
@@ -319,27 +326,50 @@ export default function Cpr() {
             onPress={sessionController.logAdrenaline}
             lastActionTime={lastAdrenalineTimeState}
             durationSeconds={adrenalineDuration} // Use setting
-            subtitle={doses.adrenaline ? `${doses.adrenaline} mg` : undefined}
+            subtitle={
+              cprMode === "neonatal"
+                ? "10 à 30 µg/kg"
+                : doses.adrenaline
+                  ? `${doses.adrenaline} mg`
+                  : undefined
+            }
             resetRequest={cancelResetRequest}
             resetKey="adrenaline"
             warningSeconds={warningSeconds}
             isActive={isScreenActive}
           />
 
-          <ActionProgressBar
-            label="Cordarone"
-            count={cordaroneCount}
-            color="#448AFF"
-            icon={<FontAwesome5 name="syringe" size={24} />}
-            onPress={sessionController.logCordarone}
-            lastActionTime={lastCordaroneTimeState}
-            durationSeconds={cordaroneDuration} // Use setting
-            subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
-            resetRequest={cancelResetRequest}
-            resetKey="cordarone"
-            warningSeconds={warningSeconds}
-            isActive={isScreenActive}
-          />
+          {cprMode !== "neonatal" ? (
+            <ActionProgressBar
+              label="Cordarone"
+              count={cordaroneCount}
+              color="#448AFF"
+              icon={<FontAwesome5 name="syringe" size={24} />}
+              onPress={sessionController.logCordarone}
+              lastActionTime={lastCordaroneTimeState}
+              durationSeconds={cordaroneDuration} // Use setting
+              subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
+              resetRequest={cancelResetRequest}
+              resetKey="cordarone"
+              warningSeconds={warningSeconds}
+              isActive={isScreenActive}
+            />
+          ) : (
+            <ActionProgressBar
+              label="REMPLISSAGE"
+              count={sessionController.getCount("remplissage")}
+              color="#448AFF"
+              icon={<FontAwesome5 name="tint" size={24} />}
+              onPress={() => sessionController.logRemplissage()}
+              lastActionTime={null} /* no timer */
+              durationSeconds={0}
+              subtitle="10 mL/kg"
+              resetRequest={cancelResetRequest}
+              resetKey="remplissage"
+              warningSeconds={warningSeconds}
+              isActive={isScreenActive}
+            />
+          )}
         </View>
 
         {/* Action Buttons Grid */}

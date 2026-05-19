@@ -5,6 +5,15 @@ interface EventWithCycle {
   cycle: number;
 }
 
+export interface CprEpisodeSummary {
+  cycle: number;
+  startTime: number;
+  endTime: number;
+  shock: CprEvent[];
+  adrenaline: CprEvent[];
+  cordarone: CprEvent[];
+}
+
 function isRacsEvent(event: CprEvent): boolean {
   return (
     event.type === "event" &&
@@ -113,6 +122,68 @@ export function getEventsWithCycles(session: CprSession): EventWithCycle[] {
   }
 
   return eventsWithCycles;
+}
+
+const createEmptyActions = () => ({
+  shock: [] as CprEvent[],
+  adrenaline: [] as CprEvent[],
+  cordarone: [] as CprEvent[],
+});
+
+export function getCprEpisodeSummaries(
+  session: CprSession,
+): CprEpisodeSummary[] {
+  const sortedEvents = [...session.events].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
+  const summaries: CprEpisodeSummary[] = [];
+  let cycle = 1;
+  let cycleStartTime = session.startTime;
+  let actions = createEmptyActions();
+
+  for (const event of sortedEvents) {
+    if (isResumeEvent(event)) {
+      cycleStartTime = event.timestamp;
+      actions = createEmptyActions();
+      continue;
+    }
+
+    if (event.type === "shock") {
+      actions.shock.push(event);
+    } else if (event.type === "adrenaline") {
+      actions.adrenaline.push(event);
+    } else if (event.type === "cordarone") {
+      actions.cordarone.push(event);
+    }
+
+    if (isRacsEvent(event)) {
+      summaries.push({
+        cycle,
+        startTime: cycleStartTime,
+        endTime: event.timestamp,
+        shock: [...actions.shock],
+        adrenaline: [...actions.adrenaline],
+        cordarone: [...actions.cordarone],
+      });
+      cycle += 1;
+      cycleStartTime = event.timestamp;
+      actions = createEmptyActions();
+    }
+  }
+
+  return summaries;
+}
+
+export function getCprDurationMs(session: CprSession): number {
+  const summaries = getCprEpisodeSummaries(session);
+  if (summaries.length > 0) {
+    return summaries.reduce(
+      (total, episode) => total + episode.endTime - episode.startTime,
+      0,
+    );
+  }
+
+  return session.endTime ? Math.max(0, session.endTime - session.startTime) : 0;
 }
 
 export function getCurrentCycleElapsedSeconds(

@@ -104,6 +104,10 @@ export class SessionController {
     this.pushLog({ type: "adrenaline", timestamp: Date.now() });
   };
 
+  logRemplissage = () => {
+    this.pushLog({ type: "event", timestamp: Date.now(), details: "REMPLISSAGE" });
+  };
+
   logEvents = (events: string[]) => {
     const now = Date.now();
     events.forEach((event) =>
@@ -119,7 +123,12 @@ export class SessionController {
     return sessionStore.cancelLastOfType(type);
   };
 
-  getCount = (type: CprEvent["type"]) => {
+  getCount = (type: CprEvent["type"] | "remplissage") => {
+    if (type === "remplissage") {
+      return (
+        sessionStore.getSession()?.events.filter((l) => l.type === "event" && l.details === "REMPLISSAGE").length || 0
+      );
+    }
     return (
       sessionStore.getSession()?.events.filter((l) => l.type === type).length ||
       0
