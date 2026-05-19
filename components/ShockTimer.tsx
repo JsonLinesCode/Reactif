@@ -377,6 +377,15 @@ export default function ShockTimer({
             {energyDose ? (
               <Text style={styles.energyText}>{energyDose}J</Text>
             ) : null}
+            {localShockCount > 0 ? (
+              <TouchableOpacity
+                style={styles.badge}
+                onPress={handleShockBadgePress}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.badgeText}>{localShockCount}</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         </AnimatedTouchableOpacity>
       )}
