@@ -52,7 +52,8 @@ export default function CprEnd() {
     backgroundColor: isDark ? "#222121" : "#fff",
     borderColor: isDark ? "#555" : "#e5e7eb",
   };
-  const dividerStyle = { backgroundColor: isDark ? "#444" : "#f1f5f9" };
+
+  const dividerStyle = { backgroundColor: isDark ? "#555" : "#EEEEEE" };
   const neutralButtonColor = isDark ? "#fff" : "#007BFF";
   const outlineButtonStyle = {
     backgroundColor: "transparent",
@@ -67,6 +68,7 @@ export default function CprEnd() {
 
   const [step, setStep] = useState<"racs" | "summary">(initialMode as any);
   const [session, setSession] = useState<CprSession | null>(null);
+  const cprMode = session?.mode || sessionStore.getSession()?.mode || "adult";
   const ecgDurationSeconds = 8 * 60;
   const [ecgTimeLeft, setEcgTimeLeft] = useState(ecgDurationSeconds);
   const ecgAlertedRef = useRef(false);
@@ -348,94 +350,96 @@ export default function CprEnd() {
               )}
             </View>
 
-            <View style={styles.ecgSection}>
-              <AnimatedTouchableOpacity
-                onPress={handleEcgPress}
-                onPressIn={() => {
-                  Animated.timing(ecgBounceAnim, {
-                    toValue: 0.95,
-                    duration: 100,
-                    useNativeDriver: true,
-                  }).start();
-                }}
-                onPressOut={() => {
-                  Animated.timing(ecgBounceAnim, {
-                    toValue: 1,
-                    duration: 100,
-                    useNativeDriver: true,
-                  }).start();
-                }}
-                activeOpacity={0.8}
-                style={[
-                  styles.ecgButton,
-                  {
-                    width: ecgSize,
-                    height: ecgSize,
-                    transform: [{ scale: ecgBounceAnim }],
-                  },
-                ]}
-              >
-                <Svg width={ecgSize} height={ecgSize}>
-                  <G rotation="-90" origin={`${ecgCenter}, ${ecgCenter}`}>
-                    <Circle
-                      cx={ecgCenter}
-                      cy={ecgCenter}
-                      r={ecgRadius}
-                      stroke="#f5dd4b"
-                      strokeWidth={ecgStrokeWidth}
-                      fill="none"
-                    />
-                    <Circle
-                      cx={ecgCenter}
-                      cy={ecgCenter}
-                      r={ecgRadius}
-                      stroke="#FF5252"
-                      strokeWidth={ecgStrokeWidth}
-                      strokeDasharray={ecgCircumference}
-                      strokeDashoffset={ecgStrokeDashoffset}
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                  </G>
-                </Svg>
-                <View
+            {cprMode !== "neonatal" ? (
+              <View style={styles.ecgSection}>
+                <AnimatedTouchableOpacity
+                  onPress={handleEcgPress}
+                  onPressIn={() => {
+                    Animated.timing(ecgBounceAnim, {
+                      toValue: 0.95,
+                      duration: 100,
+                      useNativeDriver: true,
+                    }).start();
+                  }}
+                  onPressOut={() => {
+                    Animated.timing(ecgBounceAnim, {
+                      toValue: 1,
+                      duration: 100,
+                      useNativeDriver: true,
+                    }).start();
+                  }}
+                  activeOpacity={0.8}
                   style={[
-                    styles.ecgInner,
+                    styles.ecgButton,
                     {
-                      width: ecgInnerSize,
-                      height: ecgInnerSize,
-                      borderRadius: ecgInnerRadius,
+                      width: ecgSize,
+                      height: ecgSize,
+                      transform: [{ scale: ecgBounceAnim }],
                     },
                   ]}
                 >
-                  <MaterialCommunityIcons
-                    name="heart-pulse"
-                    size={40}
+                  <Svg width={ecgSize} height={ecgSize}>
+                    <G rotation="-90" origin={`${ecgCenter}, ${ecgCenter}`}>
+                      <Circle
+                        cx={ecgCenter}
+                        cy={ecgCenter}
+                        r={ecgRadius}
+                        stroke="#f5dd4b"
+                        strokeWidth={ecgStrokeWidth}
+                        fill="none"
+                      />
+                      <Circle
+                        cx={ecgCenter}
+                        cy={ecgCenter}
+                        r={ecgRadius}
+                        stroke="#FF5252"
+                        strokeWidth={ecgStrokeWidth}
+                        strokeDasharray={ecgCircumference}
+                        strokeDashoffset={ecgStrokeDashoffset}
+                        strokeLinecap="round"
+                        fill="none"
+                      />
+                    </G>
+                  </Svg>
+                  <View
                     style={[
-                      isDark
-                        ? { color: "#fff", marginBottom: 4 }
-                        : { color: "#000", marginBottom: 4 },
-                    ]}
-                  />
-                  <Text
-                    style={[
-                      styles.ecgLabel,
-                      isDark ? { color: "#fff" } : { color: "#000" },
+                      styles.ecgInner,
+                      {
+                        width: ecgInnerSize,
+                        height: ecgInnerSize,
+                        borderRadius: ecgInnerRadius,
+                      },
                     ]}
                   >
-                    ECG
-                  </Text>
-                  <Text
-                    style={[
-                      styles.ecgTimer,
-                      isDark ? { color: "#fff" } : { color: "#000" },
-                    ]}
-                  >
-                    {formatTime(ecgTimeLeft)}
-                  </Text>
-                </View>
-              </AnimatedTouchableOpacity>
-            </View>
+                    <MaterialCommunityIcons
+                      name="heart-pulse"
+                      size={40}
+                      style={[
+                        isDark
+                          ? { color: "#fff", marginBottom: 4 }
+                          : { color: "#000", marginBottom: 4 },
+                      ]}
+                    />
+                    <Text
+                      style={[
+                        styles.ecgLabel,
+                        isDark ? { color: "#fff" } : { color: "#000" },
+                      ]}
+                    >
+                      ECG
+                    </Text>
+                    <Text
+                      style={[
+                        styles.ecgTimer,
+                        isDark ? { color: "#fff" } : { color: "#000" },
+                      ]}
+                    >
+                      {formatTime(ecgTimeLeft)}
+                    </Text>
+                  </View>
+                </AnimatedTouchableOpacity>
+              </View>
+            ) : null}
           </View>
 
           <View style={styles.buttonGroupConfirm}>
