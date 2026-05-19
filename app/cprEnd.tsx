@@ -17,7 +17,10 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Svg, { Circle, G } from "react-native-svg";
 
 import EventSelectionModal from "@/components/EventSelectionModal";
@@ -43,6 +46,7 @@ const AnimatedTouchableOpacity =
 
 export default function CprEnd() {
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [theme, setTheme] = useState(sessionStore.theme);
   const isDark = theme === "dark";
   const bgStyle = isDark ? { backgroundColor: "#353636" } : {};
@@ -78,6 +82,9 @@ export default function CprEnd() {
   const ecgBounceAnim = useRef(new Animated.Value(1)).current;
   const fadeColor =
     isDark ? "#353636" : step === "summary" ? "#f3f4f6" : "#fff";
+  const summaryActionBottom = Math.max(16, insets.bottom + 16);
+  const summaryScrollPaddingBottom = 84 + summaryActionBottom;
+  const summaryFadeBottom = summaryActionBottom + 58;
 
   const renderBottomFade = (style?: object) => (
     <View pointerEvents="none" style={[styles.bottomScrollFade, style]}>
@@ -536,7 +543,12 @@ export default function CprEnd() {
   return (
     <SafeAreaView style={[styles.container, styles.summaryContainer, bgStyle]}>
       <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView contentContainerStyle={styles.summaryScroll}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.summaryScroll,
+          { paddingBottom: summaryScrollPaddingBottom },
+        ]}
+      >
         <View style={[styles.headerCard, cardStyle]}>
           <Text
             style={[
@@ -699,7 +711,12 @@ export default function CprEnd() {
       </ScrollView>
 
       {/* Buttons */}
-      <View style={styles.actionButtonsContainer}>
+      <View
+        style={[
+          styles.actionButtonsContainer,
+          { bottom: summaryActionBottom },
+        ]}
+      >
         <TouchableOpacity
           style={[
             styles.actionButton,
@@ -750,7 +767,10 @@ export default function CprEnd() {
           </Text>
         </TouchableOpacity>
       </View>
-      {renderBottomFade(styles.summaryBottomScrollFade)}
+      {renderBottomFade([
+        styles.summaryBottomScrollFade,
+        { bottom: summaryFadeBottom },
+      ])}
     </SafeAreaView>
   );
 }

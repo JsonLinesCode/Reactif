@@ -24,10 +24,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function HistoryDetail() {
   const { sessionId } = useLocalSearchParams<{ sessionId?: string }>();
+  const insets = useSafeAreaInsets();
   const [session, setSession] = useState<CprSession | null>(null);
   const [theme, setTheme] = useState(sessionStore.theme);
   const isDark = theme === "dark";
@@ -195,6 +200,8 @@ export default function HistoryDetail() {
   const startDate = new Date(session.startTime);
   const cprDurationText = formatDurationMs(getCprDurationMs(session));
   const hasMultipleEpisodes = cprEpisodeSummaries.length > 1;
+  const actionBarBottom = Math.max(8, insets.bottom + 8);
+  const scrollPaddingBottom = 84 + actionBarBottom;
 
   return (
     <SafeAreaView
@@ -210,7 +217,12 @@ export default function HistoryDetail() {
           headerTintColor: isDark ? "#fff" : "#111827",
         }}
       />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: scrollPaddingBottom },
+        ]}
+      >
         <View
           style={[
             styles.headerCard,
@@ -361,7 +373,7 @@ export default function HistoryDetail() {
         </View>
       </ScrollView>
 
-      <SafeAreaView style={styles.actionBar}>
+      <SafeAreaView style={[styles.actionBar, { bottom: actionBarBottom }]}>
         <TouchableOpacity
           style={[
             styles.secondaryButton,
@@ -505,6 +517,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#2563eb",
     minHeight: 46,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -516,11 +530,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     textTransform: "uppercase",
+    textAlign: "center",
+    flexShrink: 1,
+    includeFontPadding: false,
   },
   secondaryButton: {
     flex: 1,
     backgroundColor: "#e2e8f0",
     minHeight: 46,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -532,6 +551,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     textTransform: "uppercase",
+    textAlign: "center",
+    flexShrink: 1,
+    includeFontPadding: false,
   },
   emptyContainer: {
     flex: 1,
