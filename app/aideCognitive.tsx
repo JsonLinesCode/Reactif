@@ -47,7 +47,7 @@ const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
     image: require("@/assets/documents/aides-cognitives/algorithme-rcp-neonatale/image.png"),
   },
   {
-    label: "Causes réversibles de l’AC pédiatrique 4H/4T",
+    label: "Causes réversibles AC pédiatrique",
     image: require("@/assets/documents/aides-cognitives/causes-reversibles-ac-pediatrique-4h-4t/image.png"),
   },
   {

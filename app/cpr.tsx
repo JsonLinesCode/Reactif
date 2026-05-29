@@ -356,7 +356,7 @@ export default function Cpr() {
             />
           ) : (
             <ActionProgressBar
-              label="REMPLISSAGE"
+              label="Remplissage"
               count={sessionController.getCount("remplissage")}
               color="#448AFF"
               icon={<FontAwesome5 name="tint" size={24} />}
