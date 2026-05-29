@@ -58,13 +58,6 @@ export default function Cpr() {
 
   const cprMode = sessionStore.getSession()?.mode || "adult";
 
-  // Doses State
-  const [doses, setDoses] = useState({
-    adrenaline: sessionStore.getAdrenalineDose(),
-    cordarone: sessionStore.getCordaroneDose(),
-    energy: sessionStore.getEnergyDose(),
-  });
-
   // Re-render when controller notifies so controller getters update
   const [, setControllerTick] = useState(0);
   useEffect(() => {
@@ -76,7 +69,7 @@ export default function Cpr() {
     };
   }, []);
 
-  // Listen to session store to stop metronome on definitive end and update doses
+  // Listen to session store to stop metronome on definitive end
   useEffect(() => {
     const unsubscribe = sessionStore.subscribe(() => {
       const currentSession = sessionStore.getSession();
@@ -84,12 +77,6 @@ export default function Cpr() {
         setIsMuted(true);
         metronomeController.setMuted(true);
       }
-      // Keep local doses state in sync with store
-      setDoses({
-        adrenaline: sessionStore.getAdrenalineDose(),
-        cordarone: sessionStore.getCordaroneDose(),
-        energy: sessionStore.getEnergyDose(),
-      });
     });
     return () => {
       unsubscribe();
@@ -326,13 +313,8 @@ export default function Cpr() {
             onPress={sessionController.logAdrenaline}
             lastActionTime={lastAdrenalineTimeState}
             durationSeconds={adrenalineDuration} // Use setting
-            subtitle={
-              cprMode === "neonatal"
-                ? "10 à 30 µg/kg"
-                : doses.adrenaline
-                  ? `${doses.adrenaline} mg`
-                  : undefined
-            }
+            // Dose recommendations are intentionally hidden for pediatric CPR.
+            // subtitle={cprMode === "neonatal" ? "10 à 30 µg/kg" : undefined}
             resetRequest={cancelResetRequest}
             resetKey="adrenaline"
             warningSeconds={warningSeconds}
@@ -348,7 +330,8 @@ export default function Cpr() {
               onPress={sessionController.logCordarone}
               lastActionTime={lastCordaroneTimeState}
               durationSeconds={cordaroneDuration} // Use setting
-              subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
+              // Dose recommendations are intentionally hidden for pediatric CPR.
+              // subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
               resetRequest={cancelResetRequest}
               resetKey="cordarone"
               warningSeconds={warningSeconds}
@@ -363,7 +346,8 @@ export default function Cpr() {
               onPress={() => sessionController.logRemplissage()}
               lastActionTime={null} /* no timer */
               durationSeconds={0}
-              subtitle="10 mL/kg"
+              // Dose recommendations are intentionally hidden for pediatric CPR.
+              // subtitle="10 mL/kg"
               resetRequest={cancelResetRequest}
               resetKey="remplissage"
               warningSeconds={warningSeconds}
