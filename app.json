@@ -4,7 +4,7 @@
     "slug": "Reactif",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/ios-light.png",
     "scheme": "reactif",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -22,8 +22,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/icons/adaptive-icon.png"
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/icons/android-adaptive-foreground.png"
       },
       "blockedPermissions": [
         "android.permission.CAMERA",

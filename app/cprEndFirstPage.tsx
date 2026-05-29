@@ -94,10 +94,10 @@ export default function CprEndFirstPage() {
                 style={[
                   styles.buttonText,
                   outlineButtonTextStyle,
-                  { fontSize: 15 },
+                  { fontSize: 8 },
                 ]}
               >
-                (Reprise d&#39;activité circulatoire spontanée)
+                Reprise d&#39;activité circulatoire spontanée
               </Text>
             </View>
           </TouchableOpacity>

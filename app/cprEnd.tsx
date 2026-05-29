@@ -638,18 +638,13 @@ export default function CprEnd() {
                 {session.pediatricData.ageMode}
               </Text>
             )}
-            <Text style={[styles.itemText, textStyle]}>
-              Adrénaline:{" "}
-              {session.pediatricData.adrenalineDose
-                ? `${session.pediatricData.adrenalineDose} mg`
-                : "N/A"}
+            {/* Dose recommendations are intentionally hidden for pediatric CPR. */}
+            {/* <Text style={[styles.itemText, textStyle]}>
+              Adrénaline: {session.pediatricData.adrenalineDose ? `${session.pediatricData.adrenalineDose} mg` : "N/A"}
             </Text>
             <Text style={[styles.itemText, textStyle]}>
-              Cordarone:{" "}
-              {session.pediatricData.cordaroneDose
-                ? `${session.pediatricData.cordaroneDose} mg`
-                : "N/A"}
-            </Text>
+              Cordarone: {session.pediatricData.cordaroneDose ? `${session.pediatricData.cordaroneDose} mg` : "N/A"}
+            </Text> */}
           </View>
         )}
 

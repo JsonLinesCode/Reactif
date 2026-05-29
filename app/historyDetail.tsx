@@ -266,21 +266,8 @@ export default function HistoryDetail() {
                     : "N/A"}
                 </Text>
               )}
-              <Text
-                style={[
-                  styles.headerLine,
-                  secondaryTextStyle,
-                ]}
-              >
-                Adrenaline:{" "}
-                {session.pediatricData.adrenalineDose
-                  ? `${session.pediatricData.adrenalineDose} mg`
-                  : "N/A"}
-                , Cordarone:{" "}
-                {session.pediatricData.cordaroneDose
-                  ? `${session.pediatricData.cordaroneDose} mg`
-                  : "N/A"}
-                , Energie:{" "}
+              <Text style={[styles.headerLine, secondaryTextStyle]}>
+                Energie:{" "}
                 {session.pediatricData.energyDose
                   ? `${session.pediatricData.energyDose} J`
                   : "N/A"}
