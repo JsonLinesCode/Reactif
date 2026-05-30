@@ -1,7 +1,7 @@
 # Reactif
 ![Licence: CeCILL](https://img.shields.io/badge/Licence-CeCILL--2.1-blue.svg)
 
-Reactif est une application mobile (iOS/Android) d'assistance au suivi d'une RCP (Réanimation Cardio-Pulmonaire), développée avec Expo/React Native.
+RéACTIF est une aide cognitive de type time keeper qui accompagne les équipes de soin lors des réanimations cardio-pulmonaire ( RCP) spécialisée. Cette application intègre les timers nécessaires pour la gestion précise des délais recommandés concernant l'analyse du rythme et l'administration des traitements.
 
 
 ## Sommaire
