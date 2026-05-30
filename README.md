@@ -1,6 +1,8 @@
 # Reactif
+![Licence: CeCILL](https://img.shields.io/badge/Licence-CeCILL--2.1-blue.svg)
 
 Reactif est une application mobile (iOS/Android) d'assistance au suivi d'une RCP (Réanimation Cardio-Pulmonaire), développée avec Expo/React Native.
+
 
 ## Sommaire
 
