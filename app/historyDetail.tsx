@@ -1,5 +1,6 @@
 import { CprEvent, CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
+import { t } from "@/i18n";
 import {
   CprEpisodeSummary,
   formatElapsedFromStart,
@@ -129,16 +130,16 @@ export default function HistoryDetail() {
       >
         {hasMultipleEpisodes ? (
           <Text style={[styles.headerTitle, primaryTextStyle]}>
-            Résumé RCP {episode.cycle}
+            {t("historyDetail.cprSummaryCycle", { cycle: episode.cycle })}
           </Text>
         ) : null}
         <Text style={[styles.headerLine, secondaryTextStyle]}>
-          Durée RCP {episode.cycle} :{" "}
+          {t("historyDetail.cprDurationCycle", { cycle: episode.cycle })} :{" "}
           <Text style={styles.boldValue}>{formatTime(durationSeconds)}</Text>
         </Text>
-        {renderEventSummaryLine("Chocs", episode.shock)}
-        {renderEventSummaryLine("Adrénaline", episode.adrenaline)}
-        {renderEventSummaryLine("Cordarone", episode.cordarone)}
+        {renderEventSummaryLine(t("historyDetail.shocks"), episode.shock)}
+        {renderEventSummaryLine(t("session.adrenaline"), episode.adrenaline)}
+        {renderEventSummaryLine(t("session.cordarone"), episode.cordarone)}
       </View>
     );
   };
@@ -155,7 +156,7 @@ export default function HistoryDetail() {
         mimeType: "application/pdf",
       });
     } catch (error) {
-      Alert.alert("Erreur", "Impossible d'exporter le PDF.");
+      Alert.alert(t("history.exportErrorTitle"), t("history.exportErrorMessage"));
       console.error(error);
     }
   };
@@ -170,7 +171,7 @@ export default function HistoryDetail() {
       >
         <Stack.Screen
           options={{
-            title: "Détail session",
+            title: t("historyDetail.title"),
             headerStyle: pageStyle,
             headerTintColor: isDark ? "#fff" : "#111827",
           }}
@@ -182,14 +183,14 @@ export default function HistoryDetail() {
               mutedTextStyle,
             ]}
           >
-            Session introuvable.
+            {t("historyDetail.notFound")}
           </Text>
           <TouchableOpacity
             style={[styles.primaryButton, outlineButtonStyle]}
             onPress={() => router.back()}
           >
             <Text style={[styles.primaryButtonText, outlineButtonTextStyle]}>
-              Retour
+              {t("common.back")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -212,7 +213,7 @@ export default function HistoryDetail() {
     >
       <Stack.Screen
         options={{
-          title: "Détail session",
+          title: t("historyDetail.title"),
           headerStyle: pageStyle,
           headerTintColor: isDark ? "#fff" : "#111827",
         }}
@@ -230,13 +231,13 @@ export default function HistoryDetail() {
           ]}
         >
           <Text style={[styles.headerTitle, primaryTextStyle]}>
-            Résumé RCP
+            {t("historyDetail.cprSummary")}
           </Text>
           <Text style={[styles.headerLine, secondaryTextStyle]}>
-            Date: {startDate.toLocaleDateString()}
+            {t("session.date")}: {startDate.toLocaleDateString()}
           </Text>
           <Text style={[styles.headerLine, secondaryTextStyle]}>
-            Patient: {session.pediatricData ? "Enfant" : "Standard"}
+            {t("history.patient")}: {session.pediatricData ? t("history.child") : t("history.standard")}
           </Text>
           {session.pediatricData && (
             <View>
@@ -247,7 +248,7 @@ export default function HistoryDetail() {
                     secondaryTextStyle,
                   ]}
                 >
-                  Poids:{" "}
+                  {t("historyDetail.weight")}:{" "}
                   {session.pediatricData.weight
                     ? `${session.pediatricData.weight} kg`
                     : "N/A"}
@@ -260,14 +261,14 @@ export default function HistoryDetail() {
                     secondaryTextStyle,
                   ]}
                 >
-                  Age:{" "}
+                  {t("historyDetail.age")}:{" "}
                   {session.pediatricData.ageValue
                     ? `${session.pediatricData.ageValue} ${session.pediatricData.ageMode}`
                     : "N/A"}
                 </Text>
               )}
               <Text style={[styles.headerLine, secondaryTextStyle]}>
-                Energie:{" "}
+                {t("historyDetail.energy")}:{" "}
                 {session.pediatricData.energyDose
                   ? `${session.pediatricData.energyDose} J`
                   : "N/A"}
@@ -275,7 +276,7 @@ export default function HistoryDetail() {
             </View>
           )}
           <Text style={[styles.headerLine, secondaryTextStyle]}>
-            Durée totale : <Text style={styles.boldValue}>{cprDurationText}</Text>
+            {t("historyDetail.totalDuration")} : <Text style={styles.boldValue}>{cprDurationText}</Text>
           </Text>
           {cprEpisodeSummaries.length > 0 ? (
             <View style={styles.summaryEpisodesContainer}>
@@ -286,21 +287,21 @@ export default function HistoryDetail() {
           ) : (
             <View style={styles.summaryEpisodesContainer}>
               {renderEventSummaryLine(
-                "Chocs",
+                t("historyDetail.shocks"),
                 session.events.filter((event) => event.type === "shock"),
               )}
               {renderEventSummaryLine(
-                "Adrénaline",
+                t("session.adrenaline"),
                 session.events.filter((event) => event.type === "adrenaline"),
               )}
               {renderEventSummaryLine(
-                "Cordarone",
+                t("session.cordarone"),
                 session.events.filter((event) => event.type === "cordarone"),
               )}
             </View>
           )}
           <Text style={[styles.headerLine, secondaryTextStyle]}>
-            Événements: {session.events.length}
+            {t("history.events")}: {session.events.length}
           </Text>
         </View>
 
@@ -311,11 +312,11 @@ export default function HistoryDetail() {
           ]}
         >
           <Text style={[styles.sectionTitle, primaryTextStyle]}>
-            Chronologie complète
+            {t("historyDetail.fullTimeline")}
           </Text>
           {eventsWithCycles.length === 0 ? (
             <Text style={[styles.emptyTimeline, mutedTextStyle]}>
-              Aucun evenement enregistre.
+              {t("historyDetail.noEvents")}
             </Text>
           ) : (
             eventsWithCycles.map(({ event, cycle }, index) => (

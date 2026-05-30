@@ -1,4 +1,5 @@
 import CustomSwitch from "@/components/CustomSwitch";
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -149,17 +150,17 @@ export default function ChildData() {
 
   const handleValidation = () => {
     if (inputMode === "age" && !valeurTemp) {
-      Alert.alert("Erreur", "Veuillez entrer un âge.");
+      Alert.alert(t("childData.invalidAgeTitle"), t("childData.invalidAgeMessage"));
       return;
     }
     if (inputMode === "weight" && !weightInput) {
-      Alert.alert("Erreur", "Veuillez entrer un poids.");
+      Alert.alert(t("childData.invalidAgeTitle"), t("childData.invalidWeightMessage"));
       return;
     }
     if (!inputMode) {
       Alert.alert(
-        "Erreur",
-        "Veuillez sélectionner et entrer une donnée (âge ou poids).",
+        t("childData.invalidAgeTitle"),
+        t("childData.invalidInputMessage"),
       );
       return;
     }
@@ -196,11 +197,11 @@ export default function ChildData() {
           keyboardShouldPersistTaps="handled"
         >
           <Text style={[styles.titleText, textStyle]}>
-            Renseigner l&apos;âge ou le poids
+            {t("childData.title")}
           </Text>
           {/* Always show Age button, but only expand if not hidden by weight input */}
           <TouchableOpacity style={styles.choiceButton} onPress={toggleExpand}>
-            <Text style={styles.choiceButtonText}>Age</Text>
+            <Text style={styles.choiceButtonText}>{t("childData.age")}</Text>
           </TouchableOpacity>
           {/* Content that disappear/appear */}
           {expanded && !weightExpanded && (
@@ -209,8 +210,8 @@ export default function ChildData() {
                 <CustomSwitch
                   selectionMode={mode === "years" ? 2 : 1}
                   roundCorner={true}
-                  option1={"Mois"}
-                  option2={"Années"}
+                  option1={t("childData.months")}
+                  option2={t("childData.years")}
                   onSelectSwitch={onSelectSwitch}
                   selectionColor={"#007BFF"}
                 />
@@ -219,8 +220,8 @@ export default function ChildData() {
               <View style={styles.agePickerContainer}>
                 <Text style={styles.expandedButtonText}>
                   {mode === "months"
-                    ? "Entrer age (mois):"
-                    : "Entrer age (années):"}
+                    ? t("childData.enterAgeMonths")
+                    : t("childData.enterAgeYears")}
                 </Text>
                 <TextInput
                   style={styles.input}
@@ -240,7 +241,7 @@ export default function ChildData() {
             onPress={toggleWeightExpand}
           >
             <Text style={styles.choiceButtonText}>
-              {weightExpanded ? " Poids (kg)" : "Poids (kg)"}
+              {t("childData.weightKg")}
             </Text>
           </TouchableOpacity>
 
@@ -248,7 +249,7 @@ export default function ChildData() {
             <View style={[styles.expandedContent, expandedBg]}>
               <View style={styles.weightPickerContainer}>
                 <Text style={styles.expandedButtonText}>
-                  Entrer poids (kg):
+                  {t("childData.enterWeightKg")}
                 </Text>
                 <TextInput
                   style={styles.input}

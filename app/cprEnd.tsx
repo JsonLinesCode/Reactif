@@ -25,6 +25,7 @@ import Svg, { Circle, G } from "react-native-svg";
 
 import EventSelectionModal from "@/components/EventSelectionModal";
 import { sessionController } from "@/controllers/SessionController";
+import { t } from "@/i18n";
 import { CprEvent, CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import {
@@ -218,7 +219,7 @@ export default function CprEnd() {
         mimeType: "application/pdf",
       });
     } catch (error) {
-      Alert.alert("Erreur", "Impossible de générer ou partager le PDF.");
+      Alert.alert(t("cprEnd.exportErrorTitle"), t("cprEnd.exportErrorMessage"));
       console.error(error);
     }
   };
@@ -229,12 +230,12 @@ export default function CprEnd() {
   };
 
   const getDurationString = () => {
-    if (!session) return "0 minutes et 0 secondes";
+    if (!session) return t("cprEnd.durationMinutesSeconds", { minutes: 0, seconds: 0 });
 
     const diff = getCprDurationMs(session);
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
-    return `${minutes} minutes et ${seconds} secondes`;
+    return t("cprEnd.durationMinutesSeconds", { minutes, seconds });
   };
 
   const formatTime = (totalSeconds: number) => {
@@ -279,15 +280,17 @@ export default function CprEnd() {
         style={hasMultipleEpisodes ? styles.cprEpisodeBlock : undefined}
       >
         <Text style={[styles.cardText, styles.cprSummaryTitle, textStyle]}>
-          {hasMultipleEpisodes ? `Résumé RCP ${episode.cycle}` : "Résumé RCP"}
+          {hasMultipleEpisodes
+            ? t("cprEnd.cprSummaryCycle", { cycle: episode.cycle })
+            : t("cprEnd.cprSummary")}
         </Text>
         <Text style={[styles.cardText, textStyle]}>
-          Durée RCP {episode.cycle} :{" "}
+          {t("cprEnd.cprDurationCycle", { cycle: episode.cycle })} :{" "}
           <Text style={styles.boldValue}>{formatTime(durationSeconds)}</Text>
         </Text>
-        {renderEventSummaryLine("Chocs", episode.shock)}
-        {renderEventSummaryLine("Adrénaline", episode.adrenaline)}
-        {renderEventSummaryLine("Cordarone", episode.cordarone)}
+        {renderEventSummaryLine(t("cprEnd.shocks"), episode.shock)}
+        {renderEventSummaryLine(t("session.adrenaline"), episode.adrenaline)}
+        {renderEventSummaryLine(t("session.cordarone"), episode.cordarone)}
       </View>
     );
   };
@@ -556,7 +559,7 @@ export default function CprEnd() {
               isDark ? { color: "#fff" } : { color: "#111827" },
             ]}
           >
-            {summaryTitle === "Décès" ? "DÉCÈS" : "RÉSUME DE LA RCP"}
+            {summaryTitle === "Décès" ? t("cprEnd.deathUpper") : t("cprEnd.cprSummaryUpper")}
           </Text>
         </View>
 

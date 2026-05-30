@@ -17,6 +17,7 @@ import { CprSession } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import { formatDuration, generateSessionHtml } from "@/utils/sessionUtils";
 import ContextualMenu from "@/components/ContextualMenu";
+import { t } from "@/i18n";
 
 export default function History() {
   const [sessions, setSessions] = useState<CprSession[]>([]);
@@ -70,7 +71,7 @@ export default function History() {
         mimeType: "application/pdf",
       });
     } catch (error) {
-      Alert.alert("Erreur", "Impossible d'exporter le PDF.");
+      Alert.alert(t("history.exportErrorTitle"), t("history.exportErrorMessage"));
       console.error(error);
     }
   };
@@ -103,12 +104,12 @@ export default function History() {
 
   const deleteSelectedSessions = async () => {
     Alert.alert(
-      "Supprimer les sessions",
-      `Voulez-vous vraiment supprimer ${selectedSessionIds.size} session(s) ?`,
+      t("history.deleteTitle"),
+      t("history.deleteMessage", { count: selectedSessionIds.size }),
       [
-        { text: "Annuler", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Supprimer",
+          text: t("history.delete"),
           style: "destructive",
           onPress: async () => {
             const idsToDelete = Array.from(selectedSessionIds);
@@ -157,10 +158,10 @@ export default function History() {
           >
             <View>
               <Text style={[styles.cardTitle, primaryTextStyle]}>
-                Session #{sessionNumber}
+                {t("history.session")} #{sessionNumber}
               </Text>
               <Text style={[styles.infoText, secondaryTextStyle]}>
-                Temps écoulé: {formatDuration(item.startTime, item.endTime)}
+                {t("history.elapsedTime")}: {formatDuration(item.startTime, item.endTime)}
               </Text>
             </View>
             {!isSelectionMode && (
@@ -187,16 +188,16 @@ export default function History() {
           <View style={styles.cardContent}>
             {item.pediatricData ? (
               <Text style={[styles.infoText, secondaryTextStyle]}>
-                Patient: Enfant ({item.pediatricData.ageValue}{" "}
+                {t("history.patient")}: {t("history.child")} ({item.pediatricData.ageValue}{" "}
                 {item.pediatricData.ageMode})
               </Text>
             ) : (
               <Text style={[styles.infoText, secondaryTextStyle]}>
-                Patient: Standard
+                {t("history.patient")}: {t("history.standard")}
               </Text>
             )}
             <Text style={[styles.infoText, secondaryTextStyle]}>
-              Événements: {item.events.length}
+              {t("history.events")}: {item.events.length}
             </Text>
           </View>
         </View>
@@ -244,7 +245,7 @@ export default function History() {
                 outlineButtonTextStyle,
               ]}
             >
-              {isSelectionMode ? "Annuler" : "Sélectionner"}
+              {isSelectionMode ? t("history.cancel") : t("history.select")}
             </Text>
           </TouchableOpacity>
 
@@ -254,7 +255,7 @@ export default function History() {
               onPress={deleteSelectedSessions}
             >
               <Text style={styles.deleteButtonText}>
-                Supprimer ({selectedSessionIds.size})
+                {t("history.delete")} ({selectedSessionIds.size})
               </Text>
             </TouchableOpacity>
           )}
@@ -267,13 +268,13 @@ export default function History() {
         </View>
       </View>
 
-      <Stack.Screen options={{ title: "Historique des sessions" }} />
+      <Stack.Screen options={{ title: t("history.title") }} />
       {sessions.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text
             style={[styles.emptyText, { color: isDark ? "#aaa" : "#888" }]}
           >
-            Aucune session enregistrée.
+            {t("history.noSession")}
           </Text>
         </View>
       ) : (

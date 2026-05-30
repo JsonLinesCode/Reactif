@@ -20,6 +20,7 @@ import { sessionStore } from "@/store/sessionStore";
 
 import { metronomeController } from "@/controllers/MetronomeController";
 import { sessionController } from "@/controllers/SessionController";
+import { t } from "@/i18n";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
@@ -306,7 +307,7 @@ export default function Cpr() {
         {/* Action Progress Bars */}
         <View style={styles.actionsContainer}>
           <ActionProgressBar
-            label="Adrénaline"
+            label={t("session.adrenaline")}
             count={adrenalineCount}
             color="#448AFF"
             icon={<FontAwesome5 name="syringe" size={24} />}
@@ -323,7 +324,7 @@ export default function Cpr() {
 
           {cprMode !== "neonatal" ? (
             <ActionProgressBar
-              label="Cordarone"
+              label={t("session.cordarone")}
               count={cordaroneCount}
               color="#448AFF"
               icon={<FontAwesome5 name="syringe" size={24} />}
@@ -339,7 +340,7 @@ export default function Cpr() {
             />
           ) : (
             <ActionProgressBar
-              label="Remplissage"
+              label={t("events.options.fillingTransfusion")}
               count={sessionController.getCount("remplissage")}
               color="#448AFF"
               icon={<FontAwesome5 name="tint" size={24} />}
