@@ -7,6 +7,8 @@ const fr = {
     save: "Enregistrer",
     close: "Fermer",
     settings: "Paramètres",
+    time: "Heure",
+    na: "N/A",
   },
   notFound: {
     title: "Page introuvable",
@@ -115,6 +117,7 @@ const fr = {
   history: {
     title: "Historique des sessions",
     session: "Session",
+    cprPrefix: "RCP",
     elapsedTime: "Temps écoulé",
     patient: "Patient",
     child: "Enfant",
@@ -138,6 +141,8 @@ const fr = {
     totalDuration: "Durée totale",
     fullTimeline: "Chronologie complète",
     noEvents: "Aucun événement enregistré.",
+    elapsedTime: "Temps écoulé",
+    exportPdf: "Exporter en PDF",
     age: "Âge",
     weight: "Poids",
     energy: "Énergie",

@@ -7,6 +7,8 @@ const en = {
     save: "Save",
     close: "Close",
     settings: "Settings",
+    time: "Time",
+    na: "N/A",
   },
   notFound: {
     title: "Page not found",
@@ -115,6 +117,7 @@ const en = {
   history: {
     title: "Session history",
     session: "Session",
+    cprPrefix: "CPR",
     elapsedTime: "Elapsed time",
     patient: "Patient",
     child: "Child",
@@ -138,6 +141,8 @@ const en = {
     totalDuration: "Total duration",
     fullTimeline: "Full timeline",
     noEvents: "No recorded events.",
+    elapsedTime: "Elapsed time",
+    exportPdf: "Export as PDF",
     age: "Age",
     weight: "Weight",
     energy: "Energy",

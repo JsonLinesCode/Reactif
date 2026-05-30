@@ -251,7 +251,7 @@ export default function HistoryDetail() {
                   {t("historyDetail.weight")}:{" "}
                   {session.pediatricData.weight
                     ? `${session.pediatricData.weight} kg`
-                    : "N/A"}
+                    : t("common.na")}
                 </Text>
               )}
               {session.pediatricData.inputMode !== "weight" && (
@@ -263,15 +263,19 @@ export default function HistoryDetail() {
                 >
                   {t("historyDetail.age")}:{" "}
                   {session.pediatricData.ageValue
-                    ? `${session.pediatricData.ageValue} ${session.pediatricData.ageMode}`
-                    : "N/A"}
+                    ? `${session.pediatricData.ageValue} ${
+                        session.pediatricData.ageMode === "months"
+                          ? t("childData.months")
+                          : t("childData.years")
+                      }`
+                    : t("common.na")}
                 </Text>
               )}
               <Text style={[styles.headerLine, secondaryTextStyle]}>
                 {t("historyDetail.energy")}:{" "}
                 {session.pediatricData.energyDose
                   ? `${session.pediatricData.energyDose} J`
-                  : "N/A"}
+                  : t("common.na")}
               </Text>
             </View>
           )}
@@ -329,7 +333,7 @@ export default function HistoryDetail() {
               >
                 <View style={styles.eventContent}>
                   <Text style={[styles.eventCycle, mutedTextStyle]}>
-                    RCP {cycle}
+                    {t("history.cprPrefix")} {cycle}
                   </Text>
                   <Text
                     style={[
@@ -337,7 +341,7 @@ export default function HistoryDetail() {
                       outlineButtonTextStyle,
                     ]}
                   >
-                    Heure: {formatHumanReadableDateTime(event.timestamp)}
+                    {t("common.time")}: {formatHumanReadableDateTime(event.timestamp)}
                   </Text>
                   <Text
                     style={[
@@ -345,7 +349,7 @@ export default function HistoryDetail() {
                       outlineButtonTextStyle,
                     ]}
                   >
-                    Temps écoulé :{" "}
+                    {t("historyDetail.elapsedTime")} :{" "}
                     {formatElapsedFromStart(session.startTime, event.timestamp)}
                   </Text>
                   <Text style={[styles.eventType, primaryTextStyle]}>
@@ -382,7 +386,7 @@ export default function HistoryDetail() {
               isDark ? { color: "#fff" } : { color: "#334155" },
             ]}
           >
-            Retour
+            {t("common.back")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -400,7 +404,7 @@ export default function HistoryDetail() {
               isDark ? outlineButtonTextStyle : {},
             ]}
           >
-            Exporter en PDF
+            {t("historyDetail.exportPdf")}
           </Text>
         </TouchableOpacity>
       </SafeAreaView>

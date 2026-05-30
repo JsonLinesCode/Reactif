@@ -189,7 +189,9 @@ export default function History() {
             {item.pediatricData ? (
               <Text style={[styles.infoText, secondaryTextStyle]}>
                 {t("history.patient")}: {t("history.child")} ({item.pediatricData.ageValue}{" "}
-                {item.pediatricData.ageMode})
+                {item.pediatricData.ageMode === "months"
+                  ? t("childData.months")
+                  : t("childData.years")})
               </Text>
             ) : (
               <Text style={[styles.infoText, secondaryTextStyle]}>
