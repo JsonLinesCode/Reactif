@@ -33,9 +33,9 @@ import {
   formatElapsedFromStart,
   formatEventDetails,
   formatEventType,
-  formatHumanReadableDateTime,
   formatHumanReadableTime,
   formatTimeWithLetters,
+  generateSessionHtml,
   getCprDurationMs,
   getCprEpisodeSummaries,
   getEventsWithCycles,
@@ -210,7 +210,7 @@ export default function CprEnd() {
   const handleExportPdf = async () => {
     if (!session) return;
 
-    const html = generateHtml(session);
+    const html = generateSessionHtml(session);
     try {
       const { uri } = await Print.printToFileAsync({ html });
       console.log("File has been saved to:", uri);
@@ -327,7 +327,7 @@ export default function CprEnd() {
         <Stack.Screen options={{ headerShown: false }} />
         <ScrollView contentContainerStyle={styles.confirmContainer}>
           <Text style={[styles.title, isDark ? { color: "#ccc" } : {}]}>
-            RACS
+            {t("cprEnd.racsTitle")}
           </Text>
 
           <View style={[styles.card, cardStyle, styles.racsSummaryCard]}>
@@ -340,7 +340,7 @@ export default function CprEnd() {
               ]}
             >
               <Text style={[styles.racsTimerLabel, textStyle]}>
-                RACS depuis
+                {t("cprEnd.racsSince")}
               </Text>
               <Text style={[styles.racsTimerValue, textStyle]}>
                 {formatTime(racsElapsedSeconds)}
@@ -356,7 +356,9 @@ export default function CprEnd() {
                   ),
                 )
               ) : (
-                <Text style={[styles.cardText, textStyle]}>Résumé RCP</Text>
+                <Text style={[styles.cardText, textStyle]}>
+                  {t("cprEnd.cprSummary")}
+                </Text>
               )}
             </View>
 
@@ -436,7 +438,7 @@ export default function CprEnd() {
                         isDark ? { color: "#fff" } : { color: "#000" },
                       ]}
                     >
-                      ECG
+                      {t("cprEnd.ecg")}
                     </Text>
                     <Text
                       style={[
@@ -462,7 +464,7 @@ export default function CprEnd() {
               onPress={handleResume}
             >
               <Text style={[styles.buttonText, outlineButtonTextStyle]}>
-                Reprendre la RCP
+                {t("cprEnd.resumeCpr")}
               </Text>
             </TouchableOpacity>
 
@@ -475,7 +477,7 @@ export default function CprEnd() {
               onPress={handleDeath}
             >
               <Text style={[styles.buttonText, outlineButtonTextStyle]}>
-                Décès
+                {t("cprEndFirst.death")}
               </Text>
             </TouchableOpacity>
 
@@ -488,7 +490,7 @@ export default function CprEnd() {
               onPress={handleConfirmEnd}
             >
               <Text style={[styles.buttonText, outlineButtonTextStyle]}>
-                Fin d&#39;intervention
+                {t("cprEnd.interventionEnd")}
               </Text>
             </TouchableOpacity>
 
@@ -501,7 +503,7 @@ export default function CprEnd() {
               onPress={handleEvent}
             >
               <Text style={[styles.buttonText, outlineButtonTextStyle]}>
-                Ajouter un évènement
+                {t("cprEnd.addEvent")}
               </Text>
             </TouchableOpacity>
 
@@ -521,7 +523,7 @@ export default function CprEnd() {
               onPress={handleOpenAideCognitive}
             >
               <Text style={[styles.buttonText, outlineButtonTextStyle]}>
-                Aides cognitives
+                {t("cprEnd.cognitiveAids")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -541,7 +543,7 @@ export default function CprEnd() {
   const customEvents = getCustomEvents();
   const summaryTitle =
     session?.events.find((e: any) => e.type === "cpr_end")?.details ||
-    "Fin de session";
+    t("cprEnd.sessionEnd");
 
   return (
     <SafeAreaView style={[styles.container, styles.summaryContainer, bgStyle]}>
@@ -567,7 +569,10 @@ export default function CprEnd() {
         <View style={[styles.card, cardStyle]}>
           <View style={[styles.cardRow]}>
             <Text style={[styles.summaryCardText, textStyle]}>
-              <Text style={styles.summaryCardLabel}>DURÉE TOTALE</Text>:{" "}
+              <Text style={styles.summaryCardLabel}>
+                {t("cprEnd.totalDurationUpper")}
+              </Text>
+              :{" "}
               {getDurationString()}
             </Text>
           </View>
@@ -584,7 +589,7 @@ export default function CprEnd() {
             <React.Fragment>
               <View style={[styles.cardRow, { marginTop: 8 }]}>
                 {renderEventSummaryLine(
-                  "CHOCS DÉLIVRÉS",
+                  t("cprEnd.shocksDelivered"),
                   session
                     ? session.events.filter((event) => event.type === "shock")
                     : [],
@@ -592,7 +597,7 @@ export default function CprEnd() {
               </View>
               <View style={[styles.cardRow, { marginTop: 8 }]}>
                 {renderEventSummaryLine(
-                  "ADRÉNALINE",
+                  t("cprEnd.adrenalineUpper"),
                   session
                     ? session.events.filter(
                         (event) => event.type === "adrenaline",
@@ -602,7 +607,7 @@ export default function CprEnd() {
               </View>
               <View style={[styles.cardRow, { marginTop: 8 }]}>
                 {renderEventSummaryLine(
-                  "CORDARONE",
+                  t("cprEnd.cordaroneUpper"),
                   session
                     ? session.events.filter(
                         (event) => event.type === "cordarone",
@@ -615,7 +620,10 @@ export default function CprEnd() {
           {summaryTitle === "Décès" && (
             <View style={[styles.cardRow, { marginTop: 8 }]}>
               <Text style={[styles.summaryCardText, textStyle]}>
-                <Text style={styles.summaryCardLabel}>HEURE DU DÉCÈS</Text>:{" "}
+                <Text style={styles.summaryCardLabel}>
+                  {t("cprEnd.deathTimeUpper")}
+                </Text>
+                :{" "}
                 {session?.endTime
                   ? formatTimeWithLetters(session.endTime)
                   : "N/A"}
@@ -628,16 +636,16 @@ export default function CprEnd() {
         {session?.pediatricData && (
           <View style={[styles.card, cardStyle]}>
             <Text style={[styles.cardTitle, textStyle]}>
-              Données pédiatriques:
+              {t("cprEnd.pediatricData")}:
             </Text>
             <View style={[styles.divider, dividerStyle]} />
             {session.pediatricData.inputMode === "weight" ? (
               <Text style={[styles.itemText, textStyle]}>
-                Poids: {session.pediatricData.weight} kg
+                {t("historyDetail.weight")}: {session.pediatricData.weight} kg
               </Text>
             ) : (
               <Text style={[styles.itemText, textStyle]}>
-                Age: {session.pediatricData.ageValue}{" "}
+                {t("historyDetail.age")}: {session.pediatricData.ageValue}{" "}
                 {session.pediatricData.ageMode}
               </Text>
             )}
@@ -655,13 +663,13 @@ export default function CprEnd() {
         <View style={[styles.card, cardStyle]}>
           <View style={styles.cardHeaderRow}>
             <Text style={[styles.cardTitle, textStyle]}>
-              Actions réalisées:
+              {t("cprEnd.actionsDone")}:
             </Text>
           </View>
           <View style={[styles.divider, dividerStyle]} />
           {actions.length === 0 ? (
             <Text style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}>
-              Aucune action.
+              {t("cprEnd.noAction")}
             </Text>
           ) : (
             actions.map(({ event, cycle }, i) => (
@@ -670,9 +678,9 @@ export default function CprEnd() {
                   • [RCP {cycle}] {formatEventType(event.type)}
                 </Text>
                 <Text style={[styles.itemTimestamp, mutedTextStyle]}>
-                  Temps écoulé:{" "}
+                  {t("cprEnd.elapsedTime")}:{" "}
                   {formatElapsedFromStart(session!.startTime, event.timestamp)}{" "}
-                  | Heure: {formatTimeWithLetters(event.timestamp)}
+                  | {t("cprEnd.time")}: {formatTimeWithLetters(event.timestamp)}
                 </Text>
               </View>
             ))
@@ -683,13 +691,13 @@ export default function CprEnd() {
         <View style={[styles.card, cardStyle]}>
           <View style={styles.cardHeaderRow}>
             <Text style={[styles.cardTitle, textStyle]}>
-              Événements saisis:
+              {t("cprEnd.enteredEvents")}:
             </Text>
           </View>
           <View style={[styles.divider, dividerStyle]} />
           {customEvents.length === 0 ? (
             <Text style={[styles.emptyText, isDark ? { color: "#aaa" } : {}]}>
-              Aucun événement.
+              {t("cprEnd.noEvent")}
             </Text>
           ) : (
             customEvents.map(({ event, cycle }, i: number) => (
@@ -698,9 +706,9 @@ export default function CprEnd() {
                   • [RCP {cycle}] {formatEventDetails(event.details)}
                 </Text>
                 <Text style={[styles.itemTimestamp, mutedTextStyle]}>
-                  Temps écoulé:{" "}
+                  {t("cprEnd.elapsedTime")}:{" "}
                   {formatElapsedFromStart(session!.startTime, event.timestamp)}{" "}
-                  | Heure: {formatHumanReadableTime(event.timestamp)}
+                  | {t("cprEnd.time")}: {formatHumanReadableTime(event.timestamp)}
                 </Text>
               </View>
             ))
@@ -734,8 +742,7 @@ export default function CprEnd() {
               isDark ? outlineButtonTextStyle : styles.primaryActionButtonText,
             ]}
           >
-            {" "}
-            Exporter en PDF
+            {t("cprEnd.exportPdf")}
           </Text>
         </TouchableOpacity>
 
@@ -760,8 +767,7 @@ export default function CprEnd() {
                 : styles.secondaryActionButtonText,
             ]}
           >
-            {" "}
-            Retour à l&apos;accueil
+            {t("cprEnd.backHome")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -771,68 +777,6 @@ export default function CprEnd() {
       ])}
     </SafeAreaView>
   );
-}
-
-// Simple HTML generator for the PDF
-function generateHtml(session: CprSession) {
-  const eventsHtml = getEventsWithCycles(session)
-    .map(
-      ({ event, cycle }) => `
-        <tr>
-            <td>RCP ${cycle}</td>
-            <td>${formatEventType(event.type)}</td>
-            <td>${formatEventDetails(event.details)}</td>
-            <td>${formatElapsedFromStart(session.startTime, event.timestamp)}</td>
-            <td>${formatHumanReadableDateTime(event.timestamp)}</td>
-        </tr>
-      `,
-    )
-    .join("");
-
-  const pediatricInfo = session.pediatricData
-    ? `<p><strong>Patient:</strong> Enfant (${session.pediatricData.inputMode === "weight" ? `${session.pediatricData.weight} kg` : `${session.pediatricData.ageValue} ${session.pediatricData.ageMode}`})</p>`
-    : `<p><strong>Patient:</strong> Adulte (Standard)</p>`;
-
-  return `
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
-        <style>
-            body { font-family: Helvetica, Arial, sans-serif; padding: 20px; }
-            h1 { text-align: center; color: #333; }
-            .info { margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-            .cycle-header td { background-color: #e0e0e0; }
-        </style>
-      </head>
-      <body>
-        <h1>Rapport de Réanimation</h1>
-        <div class="info">
-            <p><strong>Date:</strong> ${new Date(session.startTime).toLocaleDateString()}</p>
-            ${pediatricInfo}
-            <p><strong>ID Session:</strong> ${session.id}</p>
-        </div>
-        
-        <h2>Journal des événements</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Cycle</th>
-                    <th>Type</th>
-                    <th>Détails</th>
-                    <th>Temps écoulé</th>
-                    <th>Heure</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${eventsHtml}
-            </tbody>
-        </table>
-      </body>
-    </html>
-  `;
 }
 
 const styles = StyleSheet.create({
