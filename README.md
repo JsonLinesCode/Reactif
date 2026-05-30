@@ -50,30 +50,35 @@ Reactif est une application mobile (iOS/Android) d'assistance au suivi d'une RCP
 
 - Node.js 20.x (aligné avec GitHub Actions)
 - npm 10+
-- iOS:
-  - macOS
-  - Xcode + CocoaPods
-- Android:
-  - JDK 17
-  - Android SDK
+- Expo CLI via `npx expo`
+- Pour build native local (`expo run:*`) uniquement:
+  - iOS: macOS + Xcode + CocoaPods
+  - Android: JDK 17 + Android SDK
 
 ## Installation et lancement
 
 ```bash
 npm ci
-npm run start
+npx expo start
 ```
 
-Lancer sur appareil/simulateur:
+Depuis le serveur Expo:
+
+- Taper `i` pour iOS Simulator
+- Taper `a` pour Android Emulator
+- Scanner le QR code avec Expo Go (si compatible)
+
+Lancer avec génération native locale (dev build):
 
 ```bash
 npm run ios
 npm run android
 ```
 
-Lint:
+Autres commandes utiles:
 
 ```bash
+npm run web
 npm run lint
 ```
 
