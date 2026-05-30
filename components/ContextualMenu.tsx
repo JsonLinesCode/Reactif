@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Menu } from "react-native-paper";
 
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 
 interface ContextualMenuProps {
@@ -54,7 +55,7 @@ const ContextualMenu = ({
             onToggleSelectAll();
             closeMenu();
           }}
-          title={isAllSelected ? "Tout désélectionner" : "Tout sélectionner"}
+          title={isAllSelected ? t("menu.unselectAll") : t("menu.selectAll")}
         />
       </Menu>
     </View>

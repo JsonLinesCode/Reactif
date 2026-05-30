@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
@@ -94,7 +95,7 @@ export default function Ressources() {
     >
       <Stack.Screen
         options={{
-          title: "Ressources",
+          title: t("resources.title"),
           headerStyle: {
             backgroundColor: isDark ? "#111827" : "#F5F5F5",
           },

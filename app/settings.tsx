@@ -12,11 +12,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomSwitch from "@/components/CustomSwitch";
+import { useI18n } from "@/hooks/useI18n";
 import { useCprSettings } from "@/hooks/useCprSettings";
 import { sessionStore } from "@/store/sessionStore";
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { locale, setLocale, t } = useI18n();
   const [theme, setTheme] = useState(sessionStore.theme);
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function SettingsScreen() {
         ]}
       >
         <Text style={{ color: theme === "light" ? "#353636" : "#fff" }}>
-          Chargement...
+          {t("common.loading")}
         </Text>
       </View>
     );
@@ -167,7 +169,7 @@ export default function SettingsScreen() {
             color={isDark ? "#fff" : "#000"}
           />
         </TouchableOpacity>
-        <Text style={[styles.title, textStyle]}>Paramètres</Text>
+        <Text style={[styles.title, textStyle]}>{t("settings.title")}</Text>
       </View>
 
       <View style={styles.body}>
@@ -175,15 +177,29 @@ export default function SettingsScreen() {
           <Text
             style={[styles.sectionTitle, sectionTitleColor, { marginTop: 20 }]}
           >
-            Thème de l&#39;application
+            {t("settings.appTheme")}
           </Text>
           <View style={{ alignItems: "center", marginBottom: 20 }}>
             <CustomSwitch
               selectionMode={theme === "light" ? 1 : 2}
               roundCorner={true}
-              option1={"Clair"}
-              option2={"Sombre"}
+              option1={t("settings.light")}
+              option2={t("settings.dark")}
               onSelectSwitch={onSelectSwitch}
+              selectionColor={"#007BFF"}
+              isDark={isDark}
+            />
+          </View>
+          <Text style={[styles.sectionTitle, sectionTitleColor]}>
+            {t("settings.language")}
+          </Text>
+          <View style={{ alignItems: "center", marginBottom: 20 }}>
+            <CustomSwitch
+              selectionMode={locale === "fr" ? 1 : 2}
+              roundCorner={true}
+              option1={t("settings.french")}
+              option2={t("settings.english")}
+              onSelectSwitch={(val) => void setLocale(val === 1 ? "fr" : "en")}
               selectionColor={"#007BFF"}
               isDark={isDark}
             />
@@ -195,11 +211,13 @@ export default function SettingsScreen() {
             ]}
           />
           <Text style={[styles.sectionTitle, sectionTitleColor]}>
-            Durées par défaut (minutes)
+            {t("settings.defaultDurations")}
           </Text>
 
           <View style={styles.inputGroup}>
-            <Text style={[styles.label, labelColor]}>Analyse (Intervalle)</Text>
+            <Text style={[styles.label, labelColor]}>
+              {t("settings.analysisInterval")}
+            </Text>
             <View style={[styles.inputWrapper, inputBgStyle]}>
               <TextInput
                 style={[styles.input, textStyle]}
@@ -213,7 +231,7 @@ export default function SettingsScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, labelColor]}>
-              Adrénaline (Intervalle)
+              {t("settings.adrenalineInterval")}
             </Text>
             <View style={[styles.inputWrapper, inputBgStyle]}>
               <View style={styles.pickerRow}>
@@ -247,7 +265,7 @@ export default function SettingsScreen() {
 
           <View style={styles.inputGroup}>
             <Text style={[styles.label, labelColor]}>
-              {"Alerte sonore avant l'échéance des timers"}
+              {t("settings.warningBeforeTimerEnd")}
             </Text>
             <View style={[styles.inputWrapper, inputBgStyle]}>
               <TextInput
@@ -267,7 +285,9 @@ export default function SettingsScreen() {
             ]}
           />
 
-          <Text style={[styles.sectionTitle, sectionTitleColor]}>Sons</Text>
+          <Text style={[styles.sectionTitle, sectionTitleColor]}>
+            {t("settings.soundSettings")}
+          </Text>
           <TouchableOpacity
             style={[
               styles.navigationRow,
@@ -286,10 +306,10 @@ export default function SettingsScreen() {
               />
               <View style={styles.toggleTextBlock}>
                 <Text style={[styles.toggleTitle, textStyle]}>
-                  Configurer les sons
+                  {t("settings.soundSettings")}
                 </Text>
                 <Text style={[styles.toggleSubtitle, labelColor]}>
-                  Métronome et alertes par type de timer
+                  {t("settings.soundSettingsSubtitle")}
                 </Text>
               </View>
             </View>
@@ -384,7 +404,7 @@ export default function SettingsScreen() {
             style={styles.resetButton}
             onPress={() => void handleResetSettings()}
           >
-            <Text style={styles.resetButtonText}>Réinitialiser par défaut</Text>
+            <Text style={styles.resetButtonText}>{t("settings.resetAllSettings")}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -410,7 +430,7 @@ export default function SettingsScreen() {
                 { color: isDark ? "#e2e8f0" : "#334155" },
               ]}
             >
-              À propos
+              {t("settings.about")}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -426,7 +446,7 @@ export default function SettingsScreen() {
         >
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <Text style={styles.saveButtonText}>
-              Sauvegarder les paramètres
+              {t("settings.saveAndBack")}
             </Text>
           </TouchableOpacity>
         </View>

@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -34,7 +35,7 @@ export default function LongPressButton({
   size = 80,
   iconSize = 32,
   iconName = "arrow-undo",
-  label = "Annuler",
+  label = t("common.cancel"),
   showLabel = true,
   duration = DURATION,
 }: LongPressButtonProps) {

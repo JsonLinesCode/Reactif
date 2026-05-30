@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { Link, Stack } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -16,7 +17,7 @@ export default function NotFoundScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Oops! Not Found" }} />
+      <Stack.Screen options={{ title: t("notFound.title") }} />
       <View
         style={[
           styles.container,
@@ -27,7 +28,7 @@ export default function NotFoundScreen() {
           href="/"
           style={[styles.button, { color: isDark ? "#93c5fd" : "#2563eb" }]}
         >
-          Go back to Home screen!
+          {t("notFound.backHome")}
         </Link>
       </View>
     </>

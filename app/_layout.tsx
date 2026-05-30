@@ -1,4 +1,5 @@
 import { sessionController } from "@/controllers/SessionController";
+import { initializeI18n, subscribeLocale } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { useKeepAwake } from "expo-keep-awake";
 import { Stack } from "expo-router";
@@ -32,15 +33,23 @@ TextInputAny.defaultProps = {
 export default function RootLayout() {
   useKeepAwake();
   const [theme, setTheme] = useState(sessionStore.theme);
+  const [, setLocaleTick] = useState(0);
 
   useEffect(() => {
     void sessionController.initAudioAtMaxVolume();
+    void initializeI18n();
 
     const unsubscribe = sessionStore.subscribe(() => {
       setTheme(sessionStore.theme);
     });
+    const unsubscribeLocale = subscribeLocale(() => {
+      setLocaleTick((v) => v + 1);
+    });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      unsubscribeLocale();
+    };
   }, []);
 
   return (
