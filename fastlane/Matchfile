@@ -1,0 +1,10 @@
+git_url(ENV["MATCH_GIT_URL"] || "https://github.com/JsonLinesCode/reactif-certificates.git")
+git_branch(ENV["MATCH_GIT_BRANCH"] || "main")
+git_basic_authorization(ENV["MATCH_GIT_BASIC_AUTHORIZATION"]) if ENV["MATCH_GIT_BASIC_AUTHORIZATION"]
+storage_mode("git")
+
+type("appstore")
+platform("ios")
+app_identifier("fr.reactif")
+
+readonly(ENV.fetch("MATCH_READONLY", "false") == "true")

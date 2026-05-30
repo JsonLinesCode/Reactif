@@ -1,0 +1,99 @@
+require "pathname"
+
+default_platform(:android)
+
+def required_env(name)
+  value = ENV[name].to_s.strip
+  UI.user_error!("Missing #{name}") if value.empty?
+  value
+end
+
+def optional_env(name)
+  value = ENV[name].to_s.strip
+  value.empty? ? nil : value
+end
+
+def ci_build_number
+  explicit_build_number = optional_env("IOS_BUILD_NUMBER")
+  return explicit_build_number if explicit_build_number
+
+  offset = optional_env("IOS_BUILD_NUMBER_OFFSET").to_i
+  (Time.now.to_i + offset).to_s
+end
+
+platform :ios do
+  desc "Create or sync App Store signing assets used for TestFlight"
+  lane :testflight_release do
+    setup_ci
+
+    api_key = app_store_connect_api_key(
+        key_id: required_env("P8_KEY_ID"),
+        issuer_id: required_env("P8_ISSUER_ID"),
+        key_filepath: required_env("P8_FILE_PATH"),
+        in_house: false
+    )
+    match(api_key: api_key)
+    increment_build_number(
+      build_number: ci_build_number,
+      xcodeproj: "ios/Reactif.xcodeproj"
+    )
+    build_app(workspace: "ios/Reactif.xcworkspace", scheme: "Reactif", export_method: "app-store") # Change name of workspace
+
+    upload_to_testflight(
+      changelog: ENV["CHANGELOG"] || "Pas de note de mise à jour fournie. Merci de consulter le changelog in-app.",
+      distribute_external: true,
+      groups: ["TestReactifExte"],
+      beta_app_description: optional_env("BETA_APP_DESCRIPTION") || "Version beta de Reactif pour les tests externes.",
+      beta_app_feedback_email: required_env("BETA_APP_FEEDBACK_EMAIL"),
+      demo_account_required: false
+    )
+  end
+end
+
+platform :android do
+  desc "Upload Android AAB to Google Play Internal track with changelog metadata"
+  lane :internal_release do |options|
+    project_root = File.expand_path("..", __dir__)
+
+    raw_aab_path = options[:aab] || ENV["AAB_PATH"] || "android/app/build/outputs/bundle/release/app-release.aab"
+    track = options[:track] || ENV["PLAY_TRACK"] || "internal"
+    release_status = options[:release_status] || ENV["PLAY_RELEASE_STATUS"] || "draft"
+    raw_json_key_path = options[:json_key] || ENV["PLAY_JSON_KEY"]
+    raw_metadata_path = options[:metadata_path] || ENV["PLAY_METADATA_PATH"] || ".ci/play-metadata/android"
+
+    aab_path = Pathname.new(raw_aab_path).absolute? ? raw_aab_path : File.expand_path(raw_aab_path, project_root)
+    json_key_path = if raw_json_key_path.to_s.strip.empty?
+      raw_json_key_path
+    else
+      Pathname.new(raw_json_key_path).absolute? ? raw_json_key_path : File.expand_path(raw_json_key_path, project_root)
+    end
+    metadata_path = Pathname.new(raw_metadata_path).absolute? ? raw_metadata_path : File.expand_path(raw_metadata_path, project_root)
+
+    if !File.exist?(aab_path)
+      fallback_aab = Dir
+        .glob(File.join(project_root, "android/app/build/outputs/**/*.aab"))
+        .max_by { |p| File.mtime(p) }
+
+      if fallback_aab
+        UI.important("AAB not found at #{aab_path}. Using detected bundle: #{fallback_aab}")
+        aab_path = fallback_aab
+      end
+    end
+
+    UI.user_error!("Missing Google Play service account json path. Set PLAY_JSON_KEY or pass json_key.") if json_key_path.to_s.strip.empty?
+    UI.user_error!("AAB not found at #{aab_path}") unless File.exist?(aab_path)
+    UI.user_error!("Google Play json key file not found at #{json_key_path}") unless File.exist?(json_key_path)
+
+    supply(
+      aab: aab_path,
+      track: track,
+      release_status: release_status,
+      json_key: json_key_path,
+      metadata_path: metadata_path,
+      skip_upload_changelogs: false,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_metadata: true
+    )
+  end
+end

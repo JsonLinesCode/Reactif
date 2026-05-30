@@ -39,5 +39,25 @@ yarn-error.*
 app-example
 
 # generated native folders
-/ios
-/android
+/android/build
+.gradle
+*.aab
+
+# iOS generated dependencies/build output
+/ios/Pods/
+/ios/build/
+/ios/DerivedData/
+
+# Xcode local user state
+/ios/.xcode.env.local
+/ios/**/*.xcuserdata/
+/ios/**/*.xcuserstate
+
+# iOS build/export artifacts
+*.ipa
+*.xcarchive
+/AuthKey.*
+/.ci/
+
+*.env
+!/ios/.xcode.env

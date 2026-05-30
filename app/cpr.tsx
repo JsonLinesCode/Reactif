@@ -1,121 +1,404 @@
-import { Audio } from "expo-av";
-import { useEffect, useRef, useState } from "react";
-import { Animated, StyleSheet, Text } from "react-native";
-import { BackgroundTimer } from "react-native-nitro-bg-timer";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  BackHandler,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import ActionButtons from "@/components/ActionButtons";
+import ActionProgressBar from "@/components/ActionProgressBar";
+import CprTimer from "@/components/CprTimer";
+import EventSelectionModal from "@/components/EventSelectionModal";
+import MetronomeControl from "@/components/MetronomeControl";
+import ShockTimer from "@/components/ShockTimer";
+import { useCprSettings } from "@/hooks/useCprSettings";
+import { sessionStore } from "@/store/sessionStore";
+
+import { metronomeController } from "@/controllers/MetronomeController";
+import { sessionController } from "@/controllers/SessionController";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+
+type ResetTarget = "shockTimer" | "cordarone" | "adrenaline";
+
+interface CancelResetRequest {
+  token: number;
+  target: ResetTarget | "remplissage" | null;
+  sourceEventType: "shock" | "analysis" | "cordarone" | "adrenaline" | "event" | null;
+}
+
 export default function Cpr() {
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [bpm, setBpm] = useState(120);
+  const router = useRouter();
+  const {
+    shockDuration,
+    cordaroneDuration,
+    adrenalineDuration,
+    warningSeconds,
+    endButtonShortTap,
+  } = useCprSettings();
 
-  // Ref to hold the single sound object to prevent "layering"
-  const soundRef = useRef<Audio.Sound | null>(null);
+  // ---- Dark Mode State ----
+  const [theme, setTheme] = useState(sessionStore.theme);
 
-  // 1. Pre-load the sound once
   useEffect(() => {
-    async function loadSound() {
-      const { sound } = await Audio.Sound.createAsync(
-        require("@/assets/audio/metronome_tick.mp3"), // Use a short, uncompressed .wav
-        { shouldPlay: false },
-      );
-      soundRef.current = sound;
+    const unsubscribe = sessionStore.subscribe(() => {
+      setTheme(sessionStore.theme);
+    });
+    return () => unsubscribe();
+  }, []);
 
-      // Set audio category for low-latency/background play
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        shouldDuckAndroid: false,
-      });
-    }
-    loadSound();
+  // ----- Metronome State & Logic -----
+  const [bpm, setBpm] = useState(100);
+  const [isMuted, setIsMuted] = useState(true);
+  const isScreenActive = useIsFocused();
 
+  const cprMode = sessionStore.getSession()?.mode || "adult";
+
+  // Re-render when controller notifies so controller getters update
+  const [, setControllerTick] = useState(0);
+  useEffect(() => {
+    const unsubscribe = sessionController.subscribe(() => {
+      setControllerTick((t) => t + 1);
+    });
     return () => {
-      soundRef.current?.unloadAsync();
+      unsubscribe();
     };
   }, []);
 
-  // 2. The Tick Function
-  const playTick = async () => {
-    if (soundRef.current) {
-      try {
-        // Reset and play immediately (avoids stacking instances)
-        await soundRef.current.setPositionAsync(0);
-        await soundRef.current.playAsync();
-      } catch (e) {
-        console.error("Tick failed", e);
+  // Listen to session store to stop metronome on definitive end
+  useEffect(() => {
+    const unsubscribe = sessionStore.subscribe(() => {
+      const currentSession = sessionStore.getSession();
+      if (currentSession?.endTime) {
+        setIsMuted(true);
+        metronomeController.setMuted(true);
+      }
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Update shared values
+  useEffect(() => {
+    metronomeController.setBpm(bpm);
+  }, [bpm]);
+
+  useEffect(() => {
+    metronomeController.setMuted(isMuted);
+  }, [isMuted]);
+
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setHidden(false, "none");
+      return () => {
+        StatusBar.setHidden(false, "none");
+        metronomeController.stop();
+        void sessionController.stopAllSounds();
+      };
+    }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      if (Platform.OS !== "android") return;
+      const subscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => true,
+      );
+      return () => {
+        subscription.remove();
+      };
+    }, []),
+  );
+
+  // metronomeController handles timing and sound
+
+  const getLastResumeTimestamp = () => {
+    const events = sessionStore.getSession()?.events || [];
+    for (let i = events.length - 1; i >= 0; i -= 1) {
+      const event = events[i];
+      if (
+        event.type === "event" &&
+        String(event.details || "").toUpperCase() === "RESUME"
+      ) {
+        return event.timestamp;
       }
     }
+    return null;
   };
 
-  // 3. Toggle the Nitro Timer
-  const toggleMetronome = () => {
-    if (isPlaying) {
-      setIsPlaying(false);
-    } else {
-      const intervalMs = (60 / bpm) * 1000;
-
-      BackgroundTimer.setInterval(() => {
-        playTick();
-      }, intervalMs);
-
-      setIsPlaying(true);
+  const getLastTimeSinceResume = (
+    type: "shock" | "analysis" | "cordarone" | "adrenaline",
+  ) => {
+    const events = sessionStore.getSession()?.events || [];
+    const resumeTs = getLastResumeTimestamp();
+    for (let i = events.length - 1; i >= 0; i -= 1) {
+      const event = events[i];
+      if (event.type !== type) continue;
+      if (resumeTs && event.timestamp <= resumeTs) {
+        return null;
+      }
+      return event.timestamp;
     }
+    return null;
   };
-  useEffect(() => {
-    const interval = setInterval(() => {
-      Animated.sequence([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, 1000);
 
-    return () => clearInterval(interval);
-  }, [fadeAnim]);
+  const shockCount = sessionController.getCount("shock");
+  const lastShockTime = getLastTimeSinceResume("shock");
+  const lastAnalysisTime = getLastTimeSinceResume("analysis");
+  // Local UI state for medication counts and last timestamps so React updates reliably
+  const [cordaroneCountState, setCordaroneCountState] = useState(
+    sessionController.getCount("cordarone"),
+  );
+  const [adrenalineCountState, setAdrenalineCountState] = useState(
+    sessionController.getCount("adrenaline"),
+  );
+  const [lastCordaroneTimeState, setLastCordaroneTimeState] = useState<
+    number | null
+  >(getLastTimeSinceResume("cordarone"));
+  const [lastAdrenalineTimeState, setLastAdrenalineTimeState] = useState<
+    number | null
+  >(getLastTimeSinceResume("adrenaline"));
+
+  // Keep these derived values in sync with the session store when controller notifies
+  useEffect(() => {
+    const updateFromStore = () => {
+      const events = sessionStore.getSession()?.events || [];
+      const resumeTs = getLastResumeTimestamp();
+      const cordEvents = events.filter((e) => e.type === "cordarone");
+      const adrEvents = events.filter((e) => e.type === "adrenaline");
+      const cordEventsSinceResume = resumeTs
+        ? cordEvents.filter((e) => e.timestamp > resumeTs)
+        : cordEvents;
+      const adrEventsSinceResume = resumeTs
+        ? adrEvents.filter((e) => e.timestamp > resumeTs)
+        : adrEvents;
+
+      setCordaroneCountState(cordEvents.length);
+      setAdrenalineCountState(adrEvents.length);
+      setLastCordaroneTimeState(
+        cordEventsSinceResume.length
+          ? cordEventsSinceResume[cordEventsSinceResume.length - 1].timestamp
+          : null,
+      );
+      setLastAdrenalineTimeState(
+        adrEventsSinceResume.length
+          ? adrEventsSinceResume[adrEventsSinceResume.length - 1].timestamp
+          : null,
+      );
+    };
+
+    // initialize once
+    updateFromStore();
+    const unsubscribe = sessionController.subscribe(() => {
+      updateFromStore();
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const cordaroneCount = cordaroneCountState;
+  const adrenalineCount = adrenalineCountState;
+
+  // Modal State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [cancelResetRequest, setCancelResetRequest] =
+    useState<CancelResetRequest>({
+      token: 0,
+      target: null,
+      sourceEventType: null,
+    });
+
+  const handleEnd = () => {
+    setIsMuted(true);
+    metronomeController.setMuted(true);
+    void sessionController.stopAllSounds();
+    // Navigate to End Cpr flow
+    router.push("/cprEndFirstPage" as any);
+  };
+  const handleEvent = () => setModalVisible(true);
+
+  const handleSaveEvents = (selectedEvents: string[]) => {
+    sessionController.logEvents(selectedEvents);
+  };
+
+  const handleOpenAideCognitive = () => {
+    router.push("/aideCognitive" as any);
+  };
+
+  const handleCancel = () => {
+    const lastEvent = sessionStore.getSession()?.events.at(-1);
+    const lastEventType = lastEvent?.type;
+    let target: ResetTarget | "remplissage" | null = null;
+
+    if (lastEventType === "shock" || lastEventType === "analysis") {
+      target = "shockTimer";
+    }
+    if (lastEventType === "cordarone") {
+      target = "cordarone";
+    }
+    if (lastEventType === "adrenaline") {
+      target = "adrenaline";
+    }
+    if (lastEventType === "event" && lastEvent?.details === "REMPLISSAGE") {
+      target = "remplissage";
+    }
+
+    sessionController.cancelLast();
+    setCancelResetRequest((prev) => ({
+      token: prev.token + 1,
+      target,
+      sourceEventType:
+        lastEventType === "shock" ||
+        lastEventType === "analysis" ||
+        lastEventType === "cordarone" ||
+        lastEventType === "adrenaline" ||
+        lastEventType === "event"
+          ? lastEventType
+          : null,
+    }));
+  };
+
+  const handleCancelLastShock = () => {
+    const removed = sessionController.cancelLastOfType("shock");
+    if (!removed) return false;
+    setCancelResetRequest((prev) => ({
+      token: prev.token + 1,
+      target: "shockTimer",
+      sourceEventType: "shock",
+    }));
+    return true;
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Animated.View style={[styles.chronoContainer, { opacity: fadeAnim }]}>
-        <Text style={styles.chronoText}>test</Text>
-      </Animated.View>
-      <Text>
-        fdsoifhjsdoiufuiopdsjufopijsdopijfoipsdjfjiosdjfoipsdjopifjisdojfisjdfiop
-      </Text>
+    <SafeAreaView
+      style={[
+        { flex: 1, backgroundColor: "#fff" },
+        theme === "dark" ? { backgroundColor: "#353636" } : {},
+      ]}
+    >
+      <View style={styles.container}>
+        {/* Top Timer */}
+        <CprTimer />
+
+        {/* Shock Circular Timer */}
+        {/* Pass shockDuration from settings */}
+        <View style={styles.shockRow}>
+          <ShockTimer
+            onShock={sessionController.logShock}
+            onAnalysis={sessionController.logAnalysis}
+            onCancelLastShock={handleCancelLastShock}
+            lastShockTime={lastShockTime}
+            lastAnalysisTime={lastAnalysisTime}
+            durationSeconds={shockDuration}
+            shockCount={shockCount}
+            resetRequest={cancelResetRequest}
+            warningSeconds={warningSeconds}
+          />
+        </View>
+
+        {/* Action Progress Bars */}
+        <View style={styles.actionsContainer}>
+          <ActionProgressBar
+            label="Adrénaline"
+            count={adrenalineCount}
+            color="#448AFF"
+            icon={<FontAwesome5 name="syringe" size={24} />}
+            onPress={sessionController.logAdrenaline}
+            lastActionTime={lastAdrenalineTimeState}
+            durationSeconds={adrenalineDuration} // Use setting
+            // Dose recommendations are intentionally hidden for pediatric CPR.
+            // subtitle={cprMode === "neonatal" ? "10 à 30 µg/kg" : undefined}
+            resetRequest={cancelResetRequest}
+            resetKey="adrenaline"
+            warningSeconds={warningSeconds}
+            isActive={isScreenActive}
+          />
+
+          {cprMode !== "neonatal" ? (
+            <ActionProgressBar
+              label="Cordarone"
+              count={cordaroneCount}
+              color="#448AFF"
+              icon={<FontAwesome5 name="syringe" size={24} />}
+              onPress={sessionController.logCordarone}
+              lastActionTime={lastCordaroneTimeState}
+              durationSeconds={cordaroneDuration} // Use setting
+              // Dose recommendations are intentionally hidden for pediatric CPR.
+              // subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
+              resetRequest={cancelResetRequest}
+              resetKey="cordarone"
+              warningSeconds={warningSeconds}
+              isActive={isScreenActive}
+            />
+          ) : (
+            <ActionProgressBar
+              label="Remplissage"
+              count={sessionController.getCount("remplissage")}
+              color="#448AFF"
+              icon={<FontAwesome5 name="tint" size={24} />}
+              onPress={() => sessionController.logRemplissage()}
+              lastActionTime={null} /* no timer */
+              durationSeconds={0}
+              // Dose recommendations are intentionally hidden for pediatric CPR.
+              // subtitle="10 mL/kg"
+              resetRequest={cancelResetRequest}
+              resetKey="remplissage"
+              warningSeconds={warningSeconds}
+              isActive={isScreenActive}
+            />
+          )}
+        </View>
+
+        {/* Action Buttons Grid */}
+        <ActionButtons
+          onEnd={handleEnd}
+          onEvent={handleEvent}
+          onAideCognitive={handleOpenAideCognitive}
+          onCancel={handleCancel}
+          useShortTapEndButton={endButtonShortTap}
+        />
+
+        {/* Metronome */}
+        <MetronomeControl
+          bpm={bpm}
+          setBpm={setBpm}
+          isMuted={isMuted}
+          setIsMuted={setIsMuted}
+        />
+
+        <EventSelectionModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onSave={handleSaveEvents}
+        />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  chronoContainer: {
-    width: "90%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    paddingVertical: 15, // Reduced padding
-    paddingHorizontal: 20,
-    marginBottom: 20, // Reduced margin
-    alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  chronoText: {
-    fontSize: 50, // Reduced size
-    fontWeight: "bold",
-    color: "#0A3D62",
-  },
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: "#25292e",
+    padding: 16,
+    justifyContent: "space-between",
+    gap: 5,
+  },
+  actionsContainer: {
+    flexDirection: "column",
+    width: "100%",
+    gap: 16,
     justifyContent: "center",
+  },
+  shockRow: {
+    width: "100%",
     alignItems: "center",
+    justifyContent: "center",
   },
 });

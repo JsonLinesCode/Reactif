@@ -1,0 +1,38 @@
+{
+  "cli": {
+    "version": ">= 18.0.1",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "internal": {
+      "extends": "production"
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "JAVA_HOME": "/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home",
+        "ANDROID_HOME": "/Users/work/Library/Android/sdk",
+        "ANDROID_SDK_ROOT": "/Users/work/Library/Android/sdk"
+      }
+    }
+  },
+  "submit": {
+    "production": {},
+    "internal": {
+      "android": {
+        "track": "internal",
+        "releaseStatus": "draft"
+      }
+    }
+  }
+}
