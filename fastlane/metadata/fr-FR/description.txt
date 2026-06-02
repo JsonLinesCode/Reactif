@@ -1,0 +1,34 @@
+REACTIF est une application d’aide aux interventions de réanimation cardiaque, pensée pour les SMUR. L’objectif est d’accompagner le soignant lors des réanimations en chronométrant automatiquement le temps écoulé entre chaque administration de médicaments (adrénaline, cordarone) et de chocs. Elle permet au soignant de se libérer de cette charge mentale au cours de ces interventions, pour focaliser son attention sur le patient, et elle facilite l’horodatage ainsi que la description du déroulé de l’opération en post-intervention.
+
+Elle dispose de plusieurs fonctionnalités :
+Fonction RCP adulte
+Cette fonction permet de suivre les différentes étapes de la RCP et comprend :
+Des compteurs pour suivre en direct le nombre de doses d’adrénaline, de cordarone ou de chocs administrés ;
+Des minuteurs (timers) pour suivre le temps écoulé entre chaque administration, avec un code couleur clair : rouge pour les chocs et bleu pour les médicaments ;
+Un minuteur d'analyse, automatiquement réinitialisé par le minuteur de choc, qui laisse à l’intervenant le temps d’effectuer une rapide analyse de l'état du patient ;
+Une sélection d’événements annexes tels qu'une perfusion, une thrombolyse, une double défibrillation séquentielle, etc. ;
+Un rappel des recommandations pour le calcul des doses, un calculateur PIT et d'autres aides, directement accessibles pendant l’intervention ;
+Un métronome sonore offrant une aide supplémentaire pour le massage cardiaque ;
+Une option d’annulation avec retour haptique pour éviter les mauvaises manipulations ;
+À la fin de la RCP, la possibilité de lancer une RACS (Reprise d'Activité Cardiaque Spontanée), avec l’option de relancer la RCP en conservant le décompte des doses déjà administrées ;
+Une fois l’opération achevée, la possibilité d’exporter le rapport au format PDF.
+
+Fonction RCP pédiatrique
+Conçue pour les enfants, cette fonction comprend, en plus des options de la RCP adulte :
+Un calculateur de doses (avant le début de la RCP) basé sur l’âge ou le poids du patient, permettant également de régler l’intensité des chocs ;
+Un rappel des doses, visible au cours de la RCP directement sur les boutons correspondants.
+
+Fonction RCP néonatale
+Cette dernière catégorie permet de réaliser une RCP adaptée aux nourrissons. Elle se distingue par :
+L'absence de minuteur et de compteur pour la cordarone ;
+L'intégration d'un minuteur spécifique pour effectuer un remplissage vasculaire.
+
+Historique
+Un onglet permettant d’avoir accès aux RCP déjà effectuées, avec le détail complet des opérations.
+
+Paramètres
+Cet onglet permet de modifier les intervalles de temps entre les différentes injections d’adrénaline et les analyses, et de configurer le délai avant le déclenchement des alertes sonores annonçant la fin d’un décompte. Il est également possible de configurer l’interface en mode sombre, de modifier les sons des alertes, ou encore de désactiver le maintien long du bouton « FIN RCP » lors d’une intervention.
+
+Objectif de recherche et confidentialité : L’application a une visée de recherche : elle cherche à faciliter le processus de retour d'expérience pour perfectionner le déroulement des réanimations cardiaques.
+
+L’application ne requiert aucun accès à Internet et ne collecte aucune donnée médicale ou personnelle. Elle n’est donc pas soumise au RGPD. Les historiques des RCP sont stockés localement sur l’appareil de l’utilisateur et ne contiennent aucune donnée sensible.
