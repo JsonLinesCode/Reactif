@@ -304,14 +304,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   partnerLink: {
-    width: 84,
-    height: 84,
+    width: 96,
+    height: 96,
     alignItems: "center",
     justifyContent: "center",
   },
   partnerLogo: {
-    width: 76,
-    height: 76,
+    width: 88,
+    height: 88,
     resizeMode: "contain",
   },
   buttonHistoryText: {
