@@ -50,6 +50,7 @@
     "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-markdown-display": "^7.0.2",
     "react-native-nitro-bg-timer": "^0.1.0",
+    "react-native-nitro-modules": "^0.35.9",
     "react-native-paper": "^5.15.1",
     "react-native-pdf": "^7.0.4",
     "react-native-reanimated": "~4.1.1",
