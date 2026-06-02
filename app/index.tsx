@@ -54,6 +54,10 @@ export default function Index() {
       url: "https://www.chsf.fr/portail/offre-de-soins-18-25.html?args=Y29tcF9pZD00NyZhY3Rpb249ZmljaGVfc2VydmljZSZpZD0xMDMmY29tcG9uZW50PSZtb2R1bGU9Jnw%3D&offre_soin_service_id=103",
       icon: require("@/assets/documents/home/partners/smur-corbeil-essonnes.png"),
     },
+    {
+      url: "https://reac.univ-lille2.fr/saisie/index.php",
+      icon: require("@/assets/documents/home/partners/ReAC_Univ_Lille.png"),
+    }
   ];
 
   const handleOpenPartner = async (url: string) => {
@@ -300,14 +304,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   partnerLink: {
-    width: 84,
-    height: 84,
+    width: 96,
+    height: 96,
     alignItems: "center",
     justifyContent: "center",
   },
   partnerLogo: {
-    width: 76,
-    height: 76,
+    width: 88,
+    height: 88,
     resizeMode: "contain",
   },
   buttonHistoryText: {
