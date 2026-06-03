@@ -95,12 +95,17 @@ export default function Cpr() {
   useFocusEffect(
     useCallback(() => {
       StatusBar.setHidden(false, "none");
+      metronomeController.setBpm(bpm);
+      if (!isMuted) {
+        void metronomeController.start();
+      }
+
       return () => {
         StatusBar.setHidden(false, "none");
         metronomeController.stop();
         void sessionController.stopAllSounds();
       };
-    }, []),
+    }, [bpm, isMuted]),
   );
 
   useFocusEffect(
