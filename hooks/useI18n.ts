@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   getLocale,
@@ -17,22 +17,24 @@ export const useI18n = () => {
   const [localePreference, setLocalePreferenceState] =
     useState<LocalePreference>(getLocalePreference());
 
-  useEffect(() => {
-    const updateLocaleState = () => {
-      setLocaleState(getLocale());
-      setLocalePreferenceState(getLocalePreference());
-    };
-    const unsubscribe = subscribeLocale(updateLocaleState);
-    syncLocaleWithDeviceSettings();
-    updateLocaleState();
-    return () => unsubscribe();
+  const refreshLocale = useCallback(() => {
+    setLocaleState(getLocale());
+    setLocalePreferenceState(getLocalePreference());
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeLocale(refreshLocale);
+    syncLocaleWithDeviceSettings();
+    refreshLocale();
+    return () => unsubscribe();
+  }, [refreshLocale]);
 
   return {
     locale,
     localePreference,
     setLocale,
     setLocalePreference,
+    refreshLocale,
     t,
   };
 };

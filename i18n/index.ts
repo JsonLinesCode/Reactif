@@ -1,16 +1,52 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeModules, Platform } from "react-native";
 
+import de from "@/i18n/translations/de";
 import en from "@/i18n/translations/en";
+import es from "@/i18n/translations/es";
 import fr from "@/i18n/translations/fr";
+import it from "@/i18n/translations/it";
+import ko from "@/i18n/translations/ko";
+import pt from "@/i18n/translations/pt";
+import zh from "@/i18n/translations/zh";
 
-export type Locale = "fr" | "en";
+export type Locale = "fr" | "en" | "de" | "es" | "it" | "pt" | "zh" | "ko";
 export type LocalePreference = "device" | Locale;
 
 type Dictionary = Record<string, unknown>;
 
 const STORAGE_KEY_LOCALE = "@app_locale";
-const dictionaries: Record<Locale, Dictionary> = { fr, en };
+const dictionaries: Record<Locale, Dictionary> = {
+  fr,
+  en,
+  de,
+  es,
+  it,
+  pt,
+  zh,
+  ko,
+};
+export const localeLabels: Record<Locale, string> = {
+  fr: "settings.french",
+  en: "settings.english",
+  de: "settings.german",
+  es: "settings.spanish",
+  it: "settings.italian",
+  pt: "settings.portuguese",
+  zh: "settings.chinese",
+  ko: "settings.korean",
+};
+export const supportedLocales = Object.keys(localeLabels) as Locale[];
+const intlLocaleCodes: Record<Locale, string> = {
+  fr: "fr-FR",
+  en: "en-US",
+  de: "de-DE",
+  es: "es-ES",
+  it: "it-IT",
+  pt: "pt-PT",
+  zh: "zh-CN",
+  ko: "ko-KR",
+};
 
 let currentLocale: Locale = "fr";
 let currentLocalePreference: LocalePreference = "device";
@@ -41,7 +77,10 @@ const getDeviceLocale = (): Locale => {
     )
       .replace("_", "-")
       .toLowerCase();
-    return locale.startsWith("fr") ? "fr" : "en";
+    const languageCode = locale.split("-")[0];
+    return supportedLocales.includes(languageCode as Locale)
+      ? (languageCode as Locale)
+      : "en";
   } catch {
     return "en";
   }
@@ -72,11 +111,24 @@ export const initializeI18n = async () => {
   const previousLocale = currentLocale;
   const previousPreference = currentLocalePreference;
 
+  if (Platform.OS === "ios") {
+    currentLocalePreference = "device";
+    currentLocale = getDeviceLocale();
+    if (
+      previousLocale !== currentLocale ||
+      previousPreference !== currentLocalePreference
+    ) {
+      notify();
+    }
+    return;
+  }
+
   try {
     const stored = await AsyncStorage.getItem(STORAGE_KEY_LOCALE);
-    if (stored === "fr" || stored === "en") {
-      currentLocalePreference = stored;
-      currentLocale = stored;
+    if (supportedLocales.includes(stored as Locale)) {
+      const storedLocale = stored as Locale;
+      currentLocalePreference = storedLocale;
+      currentLocale = storedLocale;
       if (
         previousLocale !== currentLocale ||
         previousPreference !== currentLocalePreference
@@ -122,10 +174,11 @@ export const setLocale = async (locale: Locale) => {
 };
 
 export const syncLocaleWithDeviceSettings = () => {
-  if (currentLocalePreference !== "device") return;
+  if (currentLocalePreference !== "device" && Platform.OS !== "ios") return;
 
   const nextLocale = getDeviceLocale();
-  if (nextLocale !== currentLocale) {
+  if (nextLocale !== currentLocale || currentLocalePreference !== "device") {
+    currentLocalePreference = "device";
     currentLocale = nextLocale;
     notify();
   }
@@ -155,7 +208,7 @@ export const formatLocalizedTime = (
   timestamp: number,
   options?: Intl.DateTimeFormatOptions,
 ): string => {
-  const localeCode = currentLocale === "fr" ? "fr-FR" : "en-US";
+  const localeCode = intlLocaleCodes[currentLocale];
   return new Date(timestamp).toLocaleTimeString(localeCode, options);
 };
 
@@ -163,6 +216,6 @@ export const formatLocalizedDate = (
   timestamp: number,
   options?: Intl.DateTimeFormatOptions,
 ): string => {
-  const localeCode = currentLocale === "fr" ? "fr-FR" : "en-US";
+  const localeCode = intlLocaleCodes[currentLocale];
   return new Date(timestamp).toLocaleDateString(localeCode, options);
 };
