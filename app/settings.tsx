@@ -18,7 +18,7 @@ import { sessionStore } from "@/store/sessionStore";
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { locale, setLocale, t } = useI18n();
+  const { locale, localePreference, setLocalePreference, t } = useI18n();
   const [theme, setTheme] = useState(sessionStore.theme);
 
   useEffect(() => {
@@ -144,6 +144,7 @@ export default function SettingsScreen() {
     await resetSettings();
   };
 
+  const languageLabel = locale === "fr" ? t("settings.french") : t("settings.english");
   const isDark = theme === "dark";
   const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };
   const textStyle = { color: isDark ? "#fff" : "#000" };
@@ -199,11 +200,60 @@ export default function SettingsScreen() {
               roundCorner={true}
               option1={t("settings.french")}
               option2={t("settings.english")}
-              onSelectSwitch={(val) => void setLocale(val === 1 ? "fr" : "en")}
+              onSelectSwitch={(val) =>
+                void setLocalePreference(val === 1 ? "fr" : "en")
+              }
               selectionColor={"#007BFF"}
               isDark={isDark}
             />
           </View>
+          <TouchableOpacity
+            style={[
+              styles.navigationRow,
+              {
+                borderColor:
+                  localePreference === "device"
+                    ? "#007BFF"
+                    : isDark
+                      ? "#444"
+                      : "#d1d5db",
+                backgroundColor: isDark ? "#222121" : "#f9fafb",
+              },
+            ]}
+            onPress={() => void setLocalePreference("device")}
+          >
+            <View style={styles.navigationRowContent}>
+              <Ionicons
+                name="phone-portrait-outline"
+                size={22}
+                color={isDark ? "#e2e8f0" : "#334155"}
+              />
+              <View style={styles.toggleTextBlock}>
+                <Text style={[styles.toggleTitle, textStyle]}>
+                  {t("settings.deviceLanguage")}
+                </Text>
+                <Text style={[styles.toggleSubtitle, labelColor]}>
+                  {t("settings.deviceLanguageSubtitle")}
+                </Text>
+                <Text style={[styles.toggleSubtitle, labelColor]}>
+                  {t("settings.currentLanguage", { language: languageLabel })}
+                </Text>
+              </View>
+            </View>
+            {localePreference === "device" ? (
+              <View style={[styles.pill, { backgroundColor: "#22c55e" }]}>
+                <Text style={styles.pillText}>
+                  {t("settings.deviceLanguageActive")}
+                </Text>
+              </View>
+            ) : (
+              <Ionicons
+                name="sync-outline"
+                size={22}
+                color={isDark ? "#e2e8f0" : "#334155"}
+              />
+            )}
+          </TouchableOpacity>
           <View
             style={[
               styles.divider,

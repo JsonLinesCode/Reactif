@@ -1,11 +1,15 @@
 import { sessionController } from "@/controllers/SessionController";
-import { initializeI18n, subscribeLocale } from "@/i18n";
+import {
+  initializeI18n,
+  subscribeLocale,
+  syncLocaleWithDeviceSettings,
+} from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { useKeepAwake } from "expo-keep-awake";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { Platform, Text, TextInput } from "react-native";
+import { AppState, Platform, Text, TextInput } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider } from "react-native-paper";
 
@@ -33,11 +37,17 @@ TextInputAny.defaultProps = {
 export default function RootLayout() {
   useKeepAwake();
   const [theme, setTheme] = useState(sessionStore.theme);
+  const [i18nReady, setI18nReady] = useState(false);
   const [, setLocaleTick] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
     void sessionController.initAudioAtMaxVolume();
-    void initializeI18n();
+    void initializeI18n().finally(() => {
+      if (isMounted) {
+        setI18nReady(true);
+      }
+    });
 
     const unsubscribe = sessionStore.subscribe(() => {
       setTheme(sessionStore.theme);
@@ -45,12 +55,23 @@ export default function RootLayout() {
     const unsubscribeLocale = subscribeLocale(() => {
       setLocaleTick((v) => v + 1);
     });
+    const appStateSubscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") {
+        syncLocaleWithDeviceSettings();
+      }
+    });
 
     return () => {
+      isMounted = false;
       unsubscribe();
       unsubscribeLocale();
+      appStateSubscription.remove();
     };
   }, []);
+
+  if (!i18nReady) {
+    return null;
+  }
 
   return (
     <PaperProvider>

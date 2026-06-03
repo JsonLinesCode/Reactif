@@ -1,4 +1,3 @@
-import { t } from "@/i18n";
 import { useI18n } from "@/hooks/useI18n";
 import { sessionStore } from "@/store/sessionStore";
 import Feather from "@expo/vector-icons/Feather";
@@ -15,7 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
-  useI18n();
+  const { locale, t } = useI18n();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [theme, setTheme] = useState(sessionStore.theme);
@@ -69,6 +68,7 @@ export default function Index() {
   };
   return (
     <View
+      key={`home-${locale}`}
       id="coucou"
       style={[
         styles.container,
