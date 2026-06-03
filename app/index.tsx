@@ -1,9 +1,10 @@
 import { useI18n } from "@/hooks/useI18n";
 import { sessionStore } from "@/store/sessionStore";
 import Feather from "@expo/vector-icons/Feather";
+import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Linking,
   StyleSheet,
@@ -14,7 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
-  const { locale, t } = useI18n();
+  const { locale, refreshLocale, t } = useI18n();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [theme, setTheme] = useState(sessionStore.theme);
@@ -25,6 +26,12 @@ export default function Index() {
     });
     return () => unsubscribe();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshLocale();
+    }, [refreshLocale]),
+  );
 
   const isDark = theme === "dark";
   const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };

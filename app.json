@@ -17,7 +17,17 @@
         "tinted": "./assets/icons/ios-tinted.png"
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleLocalizations": [
+          "en",
+          "fr",
+          "de",
+          "es",
+          "it",
+          "pt",
+          "zh-Hans",
+          "ko"
+        ]
       }
     },
     "android": {

@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +14,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomSwitch from "@/components/CustomSwitch";
 import { useI18n } from "@/hooks/useI18n";
+import {
+  localeLabels,
+  supportedLocales,
+  type Locale,
+  type LocalePreference,
+} from "@/i18n";
 import { useCprSettings } from "@/hooks/useCprSettings";
 import { sessionStore } from "@/store/sessionStore";
 
@@ -20,6 +27,9 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { locale, localePreference, setLocalePreference, t } = useI18n();
   const [theme, setTheme] = useState(sessionStore.theme);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+  const [selectedLocalePreference, setSelectedLocalePreference] =
+    useState<LocalePreference>(localePreference);
 
   useEffect(() => {
     // Subscribe to sessionStore changes
@@ -28,6 +38,10 @@ export default function SettingsScreen() {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    setSelectedLocalePreference(localePreference);
+  }, [localePreference]);
 
   const {
     shockDuration,
@@ -112,7 +126,9 @@ export default function SettingsScreen() {
     setWarningInput(text);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    await setLocalePreference(selectedLocalePreference);
+
     const shockVal = parseFloat(shockInput);
     if (!isNaN(shockVal)) {
       updateSettings("shock", Math.round(shockVal * 60));
@@ -144,7 +160,15 @@ export default function SettingsScreen() {
     await resetSettings();
   };
 
-  const languageLabel = locale === "fr" ? t("settings.french") : t("settings.english");
+  const languageLabel = t(localeLabels[locale]);
+  const selectedLanguageLabel =
+    selectedLocalePreference === "device"
+      ? languageLabel
+      : t(localeLabels[selectedLocalePreference]);
+  const languagePreferenceLabel =
+    selectedLocalePreference === "device"
+      ? `${t("settings.deviceLanguage")} (${selectedLanguageLabel})`
+      : selectedLanguageLabel;
   const isDark = theme === "dark";
   const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };
   const textStyle = { color: isDark ? "#fff" : "#000" };
@@ -194,65 +218,36 @@ export default function SettingsScreen() {
           <Text style={[styles.sectionTitle, sectionTitleColor]}>
             {t("settings.language")}
           </Text>
-          <View style={{ alignItems: "center", marginBottom: 20 }}>
-            <CustomSwitch
-              selectionMode={locale === "fr" ? 1 : 2}
-              roundCorner={true}
-              option1={t("settings.french")}
-              option2={t("settings.english")}
-              onSelectSwitch={(val) =>
-                void setLocalePreference(val === 1 ? "fr" : "en")
-              }
-              selectionColor={"#007BFF"}
-              isDark={isDark}
-            />
-          </View>
           <TouchableOpacity
             style={[
               styles.navigationRow,
               {
-                borderColor:
-                  localePreference === "device"
-                    ? "#007BFF"
-                    : isDark
-                      ? "#444"
-                      : "#d1d5db",
+                borderColor: isDark ? "#444" : "#d1d5db",
                 backgroundColor: isDark ? "#222121" : "#f9fafb",
               },
             ]}
-            onPress={() => void setLocalePreference("device")}
+            onPress={() => setLanguageModalVisible(true)}
           >
             <View style={styles.navigationRowContent}>
               <Ionicons
-                name="phone-portrait-outline"
+                name="language-outline"
                 size={22}
                 color={isDark ? "#e2e8f0" : "#334155"}
               />
               <View style={styles.toggleTextBlock}>
                 <Text style={[styles.toggleTitle, textStyle]}>
-                  {t("settings.deviceLanguage")}
-                </Text>
-                <Text style={[styles.toggleSubtitle, labelColor]}>
-                  {t("settings.deviceLanguageSubtitle")}
+                  {languagePreferenceLabel}
                 </Text>
                 <Text style={[styles.toggleSubtitle, labelColor]}>
                   {t("settings.currentLanguage", { language: languageLabel })}
                 </Text>
               </View>
             </View>
-            {localePreference === "device" ? (
-              <View style={[styles.pill, { backgroundColor: "#22c55e" }]}>
-                <Text style={styles.pillText}>
-                  {t("settings.deviceLanguageActive")}
-                </Text>
-              </View>
-            ) : (
-              <Ionicons
-                name="sync-outline"
-                size={22}
-                color={isDark ? "#e2e8f0" : "#334155"}
-              />
-            )}
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color={isDark ? "#e2e8f0" : "#334155"}
+            />
           </TouchableOpacity>
           <View
             style={[
@@ -501,6 +496,118 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      <Modal
+        animationType="fade"
+        transparent
+        visible={languageModalVisible}
+        onRequestClose={() => setLanguageModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setLanguageModalVisible(false)}
+          />
+          <View
+            style={[
+              styles.languageModal,
+              {
+                backgroundColor: isDark ? "#222121" : "#fff",
+                borderColor: isDark ? "#444" : "#e5e7eb",
+              },
+            ]}
+          >
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, textStyle]}>
+                {t("settings.language")}
+              </Text>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setLanguageModalVisible(false)}
+              >
+                <Ionicons
+                  name="close"
+                  size={22}
+                  color={isDark ? "#e5e7eb" : "#111827"}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.languageOption,
+                {
+                  borderColor:
+                    selectedLocalePreference === "device"
+                      ? "#007BFF"
+                      : isDark
+                        ? "#444"
+                        : "#d1d5db",
+                  backgroundColor:
+                    selectedLocalePreference === "device"
+                      ? isDark
+                        ? "#0f3767"
+                        : "#e6f0ff"
+                      : "transparent",
+                },
+              ]}
+              onPress={() => {
+                setSelectedLocalePreference("device");
+                setLanguageModalVisible(false);
+              }}
+            >
+              <View style={styles.languageOptionText}>
+                <Text style={[styles.toggleTitle, textStyle]}>
+                  {t("settings.deviceLanguage")}
+                </Text>
+                <Text style={[styles.toggleSubtitle, labelColor]}>
+                  {t("settings.deviceLanguageSubtitle")}
+                </Text>
+              </View>
+              {selectedLocalePreference === "device" ? (
+                <Ionicons name="checkmark" size={22} color="#007BFF" />
+              ) : null}
+            </TouchableOpacity>
+
+            <ScrollView style={styles.languageOptionsList}>
+              {supportedLocales.map((option: Locale) => {
+                const isSelected = selectedLocalePreference === option;
+                return (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.languageOption,
+                      {
+                        borderColor: isSelected
+                          ? "#007BFF"
+                          : isDark
+                            ? "#444"
+                            : "#d1d5db",
+                        backgroundColor: isSelected
+                          ? isDark
+                            ? "#0f3767"
+                            : "#e6f0ff"
+                          : "transparent",
+                      },
+                    ]}
+                    onPress={() => {
+                      setSelectedLocalePreference(option);
+                      setLanguageModalVisible(false);
+                    }}
+                  >
+                    <Text style={[styles.toggleTitle, textStyle]}>
+                      {t(localeLabels[option])}
+                    </Text>
+                    {isSelected ? (
+                      <Ionicons name="checkmark" size={22} color="#007BFF" />
+                    ) : null}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -600,6 +707,56 @@ const styles = StyleSheet.create({
   divider: {
     height: 2,
     marginVertical: 20,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+  },
+  languageModal: {
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 16,
+    maxHeight: "82%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  modalCloseButton: {
+    width: 36,
+    height: 36,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  languageOptionsList: {
+    marginTop: 8,
+  },
+  languageOption: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginBottom: 8,
+    minHeight: 52,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  languageOptionText: {
+    flex: 1,
+    minWidth: 0,
   },
   resetButton: {
     marginTop: 28,
