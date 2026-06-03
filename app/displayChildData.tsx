@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { PediatricData } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import { router } from "expo-router";
@@ -29,7 +30,7 @@ export default function DisplayChildData() {
     return (
       <SafeAreaView style={[styles.container, bgStyle]}>
         <Text style={styles.errorText}>
-          Aucune donnée pédiatrique disponible.
+          {t("childData.noData")}
         </Text>
       </SafeAreaView>
     );
@@ -55,19 +56,19 @@ export default function DisplayChildData() {
         <View style={[styles.card, cardBgStyle]}>
           {shouldShowAge && (
             <>
-              <Text style={[styles.label, labelStyle]}>Age:</Text>
+              <Text style={[styles.label, labelStyle]}>{t("childData.age")}:</Text>
               <Text style={[styles.value, textStyle]}>
-                {ageValue} {ageMode === "months" ? "Mois" : "Ans"}
+                {ageValue} {ageMode === "months" ? t("childData.months") : t("childData.years")}
               </Text>
             </>
           )}
 
           {computeMode === "age" && (
-            <Text style={[styles.label, labelStyle]}>Poids Estimé :</Text>
+            <Text style={[styles.label, labelStyle]}>{t("childData.estimatedWeight")}</Text>
           )}
 
           {computeMode === "weight" && (
-            <Text style={[styles.label, labelStyle]}>Poids Saisi :</Text>
+            <Text style={[styles.label, labelStyle]}>{t("childData.enteredWeight")}</Text>
           )}
           <Text style={[styles.value, textStyle]}>{weight} kg</Text>
 
@@ -81,7 +82,7 @@ export default function DisplayChildData() {
           <Text style={[styles.value, textStyle]}>{cordaroneDose ? `${cordaroneDose} mg` : "N/A"}</Text> */}
 
           <Text style={[styles.label, labelStyle]}>
-            Choc électrique (Energie):
+            {t("childData.electricShockEnergy")}
           </Text>
           <Text style={[styles.value, textStyle]}>
             {energyDose ? `${energyDose} J` : "N/A"}
@@ -92,14 +93,14 @@ export default function DisplayChildData() {
           onPress={handleStartPediatricCpr}
         >
           <Text style={styles.validationButtonText}>
-            Commencer RCP
+            {t("childData.startCpr")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.cancelButton}
           onPress={() => router.push("/childData")}
         >
-          <Text style={styles.validationButtonText}>Annuler</Text>
+          <Text style={styles.validationButtonText}>{t("common.cancel")}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

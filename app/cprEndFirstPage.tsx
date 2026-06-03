@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { sessionStore } from "@/store/sessionStore";
+import { t } from "@/i18n";
 
 export default function CprEndFirstPage() {
   const [theme, setTheme] = React.useState(sessionStore.theme);
@@ -63,7 +64,7 @@ export default function CprEndFirstPage() {
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.contentContainer}>
         <Text style={[styles.title, isDark ? { color: "#ccc" } : {}]}>
-          FIN DE RCP
+          {t("cprEndFirst.title")}
         </Text>
 
         <View style={styles.buttonGroup}>
@@ -72,7 +73,7 @@ export default function CprEndFirstPage() {
             onPress={handleDeath}
           >
             <Text style={[styles.buttonText, outlineButtonTextStyle]}>
-              Décès
+              {t("cprEndFirst.death")}
             </Text>
           </TouchableOpacity>
 
@@ -88,7 +89,7 @@ export default function CprEndFirstPage() {
                   { fontSize: 20 },
                 ]}
               >
-                RACS
+                {t("cprEndFirst.racs")}
               </Text>
               <Text
                 style={[
@@ -97,7 +98,7 @@ export default function CprEndFirstPage() {
                   { fontSize: 8 },
                 ]}
               >
-                Reprise d&#39;activité circulatoire spontanée
+                {t("cprEndFirst.racsLong")}
               </Text>
             </View>
           </TouchableOpacity>

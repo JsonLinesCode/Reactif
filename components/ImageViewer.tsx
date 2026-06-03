@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import React from "react";
 import {
   Image,
@@ -60,7 +61,7 @@ export default function ImageViewer({ imgSource }: Props) {
         {imgSource ? (
           <Image source={imgSource} style={styles.image} resizeMode="contain" />
         ) : (
-          <Text>No image available</Text>
+          <Text>{t("sound.noImage")}</Text>
         )}
       </View>
     );

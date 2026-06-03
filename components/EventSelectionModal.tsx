@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
@@ -18,18 +19,18 @@ interface EventSelectionModalProps {
 }
 
 const EVENT_OPTIONS = [
-  "Perfusion",
-  "Intubation",
-  "Double défibrillation séquentielle",
-  "Antidote",
-  "Thrombolyse",
-  "Correction trouble ionique",
-  "Remplissage vasculaire / transfusion",
-  "Abord thoracique",
-  "Drainage péricardique",
-  "Gestion des hémorragies",
-  "Planche à masser",
-  "ECMO",
+  { key: "perfusion", labelKey: "events.options.perfusion" },
+  { key: "intubation", labelKey: "events.options.intubation" },
+  { key: "doubleDefib", labelKey: "events.options.doubleDefib" },
+  { key: "antidote", labelKey: "events.options.antidote" },
+  { key: "thrombolysis", labelKey: "events.options.thrombolysis" },
+  { key: "ionicCorrection", labelKey: "events.options.ionicCorrection" },
+  { key: "fillingTransfusion", labelKey: "events.options.fillingTransfusion" },
+  { key: "thoracicAccess", labelKey: "events.options.thoracicAccess" },
+  { key: "pericardialDrainage", labelKey: "events.options.pericardialDrainage" },
+  { key: "hemorrhageMgmt", labelKey: "events.options.hemorrhageMgmt" },
+  { key: "cprBoard", labelKey: "events.options.cprBoard" },
+  { key: "ecmo", labelKey: "events.options.ecmo" },
 ];
 
 export default function EventSelectionModal({
@@ -67,7 +68,11 @@ export default function EventSelectionModal({
   };
 
   const handleSave = () => {
-    onSave(Array.from(selected));
+    onSave(
+      EVENT_OPTIONS.filter((item) => selected.has(item.key)).map((item) =>
+        t(item.labelKey),
+      ),
+    );
     setSelected(new Set()); // Reset selection after save
     onClose();
   };
@@ -99,13 +104,13 @@ export default function EventSelectionModal({
           <TouchableOpacity onPress={handleClose} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Saisie Événements</Text>
+          <Text style={styles.headerTitle}>{t("events.title")}</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.titleContainer}>
             <Text style={[styles.pageTitle, textStyle]}>
-              Saisie Événements
+              {t("events.title")}
             </Text>
           </View>
 
@@ -116,15 +121,15 @@ export default function EventSelectionModal({
             ]}
           >
             {EVENT_OPTIONS.map((item) => {
-              const isSelected = selected.has(item);
+              const isSelected = selected.has(item.key);
               return (
                 <TouchableOpacity
-                  key={item}
+                  key={item.key}
                   style={[
                     styles.optionItem,
                     { borderBottomColor: isDark ? "#444" : "#eee" },
                   ]}
-                  onPress={() => toggleEvent(item)}
+                  onPress={() => toggleEvent(item.key)}
                 >
                   <View
                     style={[
@@ -146,7 +151,7 @@ export default function EventSelectionModal({
                     )}
                   </View>
                   <Text style={[styles.optionText, textStyle]}>
-                    {item}
+                    {t(item.labelKey)}
                   </Text>
                 </TouchableOpacity>
               );
@@ -175,7 +180,7 @@ export default function EventSelectionModal({
               style={{ marginRight: 8 }}
             />
             <Text style={[styles.validateButtonText, { textAlign: "center" }]}>
-              Valider et Retour
+              {t("events.validateAndBack")}
             </Text>
           </TouchableOpacity>
         </View>
