@@ -41,9 +41,9 @@ const getDeviceLocale = (): Locale => {
     )
       .replace("_", "-")
       .toLowerCase();
-    return locale.startsWith("en") ? "en" : "fr";
+    return locale.startsWith("fr") ? "fr" : "en";
   } catch {
-    return "fr";
+    return "en";
   }
 };
 
