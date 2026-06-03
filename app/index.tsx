@@ -1,3 +1,4 @@
+import { useI18n } from "@/hooks/useI18n";
 import { sessionStore } from "@/store/sessionStore";
 import Feather from "@expo/vector-icons/Feather";
 import { Image } from "expo-image";
@@ -13,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
+  const { locale, t } = useI18n();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [theme, setTheme] = useState(sessionStore.theme);
@@ -70,6 +72,7 @@ export default function Index() {
   };
   return (
     <View
+      key={`home-${locale}`}
       id="coucou"
       style={[
         styles.container,
@@ -111,7 +114,7 @@ export default function Index() {
             onPress={startAdultCpr}
           >
             <Text style={[styles.menuButtonText, outlineTextStyle]}>
-              RCP ADULTE
+              {t("home.adultCpr")}
             </Text>
           </TouchableOpacity>
           <View
@@ -132,7 +135,7 @@ export default function Index() {
               onPress={startPediatricCpr}
             >
               <Text style={[styles.menuSmallButtonText, outlineTextStyle]}>
-                RCP PEDIATRIQUE
+                {t("home.pediatricCpr")}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -144,7 +147,7 @@ export default function Index() {
               onPress={startNeonatalCpr}
             >
               <Text style={[styles.menuSmallButtonText, outlineTextStyle]}>
-                RCP NEONATALE
+                {t("home.neonatalCpr")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -159,7 +162,7 @@ export default function Index() {
             onPress={startAideCognitive}
           >
             <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
-              AIDES COGNITIVES
+              {t("home.cognitiveAids")}
             </Text>
           </TouchableOpacity>
           <View style={styles.bottomActionRow}>
@@ -172,7 +175,7 @@ export default function Index() {
               onPress={() => router.push("/history")}
             >
               <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
-                Historique
+                {t("home.history")}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity

@@ -1,4 +1,9 @@
 import { CprEvent, CprSession } from "@/models/session";
+import {
+  formatLocalizedDate,
+  formatLocalizedTime,
+  t,
+} from "@/i18n";
 
 interface EventWithCycle {
   event: CprEvent;
@@ -44,7 +49,7 @@ export function formatDuration(startTime: number, endTime?: number): string {
 }
 
 export function formatHumanReadableTime(timestamp: number): string {
-  return new Date(timestamp).toLocaleTimeString("fr-FR", {
+  return formatLocalizedTime(timestamp, {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
@@ -77,17 +82,17 @@ export function formatElapsedFromStart(
 export function formatEventType(type: CprEvent["type"]): string {
   switch (type) {
     case "shock":
-      return "Choc";
+      return t("session.shock");
     case "analysis":
-      return "Analyse";
+      return t("session.analysis");
     case "cordarone":
-      return "Cordarone";
+      return t("session.cordarone");
     case "adrenaline":
-      return "Adrenaline";
+      return t("session.adrenaline");
     case "event":
-      return "Evenement";
+      return t("session.event");
     case "cpr_end":
-      return "Fin RCP";
+      return t("session.cprEnd");
     default:
       return type;
   }
@@ -224,8 +229,8 @@ export function generateSessionHtml(session: CprSession): string {
     .join("");
 
   const pediatricInfo = session.pediatricData
-    ? `<p><strong>Patient:</strong> Enfant (${session.pediatricData.ageValue} ${session.pediatricData.ageMode})</p>`
-    : `<p><strong>Patient:</strong> Adulte (Standard)</p>`;
+    ? `<p><strong>${t("session.patient")}:</strong> ${t("session.child")} (${session.pediatricData.ageValue} ${session.pediatricData.ageMode})</p>`
+    : `<p><strong>${t("session.patient")}:</strong> ${t("session.adult")}</p>`;
 
   return `
     <html>
@@ -241,22 +246,22 @@ export function generateSessionHtml(session: CprSession): string {
         </style>
       </head>
       <body>
-        <h1>Rapport de Reanimation</h1>
+        <h1>${t("session.reportTitle")}</h1>
         <div class="info">
-            <p><strong>Date:</strong> ${new Date(session.startTime).toLocaleDateString()}</p>
+            <p><strong>${t("session.date")}:</strong> ${formatLocalizedDate(session.startTime)}</p>
             ${pediatricInfo}
-            <p><strong>Duree:</strong> ${formatDuration(session.startTime, session.endTime)}</p>
-            <p><strong>ID Session:</strong> ${session.id}</p>
+            <p><strong>${t("session.duration")}:</strong> ${formatDuration(session.startTime, session.endTime)}</p>
+            <p><strong>${t("session.sessionId")}:</strong> ${session.id}</p>
         </div>
 
-        <h2>Journal des evenements</h2>
+        <h2>${t("session.logTitle")}</h2>
         <table>
             <thead>
                 <tr>
-                  <th>Cycle</th>
-                    <th>Type</th>
-                    <th>Details</th>
-                  <th>Heure (Temps écoulé)</th>
+                  <th>${t("session.cycle")}</th>
+                    <th>${t("session.type")}</th>
+                    <th>${t("session.details")}</th>
+                  <th>${t("session.timeElapsed")}</th>
                 </tr>
             </thead>
             <tbody>

@@ -91,6 +91,7 @@ app/           Routes Expo Router (écrans)
 components/    Composants UI réutilisables
 controllers/   Logique métier (session/audio/métronome)
 hooks/         Hooks applicatifs (paramètres RCP)
+i18n/          Infrastructure de traduction + dictionnaires de langues
 models/        Types métier (session, événements)
 store/         Store de session en mémoire + persistance historique
 utils/         Fonctions utilitaires (session, sons)
@@ -98,6 +99,16 @@ assets/        Images, icônes, sons, documents
 fastlane/      Lanes Fastlane iOS/Android
 .github/       Workflows CI/CD
 ```
+
+## Internationalisation (i18n)
+
+- Locales supportées: `fr`, `en`
+- Locale persistée via AsyncStorage (`@app_locale`)
+- Moteur: `i18n/index.ts` (traduction, interpolation, formatage date/heure)
+- Hook UI: `hooks/useI18n.ts`
+- Dictionnaires:
+  - `i18n/translations/fr.ts`
+  - `i18n/translations/en.ts`
 
 ## Données et persistance
 

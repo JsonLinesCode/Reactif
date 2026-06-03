@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { getCurrentCycleElapsedSeconds } from "@/utils/sessionUtils";
 import React, { useEffect, useState } from "react";
@@ -49,7 +50,7 @@ export default function CprTimer() {
           : {},
       ]}
     >
-      <Text style={[styles.label, textStyleColor]}>DURÉE RCP</Text>
+      <Text style={[styles.label, textStyleColor]}>{t("cpr.duration")}</Text>
       <View style={styles.timerContainer}>
         <Text style={[styles.timerText, textStyleColor]}>
           {formatTime(seconds)}

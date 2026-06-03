@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { soundController } from "@/controllers/SoundController";
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import {
   DEFAULT_SOUND_CHOICES,
@@ -92,7 +93,7 @@ export default function SoundSettingsScreen() {
 
   const editingLabel =
     editingSoundSlot === METRONOME_SOUND_SLOT
-      ? "Métronome"
+      ? t("sound.metronome")
       : TIMER_SOUND_OPTIONS.flatMap(({ kind: timerKind, label: timerLabel }) =>
           REMINDER_SOUND_OPTIONS.map(({ kind: reminderKind, label }) => ({
             slot: makeTimerSoundSlot(timerKind, reminderKind),
@@ -130,13 +131,13 @@ export default function SoundSettingsScreen() {
             ]}
           >
             <Text style={styles.soundBadgeText}>
-              {isDefault ? "DÉFAUT" : "PERSO"}
+              {isDefault ? t("sound.defaultTag") : t("sound.customTag")}
             </Text>
           </View>
           <TouchableOpacity
             style={[styles.iconButton, { borderColor: rowColors.borderColor }]}
             onPress={() => void handlePreviewSlot(slot)}
-            accessibilityLabel={`Prévisualiser ${label}`}
+            accessibilityLabel={t("sound.preview", { label })}
           >
             <Ionicons
               name="play"
@@ -147,7 +148,7 @@ export default function SoundSettingsScreen() {
           <TouchableOpacity
             style={[styles.iconButton, { borderColor: rowColors.borderColor }]}
             onPress={() => setEditingSoundSlot(slot)}
-            accessibilityLabel={`Modifier ${label}`}
+            accessibilityLabel={t("sound.edit", { label })}
           >
             <Ionicons
               name="create-outline"
@@ -162,7 +163,7 @@ export default function SoundSettingsScreen() {
                 { borderColor: rowColors.borderColor },
               ]}
               onPress={() => void handleResetSound(slot)}
-              accessibilityLabel={`Réinitialiser ${label}`}
+              accessibilityLabel={t("sound.reset", { label })}
             >
               <Ionicons
                 name="refresh"
@@ -191,11 +192,13 @@ export default function SoundSettingsScreen() {
             color={isDark ? "#fff" : "#000"}
           />
         </TouchableOpacity>
-        <Text style={[styles.title, textStyle]}>Sons</Text>
+        <Text style={[styles.title, textStyle]}>{t("sound.title")}</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.sectionTitle, sectionTitleColor]}>Métronome</Text>
+        <Text style={[styles.sectionTitle, sectionTitleColor]}>
+          {t("sound.metronome")}
+        </Text>
         {renderSoundRow(METRONOME_SOUND_SLOT, "Tick")}
 
         {TIMER_SOUND_OPTIONS.map(({ kind: timerKind, label }) => (
@@ -216,7 +219,7 @@ export default function SoundSettingsScreen() {
           style={styles.resetButton}
           onPress={() => void handleResetAll()}
         >
-          <Text style={styles.resetButtonText}>Réinitialiser tous les sons</Text>
+          <Text style={styles.resetButtonText}>{t("sound.resetAll")}</Text>
         </TouchableOpacity>
       </ScrollView>
 
