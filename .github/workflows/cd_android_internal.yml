@@ -46,9 +46,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.gem
-          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_android_internal.yml') }}
+          key: ${{ runner.os }}-ruby-3.2-fastlane-v2-${{ hashFiles('.github/workflows/cd_android_internal.yml') }}
           restore-keys: |
-            ${{ runner.os }}-ruby-gems-
+            ${{ runner.os }}-ruby-3.2-fastlane-v2-
 
       - name: Add Ruby user gem bin to PATH
         run: echo "$(ruby -e 'print Gem.user_dir')/bin" >> "$GITHUB_PATH"
@@ -227,7 +227,9 @@ jobs:
           if-no-files-found: error
 
       - name: Install fastlane
-        run: gem install fastlane --user-install -N
+        run: |
+          gem install multi_json --user-install -N
+          gem install fastlane --user-install -N
 
       - name: Upload to Google Play Internal track
         run: |
