@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -170,6 +171,7 @@ export default function SettingsScreen() {
       ? `${t("settings.deviceLanguage")} (${selectedLanguageLabel})`
       : selectedLanguageLabel;
   const isDark = theme === "dark";
+  const canChooseLanguageInApp = Platform.OS !== "ios";
   const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };
   const textStyle = { color: isDark ? "#fff" : "#000" };
   const inputBgStyle = {
@@ -215,46 +217,50 @@ export default function SettingsScreen() {
               isDark={isDark}
             />
           </View>
-          <Text style={[styles.sectionTitle, sectionTitleColor]}>
-            {t("settings.language")}
-          </Text>
-          <TouchableOpacity
-            style={[
-              styles.navigationRow,
-              {
-                borderColor: isDark ? "#444" : "#d1d5db",
-                backgroundColor: isDark ? "#222121" : "#f9fafb",
-              },
-            ]}
-            onPress={() => setLanguageModalVisible(true)}
-          >
-            <View style={styles.navigationRowContent}>
-              <Ionicons
-                name="language-outline"
-                size={22}
-                color={isDark ? "#e2e8f0" : "#334155"}
+          {canChooseLanguageInApp && (
+            <>
+              <Text style={[styles.sectionTitle, sectionTitleColor]}>
+                {t("settings.language")}
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.navigationRow,
+                  {
+                    borderColor: isDark ? "#444" : "#d1d5db",
+                    backgroundColor: isDark ? "#222121" : "#f9fafb",
+                  },
+                ]}
+                onPress={() => setLanguageModalVisible(true)}
+              >
+                <View style={styles.navigationRowContent}>
+                  <Ionicons
+                    name="language-outline"
+                    size={22}
+                    color={isDark ? "#e2e8f0" : "#334155"}
+                  />
+                  <View style={styles.toggleTextBlock}>
+                    <Text style={[styles.toggleTitle, textStyle]}>
+                      {languagePreferenceLabel}
+                    </Text>
+                    <Text style={[styles.toggleSubtitle, labelColor]}>
+                      {t("settings.currentLanguage", { language: languageLabel })}
+                    </Text>
+                  </View>
+                </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={22}
+                  color={isDark ? "#e2e8f0" : "#334155"}
+                />
+              </TouchableOpacity>
+              <View
+                style={[
+                  styles.divider,
+                  { backgroundColor: isDark ? "#3a3b3c" : "#e5e7eb" },
+                ]}
               />
-              <View style={styles.toggleTextBlock}>
-                <Text style={[styles.toggleTitle, textStyle]}>
-                  {languagePreferenceLabel}
-                </Text>
-                <Text style={[styles.toggleSubtitle, labelColor]}>
-                  {t("settings.currentLanguage", { language: languageLabel })}
-                </Text>
-              </View>
-            </View>
-            <Ionicons
-              name="chevron-forward"
-              size={22}
-              color={isDark ? "#e2e8f0" : "#334155"}
-            />
-          </TouchableOpacity>
-          <View
-            style={[
-              styles.divider,
-              { backgroundColor: isDark ? "#3a3b3c" : "#e5e7eb" },
-            ]}
-          />
+            </>
+          )}
           <Text style={[styles.sectionTitle, sectionTitleColor]}>
             {t("settings.defaultDurations")}
           </Text>
@@ -496,118 +502,120 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      <Modal
-        animationType="fade"
-        transparent
-        visible={languageModalVisible}
-        onRequestClose={() => setLanguageModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={styles.modalBackdrop}
-            activeOpacity={1}
-            onPress={() => setLanguageModalVisible(false)}
-          />
-          <View
-            style={[
-              styles.languageModal,
-              {
-                backgroundColor: isDark ? "#222121" : "#fff",
-                borderColor: isDark ? "#444" : "#e5e7eb",
-              },
-            ]}
-          >
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, textStyle]}>
-                {t("settings.language")}
-              </Text>
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={() => setLanguageModalVisible(false)}
-              >
-                <Ionicons
-                  name="close"
-                  size={22}
-                  color={isDark ? "#e5e7eb" : "#111827"}
-                />
-              </TouchableOpacity>
-            </View>
-
+      {canChooseLanguageInApp && (
+        <Modal
+          animationType="fade"
+          transparent
+          visible={languageModalVisible}
+          onRequestClose={() => setLanguageModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
             <TouchableOpacity
+              style={styles.modalBackdrop}
+              activeOpacity={1}
+              onPress={() => setLanguageModalVisible(false)}
+            />
+            <View
               style={[
-                styles.languageOption,
+                styles.languageModal,
                 {
-                  borderColor:
-                    selectedLocalePreference === "device"
-                      ? "#007BFF"
-                      : isDark
-                        ? "#444"
-                        : "#d1d5db",
-                  backgroundColor:
-                    selectedLocalePreference === "device"
-                      ? isDark
-                        ? "#0f3767"
-                        : "#e6f0ff"
-                      : "transparent",
+                  backgroundColor: isDark ? "#222121" : "#fff",
+                  borderColor: isDark ? "#444" : "#e5e7eb",
                 },
               ]}
-              onPress={() => {
-                setSelectedLocalePreference("device");
-                setLanguageModalVisible(false);
-              }}
             >
-              <View style={styles.languageOptionText}>
-                <Text style={[styles.toggleTitle, textStyle]}>
-                  {t("settings.deviceLanguage")}
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, textStyle]}>
+                  {t("settings.language")}
                 </Text>
-                <Text style={[styles.toggleSubtitle, labelColor]}>
-                  {t("settings.deviceLanguageSubtitle")}
-                </Text>
+                <TouchableOpacity
+                  style={styles.modalCloseButton}
+                  onPress={() => setLanguageModalVisible(false)}
+                >
+                  <Ionicons
+                    name="close"
+                    size={22}
+                    color={isDark ? "#e5e7eb" : "#111827"}
+                  />
+                </TouchableOpacity>
               </View>
-              {selectedLocalePreference === "device" ? (
-                <Ionicons name="checkmark" size={22} color="#007BFF" />
-              ) : null}
-            </TouchableOpacity>
 
-            <ScrollView style={styles.languageOptionsList}>
-              {supportedLocales.map((option: Locale) => {
-                const isSelected = selectedLocalePreference === option;
-                return (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.languageOption,
-                      {
-                        borderColor: isSelected
-                          ? "#007BFF"
-                          : isDark
-                            ? "#444"
-                            : "#d1d5db",
-                        backgroundColor: isSelected
-                          ? isDark
-                            ? "#0f3767"
-                            : "#e6f0ff"
-                          : "transparent",
-                      },
-                    ]}
-                    onPress={() => {
-                      setSelectedLocalePreference(option);
-                      setLanguageModalVisible(false);
-                    }}
-                  >
-                    <Text style={[styles.toggleTitle, textStyle]}>
-                      {t(localeLabels[option])}
-                    </Text>
-                    {isSelected ? (
-                      <Ionicons name="checkmark" size={22} color="#007BFF" />
-                    ) : null}
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+              <TouchableOpacity
+                style={[
+                  styles.languageOption,
+                  {
+                    borderColor:
+                      selectedLocalePreference === "device"
+                        ? "#007BFF"
+                        : isDark
+                          ? "#444"
+                          : "#d1d5db",
+                    backgroundColor:
+                      selectedLocalePreference === "device"
+                        ? isDark
+                          ? "#0f3767"
+                          : "#e6f0ff"
+                        : "transparent",
+                  },
+                ]}
+                onPress={() => {
+                  setSelectedLocalePreference("device");
+                  setLanguageModalVisible(false);
+                }}
+              >
+                <View style={styles.languageOptionText}>
+                  <Text style={[styles.toggleTitle, textStyle]}>
+                    {t("settings.deviceLanguage")}
+                  </Text>
+                  <Text style={[styles.toggleSubtitle, labelColor]}>
+                    {t("settings.deviceLanguageSubtitle")}
+                  </Text>
+                </View>
+                {selectedLocalePreference === "device" ? (
+                  <Ionicons name="checkmark" size={22} color="#007BFF" />
+                ) : null}
+              </TouchableOpacity>
+
+              <ScrollView style={styles.languageOptionsList}>
+                {supportedLocales.map((option: Locale) => {
+                  const isSelected = selectedLocalePreference === option;
+                  return (
+                    <TouchableOpacity
+                      key={option}
+                      style={[
+                        styles.languageOption,
+                        {
+                          borderColor: isSelected
+                            ? "#007BFF"
+                            : isDark
+                              ? "#444"
+                              : "#d1d5db",
+                          backgroundColor: isSelected
+                            ? isDark
+                              ? "#0f3767"
+                              : "#e6f0ff"
+                            : "transparent",
+                        },
+                      ]}
+                      onPress={() => {
+                        setSelectedLocalePreference(option);
+                        setLanguageModalVisible(false);
+                      }}
+                    >
+                      <Text style={[styles.toggleTitle, textStyle]}>
+                        {t(localeLabels[option])}
+                      </Text>
+                      {isSelected ? (
+                        <Ionicons name="checkmark" size={22} color="#007BFF" />
+                      ) : null}
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
