@@ -1,4 +1,5 @@
 import LongPressButton from "@/components/LongPressButton";
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -55,7 +56,7 @@ export default function ActionButtons({
             size={BUTTON_SIZE}
             iconSize={65}
             iconName="close-outline"
-            label="Fin RCP"
+            label={t("cpr.endCpr")}
           />
         )}
         {useShortTapEndButton && (
@@ -65,7 +66,7 @@ export default function ActionButtons({
             adjustsFontSizeToFit
             minimumFontScale={0.72}
           >
-            Fin RCP
+            {t("cpr.endCpr")}
           </Text>
         )}
       </View>
@@ -90,7 +91,7 @@ export default function ActionButtons({
           adjustsFontSizeToFit
           minimumFontScale={0.72}
         >
-          Saisie
+          {t("cpr.entry")}
         </Text>
       </View>
 
@@ -116,7 +117,7 @@ export default function ActionButtons({
           adjustsFontSizeToFit
           minimumFontScale={0.72}
         >
-          Aide
+          {t("cpr.aid")}
         </Text>
       </View>
       <View style={styles.actionItem}>

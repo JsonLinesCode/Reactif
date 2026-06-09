@@ -6,6 +6,9 @@ on:
     branches:
       - beta-releases
 
+permissions:
+  contents: write
+
 jobs:
   # CD
   deploy_android:
@@ -43,9 +46,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.gem
-          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_android_internal.yml') }}
+          key: ${{ runner.os }}-ruby-3.2-fastlane-v2-${{ hashFiles('.github/workflows/cd_android_internal.yml') }}
           restore-keys: |
-            ${{ runner.os }}-ruby-gems-
+            ${{ runner.os }}-ruby-3.2-fastlane-v2-
 
       - name: Add Ruby user gem bin to PATH
         run: echo "$(ruby -e 'print Gem.user_dir')/bin" >> "$GITHUB_PATH"
@@ -128,28 +131,53 @@ jobs:
 
       - name: Set Android version code
         run: |
-          BASE_VERSION_CODE=$(date +%s)
-          VERSION_CODE_OFFSET="${{ vars.ANDROID_VERSION_CODE_OFFSET }}"
+          BASE_VERSION_CODE=$(git show -s --format=%ct HEAD)
+          VERSION_CODE_OFFSET="${{ vars.RELEASE_BUILD_NUMBER_OFFSET }}"
+          if [ -z "$VERSION_CODE_OFFSET" ]; then VERSION_CODE_OFFSET="${{ vars.ANDROID_VERSION_CODE_OFFSET }}"; fi
           if [ -z "$VERSION_CODE_OFFSET" ]; then VERSION_CODE_OFFSET=0; fi
           VERSION_CODE=$((BASE_VERSION_CODE + VERSION_CODE_OFFSET))
+          VERSION_NAME=$(node -e "const app=require('./app.json'); process.stdout.write(app.expo.version);")
           echo "ANDROID_VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
-          echo "Using Android versionCode $VERSION_CODE"
+          echo "ANDROID_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=v${VERSION_NAME}+${VERSION_CODE}" >> "$GITHUB_ENV"
+          echo "Using Android versionName $VERSION_NAME and versionCode $VERSION_CODE"
 
-      - name: Build Android App Bundle
+      - name: Build Android release artifacts
         run: |
           cd android
-          ./gradlew bundleRelease --no-daemon --parallel --build-cache
+          ./gradlew bundleRelease assembleRelease --no-daemon --parallel --build-cache
 
-      - name: Verify AAB outputs exist
+      - name: Verify Android release outputs exist
         run: |
           echo "AAB files found:"
           find android/app/build/outputs -type f -name "*.aab" -print || true
+          echo "APK files found:"
+          find android/app/build/outputs -type f -name "*.apk" -print || true
 
           AAB_COUNT=$(find android/app/build/outputs -type f -name "*.aab" | wc -l | tr -d ' ')
           if [ "$AAB_COUNT" -eq 0 ]; then
             echo "No .aab artifact found after bundleRelease"
             exit 1
           fi
+
+          APK_COUNT=$(find android/app/build/outputs -type f -name "*.apk" | wc -l | tr -d ' ')
+          if [ "$APK_COUNT" -eq 0 ]; then
+            echo "No .apk artifact found after assembleRelease"
+            exit 1
+          fi
+
+      - name: Prepare signed Android APK release asset
+        run: |
+          mkdir -p .ci/release-assets
+          APK_PATH=$(find android/app/build/outputs/apk/release -type f -name "*.apk" | sort | head -n 1)
+          cp "$APK_PATH" ".ci/release-assets/reactif-android-v${ANDROID_VERSION_NAME}+${ANDROID_VERSION_CODE}.apk"
+
+      - name: Upload signed APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-android-apk
+          path: .ci/release-assets/*.apk
+          if-no-files-found: error
 
       - name: Generate release description txt
         run: |
@@ -199,7 +227,9 @@ jobs:
           if-no-files-found: error
 
       - name: Install fastlane
-        run: gem install fastlane --user-install -N
+        run: |
+          gem install multi_json --user-install -N
+          gem install fastlane --user-install -N
 
       - name: Upload to Google Play Internal track
         run: |
@@ -210,3 +240,17 @@ jobs:
           PLAY_RELEASE_STATUS: completed
           PLAY_JSON_KEY: ${{ github.workspace }}/.ci/keys/google-play-service-account.json
           PLAY_METADATA_PATH: ${{ github.workspace }}/.ci/play-metadata/android
+
+      - name: Create Android GitHub release with signed APK
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" .ci/release-assets/*.apk --clobber
+          elif ! gh release create "$RELEASE_TAG" \
+            .ci/release-assets/*.apk \
+            --target "$GITHUB_SHA" \
+            --title "Reactif v${ANDROID_VERSION_NAME} (${ANDROID_VERSION_CODE})" \
+            --notes-file .ci/release-notes.txt; then
+            gh release upload "$RELEASE_TAG" .ci/release-assets/*.apk --clobber
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

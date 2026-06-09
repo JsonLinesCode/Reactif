@@ -20,6 +20,7 @@ import { sessionStore } from "@/store/sessionStore";
 
 import { metronomeController } from "@/controllers/MetronomeController";
 import { sessionController } from "@/controllers/SessionController";
+import { t } from "@/i18n";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
@@ -58,6 +59,12 @@ export default function Cpr() {
 
   const cprMode = sessionStore.getSession()?.mode || "adult";
 
+  const [doses, setDoses] = useState({
+    adrenaline: sessionStore.getAdrenalineDose(),
+    cordarone: sessionStore.getCordaroneDose(),
+    energy: sessionStore.getEnergyDose(),
+  });
+
   // Re-render when controller notifies so controller getters update
   const [, setControllerTick] = useState(0);
   useEffect(() => {
@@ -69,7 +76,7 @@ export default function Cpr() {
     };
   }, []);
 
-  // Listen to session store to stop metronome on definitive end
+  // Listen to session store to stop metronome on definitive end and update doses
   useEffect(() => {
     const unsubscribe = sessionStore.subscribe(() => {
       const currentSession = sessionStore.getSession();
@@ -77,6 +84,11 @@ export default function Cpr() {
         setIsMuted(true);
         metronomeController.setMuted(true);
       }
+      setDoses({
+        adrenaline: sessionStore.getAdrenalineDose(),
+        cordarone: sessionStore.getCordaroneDose(),
+        energy: sessionStore.getEnergyDose(),
+      });
     });
     return () => {
       unsubscribe();
@@ -95,12 +107,17 @@ export default function Cpr() {
   useFocusEffect(
     useCallback(() => {
       StatusBar.setHidden(false, "none");
+      metronomeController.setBpm(bpm);
+      if (!isMuted) {
+        void metronomeController.start();
+      }
+
       return () => {
         StatusBar.setHidden(false, "none");
         metronomeController.stop();
         void sessionController.stopAllSounds();
       };
-    }, []),
+    }, [bpm, isMuted]),
   );
 
   useFocusEffect(
@@ -306,15 +323,20 @@ export default function Cpr() {
         {/* Action Progress Bars */}
         <View style={styles.actionsContainer}>
           <ActionProgressBar
-            label="Adrénaline"
+            label={t("session.adrenaline")}
             count={adrenalineCount}
             color="#448AFF"
             icon={<FontAwesome5 name="syringe" size={24} />}
             onPress={sessionController.logAdrenaline}
             lastActionTime={lastAdrenalineTimeState}
             durationSeconds={adrenalineDuration} // Use setting
-            // Dose recommendations are intentionally hidden for pediatric CPR.
-            // subtitle={cprMode === "neonatal" ? "10 à 30 µg/kg" : undefined}
+            subtitle={
+              cprMode === "neonatal"
+                ? "10 à 30 µg/kg"
+                : doses.adrenaline
+                  ? `${doses.adrenaline} mg`
+                  : undefined
+            }
             resetRequest={cancelResetRequest}
             resetKey="adrenaline"
             warningSeconds={warningSeconds}
@@ -323,15 +345,14 @@ export default function Cpr() {
 
           {cprMode !== "neonatal" ? (
             <ActionProgressBar
-              label="Cordarone"
+              label={t("session.cordarone")}
               count={cordaroneCount}
               color="#448AFF"
               icon={<FontAwesome5 name="syringe" size={24} />}
               onPress={sessionController.logCordarone}
               lastActionTime={lastCordaroneTimeState}
               durationSeconds={cordaroneDuration} // Use setting
-              // Dose recommendations are intentionally hidden for pediatric CPR.
-              // subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
+              subtitle={doses.cordarone ? `${doses.cordarone} mg` : undefined}
               resetRequest={cancelResetRequest}
               resetKey="cordarone"
               warningSeconds={warningSeconds}
@@ -339,15 +360,14 @@ export default function Cpr() {
             />
           ) : (
             <ActionProgressBar
-              label="Remplissage"
+              label={t("events.options.fillingTransfusion")}
               count={sessionController.getCount("remplissage")}
               color="#448AFF"
               icon={<FontAwesome5 name="tint" size={24} />}
               onPress={() => sessionController.logRemplissage()}
               lastActionTime={null} /* no timer */
               durationSeconds={0}
-              // Dose recommendations are intentionally hidden for pediatric CPR.
-              // subtitle="10 mL/kg"
+              subtitle="10 mL/kg"
               resetRequest={cancelResetRequest}
               resetKey="remplissage"
               warningSeconds={warningSeconds}

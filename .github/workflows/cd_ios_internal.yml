@@ -6,6 +6,9 @@ on:
     branches:
       - beta-releases
 
+permissions:
+  contents: write
+
 jobs:
   # CD
   deploy_ios:
@@ -47,9 +50,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.gem
-          key: ${{ runner.os }}-ruby-gems-${{ hashFiles('.github/workflows/cd_ios_internal.yml') }}
+          key: ${{ runner.os }}-ruby-4.0-fastlane-v2-${{ hashFiles('.github/workflows/cd_ios_internal.yml') }}
           restore-keys: |
-            ${{ runner.os }}-ruby-gems-
+            ${{ runner.os }}-ruby-4.0-fastlane-v2-
 
       - name: Add Ruby user gem bin to PATH
         run: echo "$(ruby -e 'print Gem.user_dir')/bin" >> "$GITHUB_PATH"
@@ -59,12 +62,52 @@ jobs:
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
 
+      - name: Set iOS release version
+        run: |
+          BASE_BUILD_NUMBER=$(git show -s --format=%ct HEAD)
+          BUILD_NUMBER_OFFSET="${{ vars.RELEASE_BUILD_NUMBER_OFFSET }}"
+          if [ -z "$BUILD_NUMBER_OFFSET" ]; then BUILD_NUMBER_OFFSET="${{ vars.ANDROID_VERSION_CODE_OFFSET }}"; fi
+          if [ -z "$BUILD_NUMBER_OFFSET" ]; then BUILD_NUMBER_OFFSET=0; fi
+          BUILD_NUMBER=$((BASE_BUILD_NUMBER + BUILD_NUMBER_OFFSET))
+          VERSION_NAME=$(node -e "const app=require('./app.json'); process.stdout.write(app.expo.version);")
+          echo "IOS_BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
+          echo "IOS_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
+          echo "RELEASE_TAG=v${VERSION_NAME}+${BUILD_NUMBER}" >> "$GITHUB_ENV"
+          echo "Using iOS versionName $VERSION_NAME and buildNumber $BUILD_NUMBER"
+
+      - name: Generate release description txt
+        run: |
+          mkdir -p .ci
+
+          BASE_SHA="${{ github.event.before }}"
+          if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            CHANGELOG=$(git log --no-merges --pretty=format:'- %s (%h)' "$BASE_SHA"..HEAD)
+          else
+            CHANGELOG=$(git log --no-merges -n 20 --pretty=format:'- %s (%h)' HEAD)
+          fi
+
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="- Internal CI build"
+          fi
+
+          {
+            echo "Reactif CI build"
+            echo "Branch: ${{ github.ref_name }}"
+            echo "Commit: ${GITHUB_SHA::7}"
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            echo "Changes:"
+            echo "$CHANGELOG"
+          } > .ci/release-notes.txt
+
       - name: Decode iOS keystore from secret
         run: |
           printf '%s' "${{ secrets.P8_KEY_BASE_64 }}" | base64 --decode > ./AuthKey.p8
 
       - name: Install fastlane
-        run: gem install fastlane --user-install -N
+        run: |
+          gem install multi_json --user-install -N
+          gem install fastlane --user-install -N
 
       - name: Upload to App Store TestFlight track
         run: |
@@ -76,6 +119,38 @@ jobs:
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_READONLY: "true"
-          IOS_BUILD_NUMBER_OFFSET: ${{ vars.IOS_BUILD_NUMBER_OFFSET }}
+          IOS_BUILD_NUMBER: ${{ env.IOS_BUILD_NUMBER }}
+          IOS_VERSION_NAME: ${{ env.IOS_VERSION_NAME }}
           BETA_APP_DESCRIPTION: ${{ vars.BETA_APP_DESCRIPTION }}
           BETA_APP_FEEDBACK_EMAIL: ${{ secrets.BETA_APP_FEEDBACK_EMAIL }}
+
+      - name: Prepare signed iOS IPA release asset
+        run: |
+          mkdir -p .ci/release-assets
+          IPA_PATH=$(find . -type f -name "*.ipa" | sort | head -n 1)
+          if [ -z "$IPA_PATH" ]; then
+            echo "No .ipa artifact found after Fastlane build"
+            exit 1
+          fi
+          cp "$IPA_PATH" ".ci/release-assets/reactif-ios-v${IOS_VERSION_NAME}+${IOS_BUILD_NUMBER}.ipa"
+
+      - name: Upload signed IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-ios-ipa
+          path: .ci/release-assets/*.ipa
+          if-no-files-found: error
+
+      - name: Create iOS GitHub release with signed IPA
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" .ci/release-assets/*.ipa --clobber
+          elif ! gh release create "$RELEASE_TAG" \
+            .ci/release-assets/*.ipa \
+            --target "$GITHUB_SHA" \
+            --title "Reactif v${IOS_VERSION_NAME} (${IOS_BUILD_NUMBER})" \
+            --notes-file .ci/release-notes.txt; then
+            gh release upload "$RELEASE_TAG" .ci/release-assets/*.ipa --clobber
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,5 @@
 require "pathname"
+require "json"
 
 default_platform(:android)
 
@@ -21,6 +22,14 @@ def ci_build_number
   (Time.now.to_i + offset).to_s
 end
 
+def app_version_name
+  explicit_version_name = optional_env("IOS_VERSION_NAME")
+  return explicit_version_name if explicit_version_name
+
+  app_json_path = File.expand_path("../app.json", __dir__)
+  JSON.parse(File.read(app_json_path)).dig("expo", "version").to_s
+end
+
 platform :ios do
   desc "Create or sync App Store signing assets used for TestFlight"
   lane :testflight_release do
@@ -33,6 +42,10 @@ platform :ios do
         in_house: false
     )
     match(api_key: api_key)
+    increment_version_number(
+      version_number: app_version_name,
+      xcodeproj: "ios/Reactif.xcodeproj"
+    )
     increment_build_number(
       build_number: ci_build_number,
       xcodeproj: "ios/Reactif.xcodeproj"

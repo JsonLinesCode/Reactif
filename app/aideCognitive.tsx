@@ -1,4 +1,5 @@
 import ImageViewer from "@/components/ImageViewer";
+import { t } from "@/i18n";
 import { sessionStore } from "@/store/sessionStore";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter, type Href } from "expo-router";
@@ -18,7 +19,7 @@ import {
 } from "react-native-safe-area-context";
 
 type CognitiveDocument = {
-  label: string;
+  labelKey: string;
   image?: ImageSourcePropType;
   pdf?: { uri: string } | number;
   route?: Href;
@@ -26,32 +27,32 @@ type CognitiveDocument = {
 
 const COGNITIVE_DOCUMENTS: CognitiveDocument[] = [
   {
-    label: "Organisation RCP specialisée",
+    labelKey: "cognitive.docs.organization",
     image: require("@/assets/documents/aides-cognitives//organisation-rcp-specialisee/image.png"),
   },
   {
-    label: "Reglages respirateur RCP Adulte",
+    labelKey: "cognitive.docs.ventilator",
     route: "/aideRespiratoire",
   },
 
   {
-    label: "Algorithme RCP adulte",
+    labelKey: "cognitive.docs.adultAlgo",
     image: require("@/assets/documents/aides-cognitives/algorithme-rcp-adulte/image.png"),
   },
   {
-    label: "Algorithme RCP pédiatrique",
+    labelKey: "cognitive.docs.pediatricAlgo",
     image: require("@/assets/documents/aides-cognitives/algorithme-rcp-pediatrique/image.png"),
   },
   {
-    label: "Algorithme RCP néonatale",
+    labelKey: "cognitive.docs.neonatalAlgo",
     image: require("@/assets/documents/aides-cognitives/algorithme-rcp-neonatale/image.png"),
   },
   {
-    label: "Causes réversibles AC pédiatrique",
+    labelKey: "cognitive.docs.reversibleCauses",
     image: require("@/assets/documents/aides-cognitives/causes-reversibles-ac-pediatrique-4h-4t/image.png"),
   },
   {
-    label: "Ressources",
+    labelKey: "cognitive.docs.resources",
     route: "/ressources",
   },
 ];
@@ -80,7 +81,7 @@ export default function AideCognitive() {
 
   const renderDocumentItem = (item: CognitiveDocument, index: number) => (
     <TouchableOpacity
-      key={`${item.label}-${index}`}
+      key={`${item.labelKey}-${index}`}
       style={[
         styles.optionItem,
         { borderBottomColor: isDark ? "#444" : "#E5E7EB" },
@@ -97,7 +98,7 @@ export default function AideCognitive() {
       <Text
         style={[styles.optionText, { color: isDark ? "#e5e7eb" : "#111827" }]}
       >
-        {item.label}
+        {t(item.labelKey)}
       </Text>
       <Ionicons
         name="chevron-forward"
@@ -116,7 +117,7 @@ export default function AideCognitive() {
     >
       <Stack.Screen
         options={{
-          title: "Aides cognitives",
+          title: t("cognitive.title"),
           headerStyle: {
             backgroundColor: isDark ? "#353636" : "#F5F5F5",
           },
@@ -176,7 +177,7 @@ export default function AideCognitive() {
               <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.viewerHeaderTitle} numberOfLines={1}>
-              {selectedDocument?.label ?? "Fiche"}
+              {selectedDocument ? t(selectedDocument.labelKey) : t("cognitive.sheet")}
             </Text>
           </View>
 
@@ -186,8 +187,7 @@ export default function AideCognitive() {
                 <ImageViewer imgSource={selectedDocument.image} />
               ) : selectedDocument.pdf ? (
                 <Text style={{ color: isDark ? "#fff" : "#000" }}>
-                  PDF documents are not supported in this build. Please open the
-                  PDF externally.
+                  {t("sound.unsupportedPdf")}
                 </Text>
               ) : null
             ) : null}

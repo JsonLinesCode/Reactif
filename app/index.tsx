@@ -1,8 +1,10 @@
+import { useI18n } from "@/hooks/useI18n";
 import { sessionStore } from "@/store/sessionStore";
 import Feather from "@expo/vector-icons/Feather";
+import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Linking,
   StyleSheet,
@@ -13,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Index() {
+  const { locale, refreshLocale, t } = useI18n();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [theme, setTheme] = useState(sessionStore.theme);
@@ -23,6 +26,12 @@ export default function Index() {
     });
     return () => unsubscribe();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshLocale();
+    }, [refreshLocale]),
+  );
 
   const isDark = theme === "dark";
   const bgStyle = { backgroundColor: isDark ? "#353636" : "#fff" };
@@ -54,6 +63,10 @@ export default function Index() {
       url: "https://www.chsf.fr/portail/offre-de-soins-18-25.html?args=Y29tcF9pZD00NyZhY3Rpb249ZmljaGVfc2VydmljZSZpZD0xMDMmY29tcG9uZW50PSZtb2R1bGU9Jnw%3D&offre_soin_service_id=103",
       icon: require("@/assets/documents/home/partners/smur-corbeil-essonnes.png"),
     },
+    {
+      url: "https://reac.univ-lille2.fr/saisie/index.php",
+      icon: require("@/assets/documents/home/partners/ReAC_Univ_Lille.png"),
+    }
   ];
 
   const handleOpenPartner = async (url: string) => {
@@ -66,6 +79,7 @@ export default function Index() {
   };
   return (
     <View
+      key={`home-${locale}`}
       id="coucou"
       style={[
         styles.container,
@@ -107,7 +121,7 @@ export default function Index() {
             onPress={startAdultCpr}
           >
             <Text style={[styles.menuButtonText, outlineTextStyle]}>
-              RCP ADULTE
+              {t("home.adultCpr")}
             </Text>
           </TouchableOpacity>
           <View
@@ -128,7 +142,7 @@ export default function Index() {
               onPress={startPediatricCpr}
             >
               <Text style={[styles.menuSmallButtonText, outlineTextStyle]}>
-                RCP PEDIATRIQUE
+                {t("home.pediatricCpr")}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -140,7 +154,7 @@ export default function Index() {
               onPress={startNeonatalCpr}
             >
               <Text style={[styles.menuSmallButtonText, outlineTextStyle]}>
-                RCP NEONATALE
+                {t("home.neonatalCpr")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -155,7 +169,7 @@ export default function Index() {
             onPress={startAideCognitive}
           >
             <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
-              AIDES COGNITIVES
+              {t("home.cognitiveAids")}
             </Text>
           </TouchableOpacity>
           <View style={styles.bottomActionRow}>
@@ -168,7 +182,7 @@ export default function Index() {
               onPress={() => router.push("/history")}
             >
               <Text style={[styles.buttonHistoryText, outlineTextStyle]}>
-                Historique
+                {t("home.history")}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -300,14 +314,14 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   partnerLink: {
-    width: 84,
-    height: 84,
+    width: 96,
+    height: 96,
     alignItems: "center",
     justifyContent: "center",
   },
   partnerLogo: {
-    width: 76,
-    height: 76,
+    width: 88,
+    height: 88,
     resizeMode: "contain",
   },
   buttonHistoryText: {

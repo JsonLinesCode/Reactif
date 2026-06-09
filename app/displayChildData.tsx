@@ -1,3 +1,4 @@
+import { t } from "@/i18n";
 import { PediatricData } from "@/models/session";
 import { sessionStore } from "@/store/sessionStore";
 import { router } from "expo-router";
@@ -29,7 +30,7 @@ export default function DisplayChildData() {
     return (
       <SafeAreaView style={[styles.container, bgStyle]}>
         <Text style={styles.errorText}>
-          Aucune donnée pédiatrique disponible.
+          {t("childData.noData")}
         </Text>
       </SafeAreaView>
     );
@@ -39,6 +40,8 @@ export default function DisplayChildData() {
     ageValue,
     ageMode,
     weight,
+    adrenalineDose,
+    cordaroneDose,
     energyDose,
   } = data;
   // Only show age if computeMode is 'age'
@@ -55,33 +58,32 @@ export default function DisplayChildData() {
         <View style={[styles.card, cardBgStyle]}>
           {shouldShowAge && (
             <>
-              <Text style={[styles.label, labelStyle]}>Age:</Text>
+              <Text style={[styles.label, labelStyle]}>{t("childData.age")}:</Text>
               <Text style={[styles.value, textStyle]}>
-                {ageValue} {ageMode === "months" ? "Mois" : "Ans"}
+                {ageValue} {ageMode === "months" ? t("childData.months") : t("childData.years")}
               </Text>
             </>
           )}
 
           {computeMode === "age" && (
-            <Text style={[styles.label, labelStyle]}>Poids Estimé :</Text>
+            <Text style={[styles.label, labelStyle]}>{t("childData.estimatedWeight")}</Text>
           )}
 
           {computeMode === "weight" && (
-            <Text style={[styles.label, labelStyle]}>Poids Saisi :</Text>
+            <Text style={[styles.label, labelStyle]}>{t("childData.enteredWeight")}</Text>
           )}
           <Text style={[styles.value, textStyle]}>{weight} kg</Text>
 
           <View style={styles.separator} />
 
-          {/* Dose recommendations are intentionally hidden for pediatric CPR. */}
-          {/* <Text style={[styles.label, labelStyle]}>Adrénaline (IV/IO):</Text>
+          <Text style={[styles.label, labelStyle]}>{t("session.adrenaline")} (IV/IO):</Text>
           <Text style={[styles.value, textStyle]}>{adrenalineDose ? `${adrenalineDose} mg` : "N/A"}</Text>
 
-          <Text style={[styles.label, labelStyle]}>Amiodarone (Cordarone):</Text>
-          <Text style={[styles.value, textStyle]}>{cordaroneDose ? `${cordaroneDose} mg` : "N/A"}</Text> */}
+          <Text style={[styles.label, labelStyle]}>Amiodarone ({t("session.cordarone")}):</Text>
+          <Text style={[styles.value, textStyle]}>{cordaroneDose ? `${cordaroneDose} mg` : "N/A"}</Text>
 
           <Text style={[styles.label, labelStyle]}>
-            Choc électrique (Energie):
+            {t("childData.electricShockEnergy")}
           </Text>
           <Text style={[styles.value, textStyle]}>
             {energyDose ? `${energyDose} J` : "N/A"}
@@ -92,14 +94,14 @@ export default function DisplayChildData() {
           onPress={handleStartPediatricCpr}
         >
           <Text style={styles.validationButtonText}>
-            Commencer RCP
+            {t("childData.startCpr")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.cancelButton}
           onPress={() => router.push("/childData")}
         >
-          <Text style={styles.validationButtonText}>Annuler</Text>
+          <Text style={styles.validationButtonText}>{t("common.cancel")}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

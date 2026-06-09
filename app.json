@@ -2,7 +2,7 @@
   "expo": {
     "name": "Reactif",
     "slug": "Reactif",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icons/ios-light.png",
     "scheme": "reactif",
@@ -17,7 +17,17 @@
         "tinted": "./assets/icons/ios-tinted.png"
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleLocalizations": [
+          "en",
+          "fr",
+          "de",
+          "es",
+          "it",
+          "pt",
+          "zh-Hans",
+          "ko"
+        ]
       }
     },
     "android": {
@@ -72,7 +82,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/icons/adaptive-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
