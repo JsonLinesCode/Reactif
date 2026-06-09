@@ -143,9 +143,8 @@ export default function ChildData() {
     finalWeight = null;
   }
 
-  // Dose calculations are intentionally disabled for pediatric CPR.
-  // const adrenalineDose = finalWeight ? (0.01 * finalWeight).toFixed(2) : null;
-  // const cordaroneDose = finalWeight ? (5 * finalWeight).toFixed(1) : null;
+  const adrenalineDose = finalWeight ? (0.01 * finalWeight).toFixed(2) : null;
+  const cordaroneDose = finalWeight ? (5 * finalWeight).toFixed(1) : null;
   const energyDose = finalWeight ? (4 * finalWeight).toFixed(0) : null;
 
   const handleValidation = () => {
@@ -174,8 +173,8 @@ export default function ChildData() {
       ageMode: currentMode,
       ageValue: ageVal,
       weight: finalWeight ?? 0,
-      // adrenalineDose: adrenalineDose ?? undefined,
-      // cordaroneDose: cordaroneDose ?? undefined,
+      adrenalineDose: adrenalineDose ?? undefined,
+      cordaroneDose: cordaroneDose ?? undefined,
       energyDose: energyDose ?? undefined,
     });
 
