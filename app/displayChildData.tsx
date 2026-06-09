@@ -40,6 +40,8 @@ export default function DisplayChildData() {
     ageValue,
     ageMode,
     weight,
+    adrenalineDose,
+    cordaroneDose,
     energyDose,
   } = data;
   // Only show age if computeMode is 'age'
@@ -74,12 +76,11 @@ export default function DisplayChildData() {
 
           <View style={styles.separator} />
 
-          {/* Dose recommendations are intentionally hidden for pediatric CPR. */}
-          {/* <Text style={[styles.label, labelStyle]}>Adrénaline (IV/IO):</Text>
+          <Text style={[styles.label, labelStyle]}>{t("session.adrenaline")} (IV/IO):</Text>
           <Text style={[styles.value, textStyle]}>{adrenalineDose ? `${adrenalineDose} mg` : "N/A"}</Text>
 
-          <Text style={[styles.label, labelStyle]}>Amiodarone (Cordarone):</Text>
-          <Text style={[styles.value, textStyle]}>{cordaroneDose ? `${cordaroneDose} mg` : "N/A"}</Text> */}
+          <Text style={[styles.label, labelStyle]}>Amiodarone ({t("session.cordarone")}):</Text>
+          <Text style={[styles.value, textStyle]}>{cordaroneDose ? `${cordaroneDose} mg` : "N/A"}</Text>
 
           <Text style={[styles.label, labelStyle]}>
             {t("childData.electricShockEnergy")}

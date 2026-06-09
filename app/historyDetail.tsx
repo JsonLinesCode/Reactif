@@ -272,6 +272,15 @@ export default function HistoryDetail() {
                 </Text>
               )}
               <Text style={[styles.headerLine, secondaryTextStyle]}>
+                {t("session.adrenaline")}:{" "}
+                {session.pediatricData.adrenalineDose
+                  ? `${session.pediatricData.adrenalineDose} mg`
+                  : t("common.na")}
+                , {t("session.cordarone")}:{" "}
+                {session.pediatricData.cordaroneDose
+                  ? `${session.pediatricData.cordaroneDose} mg`
+                  : t("common.na")}
+                ,{" "}
                 {t("historyDetail.energy")}:{" "}
                 {session.pediatricData.energyDose
                   ? `${session.pediatricData.energyDose} J`
