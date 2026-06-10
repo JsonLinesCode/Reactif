@@ -1,1 +1,2 @@
 package_name("fr.reactif")
+app_identifier("fr.reactif")

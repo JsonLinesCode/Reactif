@@ -15,13 +15,13 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
-### ios sync_testflight_signing
+### ios testflight_release
 
 ```sh
-[bundle exec] fastlane ios sync_testflight_signing
+[bundle exec] fastlane ios testflight_release
 ```
 
-Create or sync App Store signing assets used for TestFlight
+Create or sync App Store signing assets, upload to TestFlight, and update App Store metadata without submitting
 
 ----
 
