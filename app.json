@@ -77,6 +77,14 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+    "spalsh": {
+      "image": "./assets/icons/adaptive-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff",
+      "dark": {
+        "backgroundColor": "#000000"
+      }
+    },
     "plugins": [
       "expo-router",
       [
