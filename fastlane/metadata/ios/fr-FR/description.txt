@@ -16,7 +16,6 @@ Fonctions RCP Adulte :
 Fonction RCP Pédiatrique :
 •	Conçue pour tenir compte des particularités de la RCP pédiatrique en ajustant les posologies au poids.
 •	Calculateur de poids en fonction de l’âge (en mois ou en année)
-•	Calculateur de posologie en fonction du poids pour l’énergie délivrée lors d’un choc (4J/ kg), l’administration d’Adrénaline (0,01 mg/kg) et la Cordarone (5mg/ kg)
 Fonction RCP néonatale :
 •	Un minuteur bloqué à 30 secondes pour l’analyse de la fréquence cardiaque
 •	Un minuteur pour l’adrénaline si indiqué
@@ -27,8 +26,3 @@ Paramètres :
 •	Modifier la nature et les délais des alarmes sonores
 Recherche :
 L’application RéACTIF est soutenue par le registre électronique des arrêts cardiaques (RéAC). L’horodatage des séquences de RCP permet d’améliorer la précision des horaires saisies dans les registres à des fins d’analyse.
-Confidentialité des données :
-•	Application gratuite et sans publicité ni abonnement
-•	Aucun accès à internet
-•	Aucune collecte de données patient ou personnelle
-•	Stockage de l’historique en locale
