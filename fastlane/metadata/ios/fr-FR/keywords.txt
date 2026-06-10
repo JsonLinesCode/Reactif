@@ -1,9 +1,1 @@
-santé
-SMUR
-Réactif
-RCP
-cardiaque
-SAMU
-Médecine d'urgence
-intervention cardiologique
-soignant
+chronomètre, réanimation, cardiaque, urgences, horodateur, RCP
