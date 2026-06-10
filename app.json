@@ -78,10 +78,14 @@
       "favicon": "./assets/images/favicon.png"
     },
 <<<<<<< HEAD
+<<<<<<< HEAD
     "splash": {
 =======
     "spalsh": {
 >>>>>>> 2b3acb1 (Feature : change splash icon)
+=======
+    "splash": {
+>>>>>>> 553eca6 (Feature : change Descriptions)
       "image": "./assets/icons/adaptive-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff",
