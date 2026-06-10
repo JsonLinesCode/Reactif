@@ -77,7 +77,7 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "spalsh": {
+    "splash": {
       "image": "./assets/icons/adaptive-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff",
