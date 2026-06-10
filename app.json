@@ -77,7 +77,11 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+<<<<<<< HEAD
     "splash": {
+=======
+    "spalsh": {
+>>>>>>> 2b3acb1 (Feature : change splash icon)
       "image": "./assets/icons/adaptive-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff",
