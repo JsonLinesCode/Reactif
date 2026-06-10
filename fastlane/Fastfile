@@ -122,9 +122,9 @@ platform :android do
       json_key: json_key_path,
       metadata_path: metadata_path,
       skip_upload_changelogs: false,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-      skip_upload_metadata: true
+      skip_upload_images: false,
+      skip_upload_screenshots: false,
+      skip_upload_metadata: false
     )
   end
 end
