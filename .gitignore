@@ -61,3 +61,4 @@ app-example
 
 *.env
 !/ios/.xcode.env
+p.json
