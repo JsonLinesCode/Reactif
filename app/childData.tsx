@@ -145,7 +145,7 @@ export default function ChildData() {
     finalWeight = null;
   }
 
-  const adrenalineDose = finalWeight ? (0.01 * finalWeight).toFixed(2) : null;
+  const adrenalineDose = finalWeight ? ( 0.01 * finalWeight).toFixed(2) : null;
   const cordaroneDose = finalWeight ? (5 * finalWeight).toFixed(1) : null;
   const energyDose = finalWeight ? (4 * finalWeight).toFixed(0) : null;
 
