@@ -1,1 +1,1 @@
-Horodatez vos RCP en SMUR : suivi des doses, des chocs et horodatage.
+L'application d'aide à la RCP pour les SMUR
