@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6e590699-3b7c-4063-883e-6c7e5156dc4c" name="Changes" comment="Fix unmerged files">
-      <change afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -189,7 +188,7 @@
       <workItem from="1781091088326" duration="1893000" />
       <workItem from="1781098027875" duration="5278000" />
       <workItem from="1781107987795" duration="290000" />
-      <workItem from="1783094421011" duration="2704000" />
+      <workItem from="1783094421011" duration="3843000" />
     </task>
     <task id="LOCAL-00001" summary="Add the age/weight selector for pediatric reanimation">
       <option name="closed" value="true" />
@@ -527,7 +526,15 @@
       <option name="project" value="LOCAL" />
       <updated>1783100907646</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="Fix unmerged files">
+      <option name="closed" value="true" />
+      <created>1783101560092</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1783101560092</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
